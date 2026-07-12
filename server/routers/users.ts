@@ -141,7 +141,7 @@ export const usersRouter = router({
     updateRole: protectedProcedure
       .input(z.object({
         userId: z.number(),
-        role: z.enum(['guard', 'supervisor_tolan', 'supervisor_malqa', 'admin_affairs', 'accountant', 'auditor', 'finance_manager', 'executive', 'super_admin', 'restaurant_operations']),
+        role: z.enum(['guard', 'supervisor_tolan', 'supervisor_malqa', 'admin_affairs', 'accountant', 'auditor', 'finance_manager', 'executive', 'super_admin', 'restaurant_operations', 'data_entry']),
       }))
       .use(requireRole('super_admin'))
       .mutation(async ({ input, ctx }) => {

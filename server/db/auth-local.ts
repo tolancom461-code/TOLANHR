@@ -72,7 +72,7 @@ export async function createLocalUser(data: {
   email?: string;
   phone?: string;
   isActive?: boolean;
-  role?: 'guard' | 'supervisor_tolan' | 'supervisor_malqa' | 'admin_affairs' | 'accountant' | 'auditor' | 'finance_manager' | 'executive' | 'super_admin' | 'restaurant_operations';
+  role?: 'guard' | 'supervisor_tolan' | 'supervisor_malqa' | 'admin_affairs' | 'accountant' | 'auditor' | 'finance_manager' | 'executive' | 'super_admin' | 'restaurant_operations' | 'data_entry';
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

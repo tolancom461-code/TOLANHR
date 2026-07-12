@@ -87,7 +87,7 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 
 // تعريف الصفحات المسموحة لكل دور
-type UserRoleType = 'guard' | 'supervisor_tolan' | 'supervisor_malqa' | 'admin_affairs' | 'accountant' | 'auditor' | 'finance_manager' | 'executive' | 'super_admin' | 'restaurant_operations';
+type UserRoleType = 'guard' | 'supervisor_tolan' | 'supervisor_malqa' | 'admin_affairs' | 'accountant' | 'auditor' | 'finance_manager' | 'executive' | 'super_admin' | 'restaurant_operations' | 'data_entry';
 
 const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
   // الحارس: فقط تسجيل الحضور (بدون سجل الحضور وبدون تقارير الحضور)
@@ -143,6 +143,8 @@ const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
   executive: ['/executive/finance', '/profile'],
   // تشغيل مطاعم: فقط صفحتَي التشغيل وإدارة المطاعم، لا غير
   restaurant_operations: ['/operations/staffing', '/operations/restaurants', '/profile'],
+  // مدخل بيانات: شاشة العمال فقط، لا غير
+  data_entry: ['/workers', '/profile'],
   super_admin: 'all',
 };
 

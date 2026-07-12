@@ -469,7 +469,7 @@ export const users = mysqlTable("users", {
 	roleId: int("role_id"),
 	isActive: tinyint("is_active").default(1),
 	loginMethod: varchar({ length: 64 }),
-	role: mysqlEnum(['guard','supervisor','supervisor_tolan','supervisor_malqa','admin_affairs','accountant','auditor','finance_manager','executive','super_admin','restaurant_operations']).default('guard').notNull(),
+	role: mysqlEnum(['guard','supervisor','supervisor_tolan','supervisor_malqa','admin_affairs','accountant','auditor','finance_manager','executive','super_admin','restaurant_operations','data_entry']).default('guard').notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 	lastSignedIn: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),

@@ -111,6 +111,7 @@ const ROLE_LABELS: Record<string, string> = {
   executive: 'الإدارة العليا',
   supervisor_tolan: 'مشرف طولان',
   supervisor_malqa: 'مشرف ملقا',
+  data_entry: 'مدخل بيانات',
 };
 
 const FIELD_LABELS: Record<string, string> = {

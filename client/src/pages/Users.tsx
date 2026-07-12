@@ -25,6 +25,7 @@ const ROLES = [
   { value: 'finance_manager', label: 'مدير مالي', description: 'الاعتماد النهائي/رفض الدفعات من المراجع (المرحلة 3) - بدون حذف', color: 'bg-purple-500' },
   { value: 'executive', label: 'إدارة عليا', description: 'لوحات التحكم فقط (استعراض)', color: 'bg-indigo-500' },
   { value: 'restaurant_operations', label: 'تشغيل مطاعم', description: 'صلاحية صفحتي التشغيل وإدارة المطاعم فقط', color: 'bg-orange-500' },
+  { value: 'data_entry', label: 'مدخل بيانات', description: 'شاشة العمال فقط (إضافة/تعديل/حذف/عرض)', color: 'bg-pink-500' },
   { value: 'super_admin', label: 'سوبر أدمن', description: 'جميع الصلاحيات بدون استثناء', color: 'bg-red-500' },
 ] as const;
 

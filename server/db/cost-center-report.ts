@@ -201,4 +201,21 @@ export async function runMigration() {
   console.log('[Migration] ✅ Migration completed');
 }
 
+/**
+ * Add 'data_entry' role to the users.role ENUM column
+ * TEMPORARY: This function should be removed after migration is complete
+ */
+export async function runRoleEnumMigration() {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database connection not available');
+  }
+  try {
+    await db.execute(sql`ALTER TABLE users MODIFY COLUMN role ENUM('guard','supervisor','supervisor_tolan','supervisor_malqa','admin_affairs','accountant','auditor','finance_manager','executive','super_admin','restaurant_operations','data_entry') NOT NULL DEFAULT 'guard'`);
+    console.log('[Migration] ✅ Added data_entry to users.role ENUM');
+  } catch (error: any) {
+    console.log('[Migration] ℹ️  role ENUM update: ' + (error.message || 'Already up to date or error occurred'));
+  }
+}
+
 
