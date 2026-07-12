@@ -14,9 +14,11 @@ import {
 } from '@/components/ui/select';
 import { ClipboardList, UtensilsCrossed, CheckCircle2, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { transliterateName } from '@/utils/transliterate';
 
 export default function Operations() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const displayName = (name: string) => (language === 'en' ? transliterateName(name) : name);
   const today = new Date().toLocaleDateString('en-CA');
   const [workDate, setWorkDate] = useState(today);
   const [costCenterId, setCostCenterId] = useState('');
@@ -40,14 +42,14 @@ export default function Operations() {
     onSuccess: () => {
       utils.restaurants.getWorkersForAssignment.invalidate({ groupId: parseInt(groupId), workDate });
     },
-    onError: (error) => toast.error(`خطأ: ${error.message}`),
+    onError: (error) => toast.error(`${t.operationalDashboard.error}: ${error.message}`),
   });
 
   const removeMutation = trpc.restaurants.removeAssignment.useMutation({
     onSuccess: () => {
       utils.restaurants.getWorkersForAssignment.invalidate({ groupId: parseInt(groupId), workDate });
     },
-    onError: (error) => toast.error(`خطأ: ${error.message}`),
+    onError: (error) => toast.error(`${t.operationalDashboard.error}: ${error.message}`),
   });
 
   const handleAssign = (workerId: number, restaurantId: string) => {
@@ -102,7 +104,7 @@ export default function Operations() {
                   <SelectContent>
                     {costCenters?.map((cc: any) => (
                       <SelectItem key={cc.id} value={String(cc.id)}>
-                        {cc.name}
+                        {displayName(cc.name)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -118,7 +120,7 @@ export default function Operations() {
                   <SelectContent>
                     {costCenterGroups?.map((g: any) => (
                       <SelectItem key={g.id} value={String(g.id)}>
-                        {g.name}
+                        {displayName(g.name)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -154,7 +156,7 @@ export default function Operations() {
                         ) : (
                           <X className="h-4 w-4 text-muted-foreground shrink-0" />
                         )}
-                        <span className="font-medium">{worker.fullName}</span>
+                        <span className="font-medium">{displayName(worker.fullName)}</span>
                         <span className="text-xs text-muted-foreground">({worker.code})</span>
                       </div>
                       <Select
@@ -168,7 +170,7 @@ export default function Operations() {
                           <SelectItem value="none">{t.staffingPage.noAssignment}</SelectItem>
                           {restaurantsList?.map((r: any) => (
                             <SelectItem key={r.id} value={String(r.id)}>
-                              {r.name}
+                              {displayName(r.name)}
                             </SelectItem>
                           ))}
                         </SelectContent>

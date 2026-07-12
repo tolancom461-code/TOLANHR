@@ -10,10 +10,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
 import { Users, UserX, Clock, CheckCircle, XCircle, ArrowRight, Filter, CalendarDays, ArrowLeftRight, AlertTriangle, ShieldCheck } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { transliterateName } from "@/utils/transliterate";
 
 type TabType = 'present' | 'absent' | 'late';
 
 export default function OperationalDashboard() {
+  const { t, language } = useLanguage();
+  const td = t.operationalDashboard;
+  const displayName = (name: string) => (language === 'en' ? transliterateName(name) : name);
   const [selectedDate] = useState(() => new Date().toLocaleDateString('en-CA'));
   const [activeTab, setActiveTab] = useState<TabType | null>(null);
   const [filterGroupId, setFilterGroupId] = useState<number | undefined>();
@@ -113,23 +118,23 @@ export default function OperationalDashboard() {
   const generateUnconfirmedMutation = trpc.operationalDashboard.generateUnconfirmedFlags.useMutation({
     onSuccess: (data) => {
       if (data.createdCount > 0) {
-        toast.success(`تم إنشاء ${data.createdCount} ملاحظة تشغيلية`, { description: 'للعمال الحاضرين الذين لم يتم تأكيد حضورهم' });
+        toast.success(`${td.flagsCreatedPrefix} ${data.createdCount} ${td.flagsCreated}`, { description: td.flagsCreatedDesc });
       } else {
-        toast.info('جميع العمال الحاضرين تم تأكيد حضورهم', { description: 'لا توجد ملاحظات جديدة' });
+        toast.info(td.allConfirmedTitle, { description: td.allConfirmedDesc });
       }
       utils.operationalDashboard.invalidate();
     },
     onError: (error) => {
-      toast.error('خطأ', { description: error.message });
+      toast.error(td.error, { description: error.message });
     },
   });
 
   const createFlagMutation = trpc.operationalDashboard.createFlag.useMutation({
     onSuccess: (_, variables) => {
       if (variables.flagType === 'transfer') {
-        toast.success("تم إرسال بلاغ النقل بنجاح", { description: "ستتم مراجعته من قبل المسؤول في معالجة الملاحظات" });
+        toast.success(td.transferSentSuccess, { description: td.transferSentDesc });
       } else {
-        toast.success("تم إرسال الملاحظة التشغيلية بنجاح", { description: "ستتم مراجعتها من قبل المسؤول" });
+        toast.success(td.flagSentSuccess, { description: td.flagSentDesc });
       }
       setActionDialog(null);
       setTransferDialog(null);
@@ -140,7 +145,7 @@ export default function OperationalDashboard() {
       utils.operationalDashboard.getConfirmedWorkerIds.invalidate();
     },
     onError: (error) => {
-      toast.error("خطأ", { description: error.message });
+      toast.error(td.error, { description: error.message });
     },
   });
 
@@ -182,7 +187,7 @@ export default function OperationalDashboard() {
 
   const handleTransferSave = () => {
     if (!transferNote.trim()) {
-      setTransferNoteError('يرجى كتابة ملاحظة توضح من أين تم نقل العامل وإلى أين');
+      setTransferNoteError(td.transferNoteError);
       return;
     }
     setTransferNoteError('');
@@ -208,7 +213,7 @@ export default function OperationalDashboard() {
 
   const submitAction = () => {
     if (!actionDialog) return;
-    const description = actionNote.trim() || (actionDialog.actionType === 'confirm_attendance' ? 'تأكيد حضور العامل' : 'تأكيد غياب العامل');
+    const description = actionNote.trim() || (actionDialog.actionType === 'confirm_attendance' ? td.confirmAttendanceDesc : td.confirmAbsenceDesc);
     createFlagMutation.mutate({
       workerId: actionDialog.workerId,
       groupId: actionDialog.groupId,
@@ -228,7 +233,7 @@ export default function OperationalDashboard() {
 
   const isLoadingWorkers = activeTab === 'present' ? presentLoading : activeTab === 'absent' ? absentLoading : lateLoading;
 
-  const tabTitle = activeTab === 'present' ? 'الحاضرون' : activeTab === 'absent' ? 'الغائبون' : activeTab === 'late' ? 'المتأخرون' : '';
+  const tabTitle = activeTab === 'present' ? td.present : activeTab === 'absent' ? td.absent : activeTab === 'late' ? td.late : '';
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -246,7 +251,7 @@ export default function OperationalDashboard() {
       <div className="space-y-6 p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">العمليات التشغيلية</h1>
+            <h1 className="text-2xl font-bold text-foreground">{td.pageTitle}</h1>
             <p className="text-muted-foreground flex items-center gap-2 mt-1">
               <CalendarDays className="h-4 w-4" />
               {formatDate(selectedDate)}
@@ -262,7 +267,7 @@ export default function OperationalDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">الحاضرون</p>
+                  <p className="text-sm font-medium text-muted-foreground">{td.present}</p>
                   <p className="text-3xl font-bold text-emerald-600 mt-1">
                     {statsLoading ? '...' : stats?.presentCount || 0}
                   </p>
@@ -274,7 +279,7 @@ export default function OperationalDashboard() {
               {activeTab === 'present' && (
                 <div className="mt-3 flex items-center text-sm text-emerald-600">
                   <ArrowRight className="h-4 w-4 ml-1" />
-                  عرض التفاصيل
+                  {td.viewDetails}
                 </div>
               )}
             </CardContent>
@@ -287,7 +292,7 @@ export default function OperationalDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">الغائبون</p>
+                  <p className="text-sm font-medium text-muted-foreground">{td.absent}</p>
                   <p className="text-3xl font-bold text-red-600 mt-1">
                     {statsLoading ? '...' : stats?.absentCount || 0}
                   </p>
@@ -299,7 +304,7 @@ export default function OperationalDashboard() {
               {activeTab === 'absent' && (
                 <div className="mt-3 flex items-center text-sm text-red-600">
                   <ArrowRight className="h-4 w-4 ml-1" />
-                  عرض التفاصيل
+                  {td.viewDetails}
                 </div>
               )}
             </CardContent>
@@ -312,7 +317,7 @@ export default function OperationalDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">المتأخرون</p>
+                  <p className="text-sm font-medium text-muted-foreground">{td.late}</p>
                   <p className="text-3xl font-bold text-amber-600 mt-1">
                     {statsLoading ? '...' : stats?.lateCount || 0}
                   </p>
@@ -324,7 +329,7 @@ export default function OperationalDashboard() {
               {activeTab === 'late' && (
                 <div className="mt-3 flex items-center text-sm text-amber-600">
                   <ArrowRight className="h-4 w-4 ml-1" />
-                  عرض التفاصيل
+                  {td.viewDetails}
                 </div>
               )}
             </CardContent>
@@ -337,7 +342,7 @@ export default function OperationalDashboard() {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Filter className="h-5 w-5" />
-                  {tabTitle} - قائمة العمال
+                  {tabTitle} - {td.workersList}
                 </CardTitle>
                 <div className="flex flex-wrap gap-3">
                   <Select
@@ -345,12 +350,12 @@ export default function OperationalDashboard() {
                     onValueChange={(v) => setFilterGroupId(v === "all" ? undefined : Number(v))}
                   >
                     <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="كل المجموعات" />
+                      <SelectValue placeholder={td.allGroups} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">كل المجموعات</SelectItem>
+                      <SelectItem value="all">{td.allGroups}</SelectItem>
                       {filteredGroups.map((g: any) => (
-                        <SelectItem key={g.id} value={String(g.id)}>{g.name}</SelectItem>
+                        <SelectItem key={g.id} value={String(g.id)}>{displayName(g.name)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -358,8 +363,8 @@ export default function OperationalDashboard() {
                   {isSupervisorTolan ? (
                     <div className="w-[200px] px-3 py-2 border rounded-md bg-muted text-muted-foreground">
                       {autoSelectedCostCenterId && costCentersData
-                        ? costCentersData.find((cc: any) => cc.id === autoSelectedCostCenterId)?.name || 'مركز التكلفة'
-                        : 'مركز التكلفة'}
+                        ? costCentersData.find((cc: any) => cc.id === autoSelectedCostCenterId)?.name || td.costCenter
+                        : td.costCenter}
                     </div>
                   ) : (
                     <Select
@@ -367,12 +372,12 @@ export default function OperationalDashboard() {
                       onValueChange={(v) => setFilterCostCenterId(v === "all" ? undefined : Number(v))}
                     >
                       <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder="كل مراكز التكلفة" />
+                        <SelectValue placeholder={td.allCostCenters} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">كل مراكز التكلفة</SelectItem>
+                        <SelectItem value="all">{td.allCostCenters}</SelectItem>
                         {filteredCostCenters.map((cc: any) => (
-                          <SelectItem key={cc.id} value={String(cc.id)}>{cc.name}</SelectItem>
+                          <SelectItem key={cc.id} value={String(cc.id)}>{displayName(cc.name)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -384,42 +389,42 @@ export default function OperationalDashboard() {
               {isLoadingWorkers ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <span className="mr-3 text-muted-foreground">جاري التحميل...</span>
+                  <span className="mr-3 text-muted-foreground">{td.loading}</span>
                 </div>
               ) : currentWorkers.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p>لا يوجد عمال في هذه الفئة</p>
+                  <p>{td.noWorkers}</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b bg-muted/50">
-                        <th className="text-right py-3 px-4 font-medium text-muted-foreground">الكود</th>
-                        <th className="text-right py-3 px-4 font-medium text-muted-foreground">اسم العامل</th>
-                        <th className="text-right py-3 px-4 font-medium text-muted-foreground">المجموعة</th>
-                        <th className="text-right py-3 px-4 font-medium text-muted-foreground">مركز التكلفة</th>
+                        <th className="text-right py-3 px-4 font-medium text-muted-foreground">{td.colCode}</th>
+                        <th className="text-right py-3 px-4 font-medium text-muted-foreground">{td.colWorkerName}</th>
+                        <th className="text-right py-3 px-4 font-medium text-muted-foreground">{td.colGroup}</th>
+                        <th className="text-right py-3 px-4 font-medium text-muted-foreground">{td.colCostCenter}</th>
                         {activeTab === 'present' && (
                           <>
-                            <th className="text-right py-3 px-4 font-medium text-muted-foreground">وقت الحضور</th>
-                            <th className="text-center py-3 px-4 font-medium text-muted-foreground">حالة التأكيد</th>
+                            <th className="text-right py-3 px-4 font-medium text-muted-foreground">{td.colCheckInTime}</th>
+                            <th className="text-center py-3 px-4 font-medium text-muted-foreground">{td.colConfirmStatus}</th>
                           </>
                         )}
                         {activeTab === 'late' && (
                           <>
-                            <th className="text-right py-3 px-4 font-medium text-muted-foreground">وقت الحضور</th>
-                            <th className="text-right py-3 px-4 font-medium text-muted-foreground">دقائق التأخير</th>
+                            <th className="text-right py-3 px-4 font-medium text-muted-foreground">{td.colCheckInTime}</th>
+                            <th className="text-right py-3 px-4 font-medium text-muted-foreground">{td.colLateMinutes}</th>
                           </>
                         )}
-                        <th className="text-center py-3 px-4 font-medium text-muted-foreground">الإجراءات</th>
+                        <th className="text-center py-3 px-4 font-medium text-muted-foreground">{td.colActions}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {currentWorkers.map((worker: any) => (
                         <tr key={worker.workerId} className="border-b hover:bg-muted/30 transition-colors">
                           <td className="py-3 px-4 font-mono text-sm">{worker.workerCode}</td>
-                          <td className="py-3 px-4 font-medium">{worker.workerName}</td>
+                          <td className="py-3 px-4 font-medium">{displayName(worker.workerName)}</td>
                           <td className="py-3 px-4 text-muted-foreground">{worker.groupName || '-'}</td>
                           <td className="py-3 px-4 text-muted-foreground">{worker.costCenterName || '-'}</td>
                           {activeTab === 'present' && (
@@ -433,12 +438,12 @@ export default function OperationalDashboard() {
                                 {confirmedSet.has(worker.workerId) ? (
                                   <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 gap-1">
                                     <ShieldCheck className="h-3.5 w-3.5" />
-                                    مؤكد
+                                    {td.confirmed}
                                   </Badge>
                                 ) : (
                                   <Badge variant="outline" className="bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 gap-1 border-amber-300">
                                     <AlertTriangle className="h-3.5 w-3.5" />
-                                    غير مؤكد
+                                    {td.notConfirmed}
                                   </Badge>
                                 )}
                               </td>
@@ -453,7 +458,7 @@ export default function OperationalDashboard() {
                               </td>
                               <td className="py-3 px-4">
                                 <Badge variant="destructive" className="bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400">
-                                  {worker.lateMinutes} دقيقة
+                                  {worker.lateMinutes} {td.minutes}
                                 </Badge>
                               </td>
                             </>
@@ -472,7 +477,7 @@ export default function OperationalDashboard() {
                                     }}
                                   >
                                     <CheckCircle className="h-4 w-4 ml-1" />
-                                    تأكيد حضور
+                                    {td.confirmAttendance}
                                   </Button>
                                   <Button
                                     size="sm"
@@ -484,7 +489,7 @@ export default function OperationalDashboard() {
                                     }}
                                   >
                                     <XCircle className="h-4 w-4 ml-1" />
-                                    تأكيد غياب
+                                    {td.confirmAbsence}
                                   </Button>
                                 </>
                               ) : activeTab === 'present' ? (
@@ -499,7 +504,7 @@ export default function OperationalDashboard() {
                                     }}
                                   >
                                     <CheckCircle className="h-4 w-4 ml-1" />
-                                    تأكيد حضور
+                                    {td.confirmAttendance}
                                   </Button>
                                   <Button
                                     size="sm"
@@ -511,7 +516,7 @@ export default function OperationalDashboard() {
                                     }}
                                   >
                                     <XCircle className="h-4 w-4 ml-1" />
-                                    تأكيد غياب
+                                    {td.confirmAbsence}
                                   </Button>
                                 </>
                               ) : (
@@ -526,7 +531,7 @@ export default function OperationalDashboard() {
                                     }}
                                   >
                                     <CheckCircle className="h-4 w-4 ml-1" />
-                                    تأكيد حضور
+                                    {td.confirmAttendance}
                                   </Button>
                                   <Button
                                     size="sm"
@@ -538,7 +543,7 @@ export default function OperationalDashboard() {
                                     }}
                                   >
                                     <XCircle className="h-4 w-4 ml-1" />
-                                    تأكيد غياب
+                                    {td.confirmAbsence}
                                   </Button>
                                 </>
                               )}
@@ -569,8 +574,8 @@ export default function OperationalDashboard() {
                     <AlertTriangle className="h-4 w-4 text-amber-500" />
                     <span>
                       {currentWorkers.filter((w: any) => !confirmedSet.has(w.workerId)).length > 0
-                        ? `${currentWorkers.filter((w: any) => !confirmedSet.has(w.workerId)).length} عامل لم يتم تأكيد حضورهم`
-                        : 'جميع العمال تم تأكيد حضورهم ✅'
+                        ? `${currentWorkers.filter((w: any) => !confirmedSet.has(w.workerId)).length} ${td.unconfirmedCount}`
+                        : td.allConfirmed
                       }
                     </span>
                   </div>
@@ -586,7 +591,7 @@ export default function OperationalDashboard() {
                       disabled={generateUnconfirmedMutation.isPending}
                     >
                       <AlertTriangle className="h-4 w-4 ml-1" />
-                      {generateUnconfirmedMutation.isPending ? 'جاري الإنشاء...' : 'إنشاء ملاحظات لغير المؤكدين'}
+                      {generateUnconfirmedMutation.isPending ? td.creating : td.createFlagsForUnconfirmed}
                     </Button>
                   )}
                 </div>
@@ -603,41 +608,41 @@ export default function OperationalDashboard() {
                 {actionDialog?.actionType === 'confirm_attendance' ? (
                   <span className="flex items-center gap-2 text-emerald-600">
                     <CheckCircle className="h-5 w-5" />
-                    تأكيد حضور العامل
+                    {td.confirmAttendanceTitle}
                   </span>
                 ) : (
                   <span className="flex items-center gap-2 text-red-600">
                     <XCircle className="h-5 w-5" />
-                    تأكيد غياب العامل
+                    {td.confirmAbsenceTitle}
                   </span>
                 )}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="bg-muted/50 rounded-lg p-3">
-                <p className="text-sm text-muted-foreground">العامل</p>
+                <p className="text-sm text-muted-foreground">{td.worker}</p>
                 <p className="font-medium">{actionDialog?.workerName}</p>
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">ملاحظات (اختياري)</label>
+                <label className="text-sm font-medium mb-2 block">{td.notesOptional}</label>
                 <Textarea
                   value={actionNote}
                   onChange={(e) => setActionNote(e.target.value)}
-                  placeholder="أضف ملاحظة توضيحية..."
+                  placeholder={td.notePlaceholder}
                   rows={3}
                 />
               </div>
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setActionDialog(null)}>
-                إلغاء
+                {td.cancel}
               </Button>
               <Button
                 onClick={submitAction}
                 disabled={createFlagMutation.isPending}
                 className={actionDialog?.actionType === 'confirm_attendance' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}
               >
-                {createFlagMutation.isPending ? 'جاري الإرسال...' : 'تأكيد وإرسال'}
+                {createFlagMutation.isPending ? td.sending : td.confirmAndSend}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -653,19 +658,19 @@ export default function OperationalDashboard() {
               <DialogTitle>
                 <span className="flex items-center gap-2 text-violet-600">
                   <ArrowLeftRight className="h-5 w-5" />
-                  نقل العامل | Transfer Worker
+                  {td.transferWorker}
                 </span>
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="bg-muted/50 rounded-lg p-3">
-                <p className="text-sm text-muted-foreground">العامل</p>
+                <p className="text-sm text-muted-foreground">{td.worker}</p>
                 <p className="font-medium">{transferDialog?.workerName}</p>
               </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  ملاحظات <span className="text-red-500">*</span>
-                  <span className="text-xs text-muted-foreground mr-2">(من أين تم نقل العامل وإلى أين)</span>
+                  {td.notesRequired} <span className="text-red-500">*</span>
+                  <span className="text-xs text-muted-foreground mr-2">{td.transferNoteHint}</span>
                 </label>
                 <Textarea
                   value={transferNote}
@@ -673,7 +678,7 @@ export default function OperationalDashboard() {
                     setTransferNote(e.target.value);
                     if (e.target.value.trim()) setTransferNoteError('');
                   }}
-                  placeholder="مثال: نقل من تولان إلى الملقا..."
+                  placeholder={td.transferNotePlaceholder}
                   rows={3}
                   className={transferNoteError ? 'border-red-500' : ''}
                 />
@@ -684,7 +689,7 @@ export default function OperationalDashboard() {
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setTransferDialog(null)}>
-                إلغاء
+                {td.cancel}
               </Button>
               <Button
                 onClick={handleTransferSave}
@@ -706,38 +711,38 @@ export default function OperationalDashboard() {
               <DialogTitle>
                 <span className="flex items-center gap-2 text-violet-600">
                   <ArrowLeftRight className="h-5 w-5" />
-                  تأكيد نقل العامل | Confirm Transfer
+                  {td.confirmTransfer}
                 </span>
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-800 rounded-lg p-4 text-center">
                 <p className="text-base font-medium text-violet-800 dark:text-violet-300 mb-2">
-                  هل أنت متأكد من رغبتك في تحويل/انتداب هذا العامل؟
+                  {td.transferConfirmQuestion}
                 </p>
                 <p className="text-sm text-violet-600 dark:text-violet-400" dir="ltr">
                   Are you sure you want to transfer this worker?
                 </p>
               </div>
               <div className="bg-muted/50 rounded-lg p-3">
-                <p className="text-sm text-muted-foreground">العامل</p>
+                <p className="text-sm text-muted-foreground">{td.worker}</p>
                 <p className="font-medium">{transferDialog?.workerName}</p>
               </div>
               <div className="bg-muted/50 rounded-lg p-3">
-                <p className="text-sm text-muted-foreground">الملاحظات</p>
+                <p className="text-sm text-muted-foreground">{td.notes}</p>
                 <p className="text-sm">{transferNote}</p>
               </div>
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={handleTransferBack}>
-                تراجع / Back
+                {td.back}
               </Button>
               <Button
                 onClick={handleTransferConfirm}
                 disabled={createFlagMutation.isPending}
                 className="bg-violet-600 hover:bg-violet-700"
               >
-                {createFlagMutation.isPending ? 'جاري الإرسال...' : 'تأكيد / Confirm'}
+                {createFlagMutation.isPending ? td.sending : td.confirm}
               </Button>
             </DialogFooter>
           </DialogContent>
