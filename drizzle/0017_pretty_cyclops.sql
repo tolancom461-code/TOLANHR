@@ -1,0 +1,20 @@
+CREATE INDEX `idx_attendance_worker_id` ON `attendance_events` (`worker_id`);--> statement-breakpoint
+CREATE INDEX `idx_attendance_event_time` ON `attendance_events` (`event_time`);--> statement-breakpoint
+CREATE INDEX `idx_attendance_worker_event` ON `attendance_events` (`worker_id`,`event_time`);--> statement-breakpoint
+CREATE INDEX `idx_pay_overrides_worker_id` ON `pay_overrides` (`worker_id`);--> statement-breakpoint
+CREATE INDEX `idx_pay_overrides_override_date` ON `pay_overrides` (`override_date`);--> statement-breakpoint
+CREATE INDEX `idx_pay_overrides_status` ON `pay_overrides` (`status`);--> statement-breakpoint
+CREATE INDEX `idx_payroll_items_batch_id` ON `payroll_batch_items` (`batch_id`);--> statement-breakpoint
+CREATE INDEX `idx_payroll_items_worker_id` ON `payroll_batch_items` (`worker_id`);--> statement-breakpoint
+CREATE INDEX `idx_payroll_items_batch_worker` ON `payroll_batch_items` (`batch_id`,`worker_id`);--> statement-breakpoint
+CREATE INDEX `idx_payroll_batches_status` ON `payroll_batches` (`status`);--> statement-breakpoint
+CREATE INDEX `idx_payroll_batches_period_start` ON `payroll_batches` (`period_start`);--> statement-breakpoint
+CREATE INDEX `idx_payroll_batches_period_end` ON `payroll_batches` (`period_end`);--> statement-breakpoint
+CREATE INDEX `idx_payroll_batches_group_id` ON `payroll_batches` (`group_id`);--> statement-breakpoint
+CREATE INDEX `idx_daily_finance_worker_id` ON `worker_daily_finance` (`worker_id`);--> statement-breakpoint
+CREATE INDEX `idx_daily_finance_work_date` ON `worker_daily_finance` (`work_date`);--> statement-breakpoint
+CREATE INDEX `idx_daily_finance_locked_batch` ON `worker_daily_finance` (`locked_batch_id`);--> statement-breakpoint
+CREATE INDEX `idx_daily_finance_worker_date` ON `worker_daily_finance` (`worker_id`,`work_date`);--> statement-breakpoint
+CREATE INDEX `idx_workers_group_id` ON `workers` (`group_id`);--> statement-breakpoint
+CREATE INDEX `idx_workers_status` ON `workers` (`status`);--> statement-breakpoint
+CREATE INDEX `idx_workers_code` ON `workers` (`code`);

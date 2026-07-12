@@ -1,0 +1,20 @@
+CREATE TABLE `operational_flags` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`flag_type` enum('emergency_call','justified_late','justified_early_leave','justified_absence','proposed_deduction','proposed_bonus','general_report') NOT NULL,
+	`worker_id` int NOT NULL,
+	`group_id` int,
+	`flag_date` date NOT NULL,
+	`end_date` date,
+	`description` text NOT NULL,
+	`attachments` json,
+	`amount` decimal(10,2),
+	`status` enum('PENDING_ADMIN_ACTION','RESOLVED','IGNORED') NOT NULL DEFAULT 'PENDING_ADMIN_ACTION',
+	`created_by` int NOT NULL,
+	`resolved_by` int,
+	`resolved_at` timestamp,
+	`resolution_action` text,
+	`resolution_notes` text,
+	`created_at` timestamp NOT NULL DEFAULT (now()),
+	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `operational_flags_id` PRIMARY KEY(`id`)
+);

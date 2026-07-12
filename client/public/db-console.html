@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TiDB Console - TolanHR</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .info-item {
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .info-item strong {
+            color: #333;
+            display: inline-block;
+            width: 120px;
+        }
+        .queries-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .query-btn {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: right;
+        }
+        .query-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .query-btn h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .query-btn p {
+            color: #666;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            direction: ltr;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            direction: ltr;
+            text-align: left;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+            direction: ltr;
+            text-align: left;
+            max-height: 600px;
+            overflow: auto;
+        }
+        #result.show {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .error {
+            color: #dc3545;
+            padding: 15px;
+            background: #f8d7da;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            color: #28a745;
+            padding: 15px;
+            background: #d4edda;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+            margin-bottom: 15px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗄️ استعلامات Batch-2026-02-001-99ms</h1>
+        <p class="subtitle">تحليل سبب فراغ الدفعة رغم وجود بصمات في 25 فبراير</p>
+        
+        <div class="info-box">
+            <h3>📋 الاستعلامات الجاهزة</h3>
+            <div class="queries-grid">
+                <div class="query-btn" onclick="loadQuery(1)">
+                    <h4>1️⃣ معلومات الدفعة</h4>
+                    <p>SELECT batch_id, period_start, period_end...</p>
+                </div>
+                <div class="query-btn" onclick="loadQuery(2)">
+                    <h4>2️⃣ عدد العناصر في الدفعة</h4>
+                    <p>SELECT COUNT(*) FROM payroll_batch_items...</p>
+                </div>
+                <div class="query-btn" onclick="loadQuery(3)">
+                    <h4>3️⃣ البصمات في 25 فبراير</h4>
+                    <p>SELECT w.full_name, ae.event_type...</p>
+                </div>
+                <div class="query-btn" onclick="loadQuery(4)">
+                    <h4>4️⃣ السجلات المالية في 25 فبراير</h4>
+                    <p>SELECT w.full_name, wdf.net_amount...</p>
+                </div>
+                <div class="query-btn" onclick="loadQuery(5)">
+                    <h4>5️⃣ جميع دفعات الرواتب</h4>
+                    <p>SELECT * FROM payroll_batches ORDER BY...</p>
+                </div>
+                <div class="query-btn" onclick="loadQuery(6)">
+                    <h4>6️⃣ المجموعات والرواتب</h4>
+                    <p>SELECT name, daily_salary FROM groups...</p>
+                </div>
+            </div>
+        </div>
+
+        <label for="query" style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">
+            📝 استعلام SQL مخصص:
+        </label>
+        <textarea id="query" placeholder="أدخل استعلام SQL هنا أو اختر من الاستعلامات الجاهزة أعلاه..."></textarea>
+
+        <div class="btn-group">
+            <button class="btn-primary" onclick="executeQuery()">▶️ تنفيذ الاستعلام</button>
+            <button class="btn-secondary" onclick="clearQuery()">🗑️ مسح</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const QUERIES = {
+            1: `SELECT 
+  batch_id,
+  period_start,
+  period_end,
+  cost_center_id,
+  created_at,
+  status
+FROM payroll_batches
+WHERE batch_id = 'Batch-2026-02-001-99ms';`,
+            2: `SELECT COUNT(*) as item_count
+FROM payroll_batch_items pbi
+JOIN payroll_batches pb ON pbi.batch_id = pb.id
+WHERE pb.batch_id = 'Batch-2026-02-001-99ms';`,
+            3: `SELECT 
+  w.full_name,
+  g.name as group_name,
+  ae.event_type,
+  ae.event_time,
+  ae.work_date
+FROM attendance_events ae
+LEFT JOIN workers w ON ae.worker_id = w.id
+LEFT JOIN groups g ON w.group_id = g.id
+WHERE ae.work_date = '2026-02-25'
+ORDER BY ae.event_time
+LIMIT 50;`,
+            4: `SELECT 
+  w.full_name,
+  g.name as group_name,
+  wdf.base_amount,
+  wdf.net_amount,
+  wdf.created_at
+FROM worker_daily_finance wdf
+LEFT JOIN workers w ON wdf.worker_id = w.id
+LEFT JOIN groups g ON w.group_id = g.id
+WHERE wdf.work_date = '2026-02-25'
+ORDER BY wdf.created_at
+LIMIT 50;`,
+            5: `SELECT 
+  batch_id,
+  period_start,
+  period_end,
+  created_at,
+  status,
+  (SELECT COUNT(*) FROM payroll_batch_items WHERE batch_id = payroll_batches.id) as items_count
+FROM payroll_batches
+ORDER BY created_at DESC
+LIMIT 10;`,
+            6: `SELECT 
+  id,
+  name,
+  daily_salary,
+  updated_at
+FROM groups
+ORDER BY name;`
+        };
+
+        function loadQuery(num) {
+            document.getElementById('query').value = QUERIES[num];
+        }
+
+        async function executeQuery() {
+            const query = document.getElementById('query').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!query) {
+                resultDiv.className = 'error show';
+                resultDiv.innerHTML = '❌ الرجاء إدخال استعلام SQL';
+                return;
+            }
+
+            resultDiv.className = 'loading show';
+            resultDiv.innerHTML = '⏳ جاري تنفيذ الاستعلام...';
+
+            try {
+                const response = await fetch('/api/trpc/dbQuery', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ query })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const result = await response.json();
+                const data = result.result?.data || result;
+
+                if (data.error) {
+                    resultDiv.className = 'error show';
+                    resultDiv.innerHTML = `❌ خطأ: ${data.error}`;
+                } else if (data.rows && data.rows.length > 0) {
+                    resultDiv.className = 'show';
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ تم التنفيذ بنجاح - ${data.rows.length} صف
+                        </div>
+                        ${renderTable(data.rows)}
+                    `;
+                } else if (data.rows && data.rows.length === 0) {
+                    resultDiv.className = 'success show';
+                    resultDiv.innerHTML = '✅ تم التنفيذ بنجاح - لا توجد نتائج';
+                } else if (data.affectedRows !== undefined) {
+                    resultDiv.className = 'success show';
+                    resultDiv.innerHTML = `✅ تم التنفيذ بنجاح - ${data.affectedRows} صف متأثر`;
+                } else {
+                    resultDiv.className = 'success show';
+                    resultDiv.innerHTML = '✅ تم التنفيذ بنجاح';
+                }
+            } catch (error) {
+                resultDiv.className = 'error show';
+                resultDiv.innerHTML = `❌ خطأ في الاتصال: ${error.message}`;
+            }
+        }
+
+        function renderTable(rows) {
+            if (!rows || rows.length === 0) return '';
+            
+            const columns = Object.keys(rows[0]);
+            let html = '<table><thead><tr>';
+            
+            columns.forEach(col => {
+                html += `<th>${col}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            rows.forEach(row => {
+                html += '<tr>';
+                columns.forEach(col => {
+                    let value = row[col];
+                    if (value === null) value = '<em style="color: #999;">NULL</em>';
+                    else if (typeof value === 'object') value = JSON.stringify(value);
+                    else if (typeof value === 'string' && value.length > 100) {
+                        value = value.substring(0, 100) + '...';
+                    }
+                    html += `<td>${value}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function clearQuery() {
+            document.getElementById('query').value = '';
+            document.getElementById('result').className = '';
+            document.getElementById('result').innerHTML = '';
+        }
+
+        // Ctrl+Enter to execute
+        document.getElementById('query').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                executeQuery();
+            }
+        });
+    </script>
+</body>
+</html>
