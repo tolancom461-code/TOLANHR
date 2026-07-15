@@ -260,7 +260,7 @@ export async function getWorkerByManualCode(code: string) {
 }
 
 // New paginated version
-export async function getTodayAttendanceWithPagination(groupId?: number, dateStr?: string, page: number = 1, limit: number = 20) {
+export async function getTodayAttendanceWithPagination(groupId?: number | number[], dateStr?: string, page: number = 1, limit: number = 20) {
   const db = await getDb();
   if (!db) return { data: [], total: 0, totalPages: 0 };
 
@@ -272,14 +272,19 @@ export async function getTodayAttendanceWithPagination(groupId?: number, dateStr
   // Expanded range to capture night shift check_outs from previous day
   const { startOfDay, endOfSearch } = getExpandedDateRange(targetDate);
   
+  // Normalize groupId to an array (supports single group or multiple groups)
+  const groupIds = Array.isArray(groupId) ? groupId : (groupId ? [groupId] : []);
+  
   // Build where conditions
   const whereConditions: any[] = [
     gte(attendanceEvents.eventTime, startOfDay),
     lt(attendanceEvents.eventTime, endOfSearch)
   ];
   
-  if (groupId) {
-    whereConditions.push(eq(workers.groupId, groupId));
+  if (groupIds.length === 1) {
+    whereConditions.push(eq(workers.groupId, groupIds[0]));
+  } else if (groupIds.length > 1) {
+    whereConditions.push(inArray(workers.groupId, groupIds));
   }
   
   // Get all events for expanded range
@@ -333,14 +338,44 @@ workerMap.set(wId, {
   
   const allResults = Array.from(workerMap.values());
   const total = allResults.length;
-  const totalPages = Math.ceil(total / limit);
-  const offset = (page - 1) * limit;
-  const data = allResults.slice(offset, offset + limit);
+  
+  // ترتيب ثابت: حسب المجموعة أولاً، ثم اسم العامل — حتى تصير المجموعات متجاورة ومستقرة بين الصفحات
+  allResults.sort((a, b) => {
+    const groupA = a.groupId ?? Number.MAX_SAFE_INTEGER;
+    const groupB = b.groupId ?? Number.MAX_SAFE_INTEGER;
+    if (groupA !== groupB) return groupA - groupB;
+    return (a.workerName || '').localeCompare(b.workerName || '', 'ar');
+  });
+  
+  // تجميع كل عامل تحت مجموعته كـ "كتلة" واحدة متلاصقة
+  const blocksMap = new Map<number | null, any[]>();
+  for (const record of allResults) {
+    const key = record.groupId ?? null;
+    if (!blocksMap.has(key)) blocksMap.set(key, []);
+    blocksMap.get(key)!.push(record);
+  }
+  const blocks = Array.from(blocksMap.values());
+  
+  // توزيع الكتل على الصفحات بحيث لا تنقطع أي مجموعة بمنتصف صفحتين
+  const pages: any[][] = [];
+  let currentPage: any[] = [];
+  for (const block of blocks) {
+    if (currentPage.length > 0 && currentPage.length + block.length > limit) {
+      pages.push(currentPage);
+      currentPage = [];
+    }
+    currentPage.push(...block);
+  }
+  if (currentPage.length > 0) pages.push(currentPage);
+  
+  const totalPages = pages.length || 1;
+  const safePage = Math.min(Math.max(page, 1), totalPages);
+  const data = pages[safePage - 1] || [];
   
   return { data, total, totalPages };
 }
 // Keep old function for backward compatibility
-export async function getTodayAttendance(groupId?: number, dateStr?: string) {
+export async function getTodayAttendance(groupId?: number | number[], dateStr?: string) {
   const db = await getDb();
   if (!db) return [];
   const { attendanceEvents, workers } = await import('../../drizzle/schema');
@@ -402,8 +437,9 @@ export async function getTodayAttendance(groupId?: number, dateStr?: string) {
   
   let results = Array.from(workerMap.values());
   
-  if (groupId) {
-    results = results.filter(r => r.groupId === groupId);
+  const groupIds = Array.isArray(groupId) ? groupId : (groupId ? [groupId] : []);
+  if (groupIds.length > 0) {
+    results = results.filter(r => groupIds.includes(r.groupId));
   }
   
   return results;
@@ -606,16 +642,18 @@ export async function upsertWorkDay(workDate: string, dayType: 'normal' | 'holid
   return { success: true };
 }
 
-export async function getAttendanceStats(startDate: Date, endDate: Date, groupId?: number) {
+export async function getAttendanceStats(startDate: Date, endDate: Date, groupId?: number | number[]) {
   const db = await getDb();
   if (!db) return { totalWorkers: 0, presentToday: 0, absentToday: 0, lateToday: 0 };
 
   const { workers, attendanceEvents } = await import('../../drizzle/schema');
   
+  const groupIds = Array.isArray(groupId) ? groupId : (groupId ? [groupId] : []);
+  
   // Get all active workers
   let allWorkers = await db.select().from(workers).where(eq(workers.status, 'active'));
-  if (groupId) {
-    allWorkers = allWorkers.filter(w => w.groupId === groupId);
+  if (groupIds.length > 0) {
+    allWorkers = allWorkers.filter(w => groupIds.includes(w.groupId));
   }
   
   // Use work_date (administrative day: 5 AM to 4:59 AM next day) instead of eventTime
@@ -633,8 +671,8 @@ export async function getAttendanceStats(startDate: Date, endDate: Date, groupId
   
   const presentWorkerIds = new Set(todayEvents.map(e => e.workerId));
   let presentWorkers = allWorkers.filter(w => presentWorkerIds.has(w.id));
-  if (groupId) {
-    presentWorkers = presentWorkers.filter(w => w.groupId === groupId);
+  if (groupIds.length > 0) {
+    presentWorkers = presentWorkers.filter(w => groupIds.includes(w.groupId));
   }
   const presentToday = presentWorkers.length;
   

@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { trpc } from '@/lib/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -17,7 +19,9 @@ import {
   Lock,
   AlertCircle,
   Download,
-  Trash2
+  Trash2,
+  ChevronDown,
+  Printer
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -28,7 +32,9 @@ export default function AttendanceLog() {
   const { user } = useAuth();
   // المراجع والمدير المالي: استعراض فقط بدون تعديل
   const canEditAttendance = user?.role !== 'auditor' && user?.role !== 'finance_manager';
-  const [selectedGroup, setSelectedGroup] = useState<string>('all');
+  // [] يعني "جميع المجموعات" — وإلا فهي قائمة معرّفات المجموعات المختارة
+  const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
+  const [isGroupFilterOpen, setIsGroupFilterOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toLocaleDateString('en-CA'));
   const [editingRecord, setEditingRecord] = useState<any>(null);
   const [editingSessions, setEditingSessions] = useState<Array<{
@@ -54,7 +60,7 @@ export default function AttendanceLog() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedGroup, selectedDate]);
+  }, [selectedGroupIds, selectedDate]);
   
   // Check if selected date is locked
   const { data: dateLockStatus } = trpc.attendance.checkDateLocked.useQuery(
@@ -63,10 +69,11 @@ export default function AttendanceLog() {
   );
 
   const { data: allGroups } = trpc.groups.list.useQuery();
+  const utils = trpc.useUtils();
   
   const groups = allGroups;
   const { data: todayLogData, isLoading, refetch } = trpc.attendance.todayLogWithPagination.useQuery({
-    groupId: selectedGroup !== 'all' ? parseInt(selectedGroup) : undefined,
+    groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined,
     date: selectedDate,
     page: currentPage,
     limit: pageSize
@@ -76,9 +83,32 @@ export default function AttendanceLog() {
   const totalPages = todayLogData?.totalPages || 1;
   const total = todayLogData?.total || 0;
   const { data: stats } = trpc.attendance.stats.useQuery({
-    groupId: selectedGroup !== 'all' ? parseInt(selectedGroup) : undefined,
+    groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined,
     date: selectedDate
   });
+
+  // تقسيم سجل اليوم إلى مجموعات — كل عامل تحت عنوان مجموعته
+  const groupedLog = useMemo(() => {
+    const byGroup = new Map<number | 'none', any[]>();
+    for (const record of todayLog) {
+      const key = (record.groupId ?? 'none') as number | 'none';
+      if (!byGroup.has(key)) byGroup.set(key, []);
+      byGroup.get(key)!.push(record);
+    }
+
+    const ordered: Array<{ key: number | 'none'; name: string; records: any[] }> = [];
+    for (const g of groups || []) {
+      if (byGroup.has(g.id)) {
+        ordered.push({ key: g.id, name: g.name, records: byGroup.get(g.id)! });
+        byGroup.delete(g.id);
+      }
+    }
+    // أي عمال بدون مجموعة معروفة (احتياط)
+    if (byGroup.has('none')) {
+      ordered.push({ key: 'none', name: 'بدون مجموعة', records: byGroup.get('none')! });
+    }
+    return ordered;
+  }, [todayLog, groups]);
 
   // Get absent workers
   const { data: absentWorkers, refetch: refetchAbsent } = trpc.attendance.getAbsentWorkers.useQuery({
@@ -133,6 +163,142 @@ export default function AttendanceLog() {
       toast.error(error.message || 'فشل تصدير سجل الحضور');
     }
   });
+
+  // طباعة كل البيانات المطابقة للفلتر (مو بس الصفحة الظاهرة حاليًا)، منسّقة ومجمّعة حسب المجموعة
+  const handlePrint = async () => {
+    try {
+      const result = await utils.attendance.todayLogWithPagination.fetch({
+        groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined,
+        date: selectedDate,
+        page: 1,
+        limit: 100000,
+      });
+      const fullLog = result?.data || [];
+      if (fullLog.length === 0) {
+        toast.error('لا يوجد بيانات لطباعتها');
+        return;
+      }
+
+      // تجميع حسب المجموعة بنفس ترتيب المجموعات المعروض على الشاشة
+      const byGroup = new Map<number | 'none', any[]>();
+      for (const record of fullLog) {
+        const key = (record.groupId ?? 'none') as number | 'none';
+        if (!byGroup.has(key)) byGroup.set(key, []);
+        byGroup.get(key)!.push(record);
+      }
+      const orderedGroups: Array<{ name: string; records: any[] }> = [];
+      for (const g of groups || []) {
+        if (byGroup.has(g.id)) {
+          orderedGroups.push({ name: g.name, records: byGroup.get(g.id)! });
+          byGroup.delete(g.id);
+        }
+      }
+      if (byGroup.has('none')) {
+        orderedGroups.push({ name: 'بدون مجموعة', records: byGroup.get('none')! });
+      }
+
+      const fmtTime = (d: string | Date | null | undefined) => {
+        if (!d) return '-';
+        return new Date(d).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true });
+      };
+      const fmtHours = (mins: number) => {
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        return `${h} س ${m} د`;
+      };
+
+      let bodyHtml = '';
+      for (const group of orderedGroups) {
+        bodyHtml += `<tr class="group-row"><td colspan="7">${group.name} <span class="count">(${group.records.length} عامل)</span></td></tr>`;
+        for (const record of group.records) {
+          const sessions = record.sessions && record.sessions.length > 0
+            ? record.sessions
+            : [{
+                checkIn: record.checkInTime ? { eventTime: record.checkInTime, method: record.checkInMethod } : null,
+                checkOut: record.checkOutTime ? { eventTime: record.checkOutTime, method: record.checkOutMethod } : null,
+              }];
+          for (const session of sessions) {
+            const checkInDate = session.checkIn?.eventTime ? new Date(session.checkIn.eventTime) : null;
+            const checkOutDate = session.checkOut?.eventTime ? new Date(session.checkOut.eventTime) : null;
+            const workMinutes = checkInDate && checkOutDate
+              ? Math.round((checkOutDate.getTime() - checkInDate.getTime()) / 60000)
+              : null;
+            bodyHtml += `<tr>
+              <td>${record.workerCode || '-'}</td>
+              <td>${record.workerName}</td>
+              <td>${fmtTime(session.checkIn?.eventTime)}</td>
+              <td>${session.checkIn?.method || '-'}</td>
+              <td>${fmtTime(session.checkOut?.eventTime)}</td>
+              <td>${session.checkOut?.method || '-'}</td>
+              <td>${workMinutes !== null ? fmtHours(workMinutes) : '-'}</td>
+            </tr>`;
+          }
+        }
+      }
+
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        toast.error('تعذر فتح نافذة الطباعة (تحقق من حاجب النوافذ المنبثقة)');
+        return;
+      }
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
+        <head>
+          <meta charset="UTF-8" />
+          <title>سجل الحضور اليومي - ${selectedDate}</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; margin: 20px; color: #111; }
+            h1 { text-align: center; font-size: 20px; margin-bottom: 4px; }
+            .subtitle { text-align: center; font-size: 13px; color: #555; margin-bottom: 16px; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: center; }
+            th { background: #f0f0f0; font-weight: bold; }
+            tr.group-row td { background: #eef2ff; font-weight: bold; text-align: right; }
+            tr.group-row .count { font-weight: normal; color: #555; font-size: 11px; }
+            @media print {
+              @page { margin: 1cm; }
+              tr.group-row { break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>سجل الحضور اليومي</h1>
+          <div class="subtitle">
+            التاريخ: ${new Date(selectedDate).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}
+            ${selectedGroupIds.length > 0 ? ` — المجموعات: ${orderedGroups.map(g => g.name).join('، ')}` : ' — جميع المجموعات'}
+            — إجمالي السجلات: ${fullLog.length}
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>الرمز</th>
+                <th>اسم العامل</th>
+                <th>وقت الحضور</th>
+                <th>طريقة الحضور</th>
+                <th>وقت الانصراف</th>
+                <th>طريقة الانصراف</th>
+                <th>ساعات العمل</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${bodyHtml}
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+      };
+    } catch (err: any) {
+      toast.error(err?.message || 'فشل تجهيز الطباعة');
+    }
+  };
 
   const updateEventMutation = trpc.attendance.updateEvent.useMutation({
     onSuccess: () => {
@@ -344,19 +510,46 @@ export default function AttendanceLog() {
               </Badge>
             )}
           </div>
-          <Select value={selectedGroup} onValueChange={setSelectedGroup}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="جميع المجموعات" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">جميع المجموعات</SelectItem>
-              {groups?.map((group) => (
-                <SelectItem key={group.id} value={group.id.toString()}>
-                  {group.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover open={isGroupFilterOpen} onOpenChange={setIsGroupFilterOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-56 justify-between font-normal">
+                <span className="truncate">
+                  {selectedGroupIds.length === 0
+                    ? 'جميع المجموعات'
+                    : selectedGroupIds.length === 1
+                    ? groups?.find((g) => g.id === selectedGroupIds[0])?.name || 'مجموعة واحدة'
+                    : `${selectedGroupIds.length} مجموعات محددة`}
+                </span>
+                <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-2" align="start">
+              <div className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer" onClick={() => setSelectedGroupIds([])}>
+                <Checkbox checked={selectedGroupIds.length === 0} />
+                <span className="text-sm font-medium">جميع المجموعات</span>
+              </div>
+              <div className="h-px bg-border my-1" />
+              <div className="max-h-64 overflow-y-auto space-y-0.5">
+                {groups?.map((group) => {
+                  const checked = selectedGroupIds.includes(group.id);
+                  return (
+                    <div
+                      key={group.id}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
+                      onClick={() =>
+                        setSelectedGroupIds((prev) =>
+                          checked ? prev.filter((id) => id !== group.id) : [...prev, group.id]
+                        )
+                      }
+                    >
+                      <Checkbox checked={checked} />
+                      <span className="text-sm">{group.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </PopoverContent>
+          </Popover>
           <Button variant="outline" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -364,12 +557,20 @@ export default function AttendanceLog() {
             variant="default" 
             onClick={() => exportMutation.mutate({ 
               date: selectedDate, 
-              groupId: selectedGroup !== 'all' ? parseInt(selectedGroup) : undefined 
+              groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined
             })}
             disabled={exportMutation.isPending || !todayLog?.length}
           >
             <Download className="h-4 w-4 ml-2" />
             تصدير Excel
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handlePrint}
+            disabled={!todayLog?.length}
+          >
+            <Printer className="h-4 w-4 ml-2" />
+            طباعة
           </Button>
         </div>
       </div>
@@ -433,7 +634,7 @@ export default function AttendanceLog() {
         <Card 
           className="cursor-pointer hover:shadow-lg transition-shadow"
           onClick={() => {
-            setAbsentFilterGroup(selectedGroup);
+            setAbsentFilterGroup(selectedGroupIds.length === 1 ? selectedGroupIds[0].toString() : 'all');
             setIsAbsentDialogOpen(true);
           }}
         >
@@ -466,7 +667,7 @@ export default function AttendanceLog() {
       </div>
 
       {/* Attendance Table */}
-      <Card>
+      <Card id="attendance-log-print-area">
         <CardHeader>
           <CardTitle>سجل اليوم</CardTitle>
           <CardDescription>جميع تسجيلات الحضور والانصراف لهذا اليوم</CardDescription>
@@ -499,7 +700,20 @@ export default function AttendanceLog() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {todayLog.map((record: any) => {
+                  {groupedLog.map((groupEntry) => (
+                    <>
+                      <TableRow key={`group-header-${groupEntry.key}`} className="bg-muted/50 hover:bg-muted/50">
+                        <TableCell colSpan={9} className="font-semibold text-sm py-2">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            {groupEntry.name}
+                            <Badge variant="secondary" className="font-normal">
+                              {groupEntry.records.length} عامل
+                            </Badge>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {groupEntry.records.map((record: any) => {
                     // ✅ عرض كل الجلسات — لو عنده جلسات متعددة نعرضها كلها
                     const sessions = record.sessions && record.sessions.length > 0
                       ? record.sessions
@@ -604,7 +818,9 @@ export default function AttendanceLog() {
                         </TableCell>
                       </TableRow>
                     ));
-                  })}
+                      })}
+                    </>
+                  ))}
                 </TableBody>
               </Table>
             </div>
@@ -615,7 +831,7 @@ export default function AttendanceLog() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-6 py-4 border-t">
             <div className="text-sm text-muted-foreground">
-              عرض {((currentPage - 1) * pageSize) + 1} إلى {Math.min(currentPage * pageSize, total)} من {total} سجل
+              عرض {todayLog.length} سجل بالصفحة {currentPage} من {totalPages} (الإجمالي {total} سجل)
             </div>
             <div className="flex gap-2">
               <Button

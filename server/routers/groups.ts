@@ -116,9 +116,9 @@ export const groupsRouter = router({
         workMinutes: z.string().optional().nullable(),
         latePenaltyRate: z.string().optional().nullable(),
         earlyLeavePenaltyRate: z.string().optional().nullable(),
-        isFlexibleSchedule: z.boolean().optional(),
+        isFlexibleSchedule: z.union([z.boolean(), z.number()]).transform(Boolean).optional(),
         requiredHours: z.string().optional().nullable(),
-        isActive: z.boolean().optional(),
+        isActive: z.union([z.boolean(), z.number()]).transform(Boolean).optional(),
       }))
       .use(requirePermissionFlag('canManageGroups'))
       .mutation(async ({ input, ctx }) => {

@@ -152,30 +152,56 @@ export async function generateAttendanceLogExcel(
   records: Array<{
     workerName: string;
     workerCode: string;
-    checkInTime: Date | null;
-    checkOutTime: Date | null;
+    groupId?: number | null;
+    groupName?: string;
+    checkInTime: Date | string | null;
+    checkOutTime: Date | string | null;
     checkInMethod: string | null;
     checkOutMethod: string | null;
+    sessions?: Array<{
+      checkIn?: { eventTime: Date | string; method?: string | null } | null;
+      checkOut?: { eventTime: Date | string; method?: string | null } | null;
+    }>;
   }>
 ): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('سجل الحضور اليومي');
 
   // Set RTL direction for Arabic
-  worksheet.views = [{ rightToLeft: true }];
+  worksheet.views = [{ rightToLeft: true, state: 'frozen', ySplit: 5 }];
+
+  // ألوان هادئة تُستخدم بكل الملف
+  const COLORS = {
+    titleBg: 'FFE8F0FE',      // أزرق فاتح جداً
+    titleText: 'FF1E3A5F',    // كحلي داكن هادئ
+    subtitleText: 'FF64748B', // رمادي مزرق
+    headerBg: 'FFD9E2F3',     // أزرق-رمادي فاتح
+    headerText: 'FF1E3A5F',
+    groupBgA: 'FFEFF6FF',     // أزرق باهت جداً
+    groupBgB: 'FFF0FBF7',     // أخضر-نعناعي باهت جداً
+    groupTextA: 'FF2C5282',
+    groupTextB: 'FF2F855A',
+    rowAltBg: 'FFF8FAFC',     // رمادي شبه أبيض للتصفيف
+    border: 'FFE2E8F0',       // حدود رفيعة هادئة
+  };
 
   // Add header
-  worksheet.mergeCells('A1:G1');
+  worksheet.mergeCells('A1:I1');
   const titleCell = worksheet.getCell('A1');
   titleCell.value = `سجل الحضور اليومي - ${date}`;
-  titleCell.font = { size: 16, bold: true };
+  titleCell.font = { size: 16, bold: true, color: { argb: COLORS.titleText } };
   titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.titleBg } };
+  worksheet.getRow(1).height = 28;
+  for (let c = 1; c <= 9; c++) {
+    worksheet.getRow(1).getCell(c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.titleBg } };
+  }
   
   if (groupName) {
-    worksheet.mergeCells('A2:G2');
+    worksheet.mergeCells('A2:I2');
     const groupCell = worksheet.getCell('A2');
-    groupCell.value = `المجموعة: ${groupName}`;
-    groupCell.font = { size: 12 };
+    groupCell.value = `المجموعات: ${groupName}`;
+    groupCell.font = { size: 12, color: { argb: COLORS.subtitleText }, italic: true };
     groupCell.alignment = { horizontal: 'center', vertical: 'middle' };
   }
 
@@ -186,59 +212,128 @@ export async function generateAttendanceLogExcel(
   const headerRow = worksheet.addRow([
     'اسم العامل',
     'كود العامل',
+    'المجموعة',
     'وقت الحضور',
     'طريقة الحضور',
     'وقت الانصراف',
     'طريقة الانصراف',
+    'ساعات العمل',
     'دقائق العمل'
   ]);
   
-  headerRow.font = { bold: true, size: 11 };
+  headerRow.font = { bold: true, size: 11, color: { argb: COLORS.headerText } };
   headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
-  headerRow.fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFE0E0E0' }
+  headerRow.height = 22;
+  headerRow.eachCell((cell) => {
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.headerBg } };
+  });
+
+  // ترتيب السجلات حسب المجموعة ثم اسم العامل، حتى تصير كل مجموعة مع بعضها بالملف
+  const sortedRecords = [...records].sort((a, b) => {
+    const groupA = a.groupId ?? Number.MAX_SAFE_INTEGER;
+    const groupB = b.groupId ?? Number.MAX_SAFE_INTEGER;
+    if (groupA !== groupB) return groupA - groupB;
+    return (a.workerName || '').localeCompare(b.workerName || '', 'ar');
+  });
+
+  // Helper: تنسيق ساعات العمل بصيغة "س د" بشكل يمنع مشاكل خلط الاتجاه (RTL/LTR)
+  // نستخدم علامة LRM (Left-to-Right Mark) حول كل رقم حتى ما يختلط ترتيبه مع الحرف العربي المجاور
+  const LRM = '\u200E';
+  const formatHoursLabel = (minutes: number) => {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${LRM}${h}${LRM} س ${LRM}${m}${LRM} د`;
   };
 
-  // Add data rows
-  for (const record of records) {
-    const workMinutes = record.checkInTime && record.checkOutTime
-      ? Math.round((record.checkOutTime.getTime() - record.checkInTime.getTime()) / 60000)
-      : null;
+  let lastGroupKey: number | string | null = '__none__' as any;
+  let groupColorToggle = false; // يتبدّل مع كل مجموعة جديدة لتمييزها عن اللي قبلها
+  let dataRowCounter = 0; // لتصفيف صفوف البيانات (Zebra striping)
 
-    const row = worksheet.addRow([
-      record.workerName,
-      record.workerCode,
-      record.checkInTime ? new Date(record.checkInTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true }) : '-',
-      record.checkInMethod || '-',
-      record.checkOutTime ? new Date(record.checkOutTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true }) : '-',
-      record.checkOutMethod || '-',
-      workMinutes !== null ? `${workMinutes} دقيقة` : '-'
-    ]);
+  // Add data rows — كل جلسة (حضور/انصراف) بصف مستقل، ومجمّعة بعنوان لكل مجموعة
+  for (const record of sortedRecords) {
+    const groupKey = record.groupId ?? 'بدون مجموعة';
+    if (groupKey !== lastGroupKey) {
+      lastGroupKey = groupKey;
+      groupColorToggle = !groupColorToggle;
+      dataRowCounter = 0; // نبدأ التصفيف من جديد مع كل مجموعة
+      const bg = groupColorToggle ? COLORS.groupBgA : COLORS.groupBgB;
+      const fg = groupColorToggle ? COLORS.groupTextA : COLORS.groupTextB;
 
-    row.alignment = { horizontal: 'center', vertical: 'middle' };
+      const sectionRow = worksheet.addRow([`${record.groupName || 'بدون مجموعة'}`]);
+      worksheet.mergeCells(`A${sectionRow.number}:I${sectionRow.number}`);
+      sectionRow.font = { bold: true, size: 11, color: { argb: fg } };
+      sectionRow.height = 20;
+      sectionRow.eachCell((cell) => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+      });
+      sectionRow.alignment = { horizontal: 'right', vertical: 'middle' };
+    }
+
+    // ✅ عرض كل الجلسات — لو عنده جلسات متعددة نعرضها كلها (نفس منطق الشاشة)
+    const sessions = record.sessions && record.sessions.length > 0
+      ? record.sessions
+      : [{
+          checkIn: record.checkInTime ? { eventTime: record.checkInTime, method: record.checkInMethod } : null,
+          checkOut: record.checkOutTime ? { eventTime: record.checkOutTime, method: record.checkOutMethod } : null,
+        }];
+
+    for (const session of sessions) {
+      const checkInDate = session.checkIn?.eventTime ? new Date(session.checkIn.eventTime) : null;
+      const checkOutDate = session.checkOut?.eventTime ? new Date(session.checkOut.eventTime) : null;
+
+      const workMinutes = checkInDate && checkOutDate
+        ? Math.round((checkOutDate.getTime() - checkInDate.getTime()) / 60000)
+        : null;
+
+      const row = worksheet.addRow([
+        record.workerName,
+        record.workerCode,
+        record.groupName || 'بدون مجموعة',
+        checkInDate ? checkInDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true }) : '-',
+        session.checkIn?.method || '-',
+        checkOutDate ? checkOutDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true }) : '-',
+        session.checkOut?.method || '-',
+        workMinutes !== null ? formatHoursLabel(workMinutes) : '-',
+        workMinutes !== null ? workMinutes : '-'
+      ]);
+
+      row.alignment = { horizontal: 'center', vertical: 'middle' };
+      // خلية "ساعات العمل" فيها نص عربي ممزوج بأرقام — نثبّت اتجاهها RTL صراحة لضمان ترتيب ثابت
+      row.getCell(8).alignment = { horizontal: 'center', vertical: 'middle', readingOrder: 'rtl' };
+      // خلية "دقائق العمل" رقم صرف — نخليها LTR عادي زي أي رقم
+      row.getCell(9).alignment = { horizontal: 'center', vertical: 'middle', readingOrder: 'ltr' };
+
+      // تصفيف هادئ لصفوف البيانات (Zebra striping) لسهولة القراءة
+      dataRowCounter++;
+      if (dataRowCounter % 2 === 0) {
+        row.eachCell((cell) => {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.rowAltBg } };
+        });
+      }
+    }
   }
 
   // Set column widths
   worksheet.columns = [
     { width: 20 }, // اسم العامل
     { width: 15 }, // كود العامل
+    { width: 20 }, // المجموعة
     { width: 15 }, // وقت الحضور
     { width: 15 }, // طريقة الحضور
     { width: 15 }, // وقت الانصراف
     { width: 15 }, // طريقة الانصراف
-    { width: 15 }  // دقائق العمل
+    { width: 16 }, // ساعات العمل
+    { width: 14 }  // دقائق العمل
   ];
 
-  // Add borders to all cells
-  worksheet.eachRow((row, rowNumber) => {
+  // حدود رفيعة هادئة على كل الخلايا (بدل الحدود السوداء الغامقة)
+  worksheet.eachRow((row) => {
     row.eachCell((cell) => {
       cell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' }
+        top: { style: 'thin', color: { argb: COLORS.border } },
+        left: { style: 'thin', color: { argb: COLORS.border } },
+        bottom: { style: 'thin', color: { argb: COLORS.border } },
+        right: { style: 'thin', color: { argb: COLORS.border } }
       };
     });
   });

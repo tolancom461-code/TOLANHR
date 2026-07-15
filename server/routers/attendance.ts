@@ -550,12 +550,14 @@ addFullSession: protectedProcedure
     todayLogWithPagination: protectedProcedure
       .input(z.object({ 
         groupId: z.number().optional(),
+        groupIds: z.array(z.number()).optional(),
         date: z.string().optional(), // Format: YYYY-MM-DD
         page: z.number().default(1),
         limit: z.number().default(20)
       }))
       .query(async ({ input }) => {
-        return await db.getTodayAttendanceWithPagination(input.groupId, input.date, input.page, input.limit);
+        const groupFilter = input.groupIds && input.groupIds.length > 0 ? input.groupIds : input.groupId;
+        return await db.getTodayAttendanceWithPagination(groupFilter, input.date, input.page, input.limit);
       }),
     
     // Get today's attendance log (old version - kept for backward compatibility)
@@ -616,6 +618,7 @@ addFullSession: protectedProcedure
     stats: protectedProcedure
       .input(z.object({ 
         groupId: z.number().optional(),
+        groupIds: z.array(z.number()).optional(),
         date: z.string().optional() // Format: YYYY-MM-DD
       }))
       .query(async ({ input }) => {
@@ -640,7 +643,8 @@ addFullSession: protectedProcedure
         }
         const tomorrow = new Date(targetDate);
         tomorrow.setDate(tomorrow.getDate() + 1);
-        return await db.getAttendanceStats(targetDate, tomorrow, input.groupId);
+        const groupFilter = input.groupIds && input.groupIds.length > 0 ? input.groupIds : input.groupId;
+        return await db.getAttendanceStats(targetDate, tomorrow, groupFilter);
       }),
     
     // Bulk update attendance times
@@ -835,27 +839,41 @@ addFullSession: protectedProcedure
       .input(z.object({
         date: z.string(),
         groupId: z.number().optional(),
+        groupIds: z.array(z.number()).optional(),
       }))
       .mutation(async ({ input }) => {
         const { generateAttendanceLogExcel } = await import('../excel-export');
         
+        const groupFilter = input.groupIds && input.groupIds.length > 0 ? input.groupIds : input.groupId;
+        
         // Get attendance log data
         const records = await db.getTodayAttendance(
-          input.groupId,
+          groupFilter,
           input.date
         );
         
-        // Get group name if groupId is provided
+        // Get group name(s) if a filter is provided (for the report subtitle)
         let groupName = null;
-        if (input.groupId) {
+        if (input.groupIds && input.groupIds.length > 0) {
+          const groupList = await Promise.all(input.groupIds.map((id) => db.getGroupById(id)));
+          groupName = groupList.filter(Boolean).map((g: any) => g.name).join('، ') || null;
+        } else if (input.groupId) {
           const group = await db.getGroupById(input.groupId);
           groupName = group?.name || null;
         }
         
+        // Map every record's groupId to its group name (for per-row/section grouping in the sheet)
+        const allGroups = await db.getAllGroups();
+        const groupNameById = new Map(allGroups.map((g: any) => [g.id, g.name]));
+        const recordsWithGroupName = records.map((r: any) => ({
+          ...r,
+          groupName: r.groupId != null ? (groupNameById.get(r.groupId) || 'بدون مجموعة') : 'بدون مجموعة',
+        }));
+        
         const excelBuffer = await generateAttendanceLogExcel(
           input.date,
           groupName,
-          records
+          recordsWithGroupName
         );
         
         return {

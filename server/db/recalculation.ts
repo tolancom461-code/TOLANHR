@@ -218,9 +218,15 @@ export async function recalculateGroupFinanceForOpenPeriods(
     .where(eq(workers.groupId, groupId));
 
   let totalDays = 0;
-  for (const worker of groupWorkers) {
-    const result = await recalculateWorkerFinanceForPeriod(worker.id, startDate, endDate);
-    totalDays += result.recalculated;
+  const CONCURRENCY = 5; // نعالج عدة عمال بنفس الوقت بدل واحد تلو الثاني، بدون إغراق قاعدة البيانات
+  for (let i = 0; i < groupWorkers.length; i += CONCURRENCY) {
+    const batch = groupWorkers.slice(i, i + CONCURRENCY);
+    const results = await Promise.all(
+      batch.map((worker) => recalculateWorkerFinanceForPeriod(worker.id, startDate, endDate))
+    );
+    for (const result of results) {
+      totalDays += result.recalculated;
+    }
   }
 
   console.log(`[Recalc Group] ✅ ${groupWorkers.length} workers, ${totalDays} days recalculated`);

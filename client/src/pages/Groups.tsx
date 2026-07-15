@@ -159,9 +159,9 @@ export default function Groups() {
       workMinutes: group.workMinutes ? String(group.workMinutes) : "",
       latePenaltyRate: group.latePenaltyRate ? String(group.latePenaltyRate) : "",
       earlyLeavePenaltyRate: group.earlyLeavePenaltyRate ? String(group.earlyLeavePenaltyRate) : "",
-      isFlexibleSchedule: group.isFlexibleSchedule || false,
+      isFlexibleSchedule: Boolean(group.isFlexibleSchedule),
       requiredHours: group.requiredHours ? String(group.requiredHours) : "8.00",
-      isActive: group.isActive !== undefined ? group.isActive : true,
+      isActive: group.isActive !== undefined ? Boolean(group.isActive) : true,
     });
     setIsEditDialogOpen(true);
   };
@@ -182,9 +182,9 @@ export default function Groups() {
         workMinutes: freshGroupData.workMinutes ? String(freshGroupData.workMinutes) : "",
         latePenaltyRate: freshGroupData.latePenaltyRate ? String(freshGroupData.latePenaltyRate) : "",
         earlyLeavePenaltyRate: freshGroupData.earlyLeavePenaltyRate ? String(freshGroupData.earlyLeavePenaltyRate) : "",
-        isFlexibleSchedule: freshGroupData.isFlexibleSchedule || false,
+        isFlexibleSchedule: Boolean(freshGroupData.isFlexibleSchedule),
         requiredHours: freshGroupData.requiredHours ? String(freshGroupData.requiredHours) : "8.00",
-        isActive: freshGroupData.isActive ?? true,
+        isActive: freshGroupData.isActive !== undefined ? Boolean(freshGroupData.isActive) : true,
       });
     }
   }, [isEditDialogOpen, freshGroupData]);

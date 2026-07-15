@@ -125,12 +125,32 @@ export async function updateGroup(id: number, data: Partial<InsertGroup>): Promi
 
   await db.update(groups).set({ ...updatedData, updatedAt: new Date() }).where(eq(groups.id, id));
 
-  // ✅ Automatic recalculation for all workers in this group (open periods only)
-  try {
-    await recalculateGroupFinanceForOpenPeriods(id);
-    console.log(`[Group Updated] ✅ Recalculated all workers in group ${id}`);
-  } catch (error: any) {
-    console.error(`[Group Updated] ⚠️ Recalc failed for group ${id}:`, error.message);
+  // ✅ إعادة الحساب تلقائيًا فقط لو تغيّر حقل فعليًا يؤثر على حساب الرواتب/الاستحقاقات
+  // (تعديل الاسم، الكود، الحالة النشطة، مركز التكلفة... لا تحتاج إعادة حساب، وهذا يوفّر وقت الحفظ كثيرًا)
+  const FINANCE_AFFECTING_FIELDS = [
+    'dailyRate',
+    'dailyWage',
+    'workMinutes',
+    'latePenaltyRate',
+    'earlyLeavePenaltyRate',
+    'isFlexibleSchedule',
+    'requiredHours',
+  ] as const;
+  const changedFinanceFields = FINANCE_AFFECTING_FIELDS.filter((f) => (data as any)[f] !== undefined);
+
+  if (changedFinanceFields.length > 0) {
+    // ⚠️ مهم: ما ننتظر (await) إعادة الحساب هنا — بيانات المجموعة فوق خُزّنت فعلاً بالسطر السابق.
+    // لو انتظرنا هنا، المستخدم بيضل شايف "جاري الحفظ..." لين تخلص إعادة الحساب (ثواني لدقائق حسب عدد العمال/الأيام)
+    // مع إن الحفظ الفعلي خلص من زمان. نشغّلها بالخلفية بدون ما نعطّل رجوع الاستجابة للمستخدم.
+    recalculateGroupFinanceForOpenPeriods(id)
+      .then(() => {
+        console.log(`[Group Updated] ✅ Recalculated all workers in group ${id} (changed: ${changedFinanceFields.join(', ')})`);
+      })
+      .catch((error: any) => {
+        console.error(`[Group Updated] ⚠️ Recalc failed for group ${id}:`, error.message);
+      });
+  } else {
+    console.log(`[Group Updated] ⏭️ Skipped recalculation for group ${id} (no finance-affecting fields changed)`);
   }
 }
 
