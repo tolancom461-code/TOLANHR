@@ -100,6 +100,7 @@ const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
     '/dashboard', '/executive', '/workers', '/groups',
     '/attendance', '/attendance/log', '/attendance/reports', '/work-days',
     '/payroll/dashboard', '/deductions', '/payroll/batches', '/payroll/batches/coverage', '/payroll/batches/create',
+    '/financial-recalculation',
     '/finance/payroll/history', '/finance/overrides', '/payroll-report', '/finance/reports', '/finance/daily-payroll-report',
     '/finance/payment-voucher',
     '/finance/payment-voucher',

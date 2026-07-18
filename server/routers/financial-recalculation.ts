@@ -22,7 +22,9 @@ import { fileURLToPath } from "url";
   // Financial Recalculation (Global Recalculator)
 export const financialRecalculationRouter = router({
     // Recalculate financial records for a date range
-    recalculateRange: adminProcedure
+    // ✅ متاح للسوبر أدمن والشؤون الإدارية
+    recalculateRange: protectedProcedure
+      .use(requireRole('super_admin', 'admin_affairs'))
       .input(z.object({
         startDate: z.string(), // "2026-02-01"
         endDate: z.string(),   // "2026-02-28"
