@@ -684,4 +684,116 @@ export async function getAttendanceStats(startDate: Date, endDate: Date, groupId
   };
 }
 
+// ============================================
+// سجل الحضور لفترة (من تاريخ - إلى تاريخ)
+// يرجع لكل عامل: إجمالي الأيام، إجمالي الدقائق، وتفصيل كل يوم (للعرض عند التوسيع)
+// ============================================
+export async function getAttendancePeriodLog(
+  startDate: string,
+  endDate: string,
+  groupId?: number | number[]
+) {
+  const db = await getDb();
+  if (!db) return { workers: [] };
+
+  const { attendanceEvents, workers } = await import('../../drizzle/schema');
+
+  // نوسّع بداية ونهاية المدى حتى نلتقط جلسات الورديات الليلية
+  // (تبدأ بيوم وتنتهي بعد منتصف الليل باليوم التالي)
+  const { startOfDay } = getExpandedDateRange(startDate);
+  const { endOfSearch } = getExpandedDateRange(endDate);
+
+  const groupIds = Array.isArray(groupId) ? groupId : (groupId ? [groupId] : []);
+
+  // العمال المطابقين للفلتر (نشطين فقط)
+  let workerRows = await db.select().from(workers).where(eq(workers.status, 'active'));
+  if (groupIds.length > 0) {
+    workerRows = workerRows.filter((w) => groupIds.includes(w.groupId as number));
+  }
+  if (workerRows.length === 0) return { workers: [] };
+
+  const workerIds = workerRows.map((w) => w.id);
+
+  const events = await db
+    .select()
+    .from(attendanceEvents)
+    .where(
+      and(
+        gte(attendanceEvents.eventTime, startOfDay),
+        lt(attendanceEvents.eventTime, endOfSearch),
+        inArray(attendanceEvents.workerId, workerIds)
+      )
+    );
+
+  // تجميع الأحداث حسب "يوم العمل الإداري" (يتعامل صح مع الورديات الليلية)
+  const grouped = groupEventsByWorkDate(events);
+
+  const workerMap = new Map<number, {
+    workerId: number;
+    workerName: string;
+    workerCode: string;
+    groupId: number | null;
+    totalDays: number;
+    totalMinutes: number;
+    days: Array<{
+      workDate: string;
+      sessions: Array<{
+        checkIn: { eventTime: string; method: string | null } | null;
+        checkOut: { eventTime: string; method: string | null } | null;
+      }>;
+      dayMinutes: number;
+    }>;
+  }>();
+
+  for (const w of workerRows) {
+    workerMap.set(w.id, {
+      workerId: w.id,
+      workerName: w.fullName,
+      workerCode: w.code,
+      groupId: w.groupId,
+      totalDays: 0,
+      totalMinutes: 0,
+      days: [],
+    });
+  }
+
+  for (const [workDate, workersOnDate] of Object.entries(grouped)) {
+    // تجاهل أي يوم يقع خارج الفترة المطلوبة (احتياط، رغم إن التجميع مبني على يوم الدخول أصلاً)
+    if (workDate < startDate || workDate > endDate) continue;
+
+    for (const [workerIdStr, data] of Object.entries(workersOnDate)) {
+      const workerId = Number(workerIdStr);
+      const entry = workerMap.get(workerId);
+      if (!entry) continue;
+
+      let dayMinutes = 0;
+      const sessions = data.sessions.map((s: any) => {
+        if (s.checkIn && s.checkOut) {
+          dayMinutes += Math.round(
+            (new Date(s.checkOut.eventTime).getTime() - new Date(s.checkIn.eventTime).getTime()) / 60000
+          );
+        }
+        return {
+          checkIn: s.checkIn ? { eventTime: s.checkIn.eventTime, method: s.checkIn.method } : null,
+          checkOut: s.checkOut ? { eventTime: s.checkOut.eventTime, method: s.checkOut.method } : null,
+        };
+      });
+
+      entry.days.push({ workDate, sessions, dayMinutes });
+      entry.totalDays += 1;
+      entry.totalMinutes += dayMinutes;
+    }
+  }
+
+  // نرجّع فقط العمال اللي عندهم حضور فعلي خلال الفترة (نفس منطق السجل اليومي)
+  const result = Array.from(workerMap.values())
+    .filter((w) => w.totalDays > 0)
+    .map((w) => ({
+      ...w,
+      days: w.days.sort((a, b) => a.workDate.localeCompare(b.workDate)),
+    }));
+
+  return { workers: result };
+}
+
 

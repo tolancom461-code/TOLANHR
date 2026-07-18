@@ -36,6 +36,11 @@ export default function AttendanceLog() {
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
   const [isGroupFilterOpen, setIsGroupFilterOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toLocaleDateString('en-CA'));
+  // ✅ وضع العرض: يوم واحد أو فترة (من-إلى)
+  const [dateMode, setDateMode] = useState<'day' | 'range'>('day');
+  const [rangeStart, setRangeStart] = useState<string>(new Date().toLocaleDateString('en-CA'));
+  const [rangeEnd, setRangeEnd] = useState<string>(new Date().toLocaleDateString('en-CA'));
+  const [expandedWorkerIds, setExpandedWorkerIds] = useState<Set<number>>(new Set());
   const [editingRecord, setEditingRecord] = useState<any>(null);
   const [editingSessions, setEditingSessions] = useState<Array<{
     checkInId: number | null;
@@ -61,6 +66,10 @@ export default function AttendanceLog() {
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedGroupIds, selectedDate]);
+
+  useEffect(() => {
+    setExpandedWorkerIds(new Set());
+  }, [rangeStart, rangeEnd, selectedGroupIds, dateMode]);
   
   // Check if selected date is locked
   const { data: dateLockStatus } = trpc.attendance.checkDateLocked.useQuery(
@@ -86,6 +95,57 @@ export default function AttendanceLog() {
     groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined,
     date: selectedDate
   });
+
+  // ✅ استعلام سجل الفترة (من-إلى) — يُفعّل فقط بوضع "فترة"
+  const { data: periodLogData, isLoading: isPeriodLoading, refetch: refetchPeriod } = trpc.attendance.periodLog.useQuery(
+    {
+      startDate: rangeStart,
+      endDate: rangeEnd,
+      groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined,
+    },
+    { enabled: dateMode === 'range' && !!rangeStart && !!rangeEnd }
+  );
+  const periodWorkers = periodLogData?.workers || [];
+
+  // تقسيم ملخص الفترة إلى مجموعات — نفس منطق تقسيم السجل اليومي بالضبط
+  const groupedPeriodLog = useMemo(() => {
+    const byGroup = new Map<number | 'none', any[]>();
+    for (const worker of periodWorkers) {
+      const key = (worker.groupId ?? 'none') as number | 'none';
+      if (!byGroup.has(key)) byGroup.set(key, []);
+      byGroup.get(key)!.push(worker);
+    }
+
+    const ordered: Array<{ key: number | 'none'; name: string; workers: any[] }> = [];
+    for (const g of groups || []) {
+      if (byGroup.has(g.id)) {
+        ordered.push({ key: g.id, name: g.name, workers: byGroup.get(g.id)! });
+        byGroup.delete(g.id);
+      }
+    }
+    if (byGroup.has('none')) {
+      ordered.push({ key: 'none', name: 'بدون مجموعة', workers: byGroup.get('none')! });
+    }
+    return ordered;
+  }, [periodWorkers, groups]);
+
+  const toggleWorkerExpanded = (workerId: number) => {
+    setExpandedWorkerIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(workerId)) {
+        next.delete(workerId);
+      } else {
+        next.add(workerId);
+      }
+      return next;
+    });
+  };
+
+  const formatMinutesLabel = (minutes: number) => {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${h} س ${m} د`;
+  };
 
   // تقسيم سجل اليوم إلى مجموعات — كل عامل تحت عنوان مجموعته
   const groupedLog = useMemo(() => {
@@ -164,6 +224,29 @@ export default function AttendanceLog() {
     }
   });
 
+  const exportPeriodMutation = trpc.attendance.exportPeriodToExcel.useMutation({
+    onSuccess: (result) => {
+      const binaryString = atob(result.data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = result.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('تم تصدير سجل الفترة بنجاح');
+    },
+    onError: (error) => {
+      toast.error(error.message || 'فشل تصدير سجل الفترة');
+    }
+  });
+
   // طباعة كل البيانات المطابقة للفلتر (مو بس الصفحة الظاهرة حاليًا)، منسّقة ومجمّعة حسب المجموعة
   const handlePrint = async () => {
     try {
@@ -208,8 +291,12 @@ export default function AttendanceLog() {
       };
 
       let bodyHtml = '';
+      let groupToggle = false;
       for (const group of orderedGroups) {
-        bodyHtml += `<tr class="group-row"><td colspan="7">${group.name} <span class="count">(${group.records.length} عامل)</span></td></tr>`;
+        groupToggle = !groupToggle;
+        const groupClass = groupToggle ? 'group-a' : 'group-b';
+        bodyHtml += `<tr class="group-row ${groupClass}"><td colspan="7">${group.name} <span class="count">(${group.records.length} عامل)</span></td></tr>`;
+        let rowCounter = 0;
         for (const record of group.records) {
           const sessions = record.sessions && record.sessions.length > 0
             ? record.sessions
@@ -223,14 +310,16 @@ export default function AttendanceLog() {
             const workMinutes = checkInDate && checkOutDate
               ? Math.round((checkOutDate.getTime() - checkInDate.getTime()) / 60000)
               : null;
-            bodyHtml += `<tr>
+            rowCounter++;
+            const altClass = rowCounter % 2 === 0 ? 'alt-row' : '';
+            bodyHtml += `<tr class="${altClass}">
               <td>${record.workerCode || '-'}</td>
-              <td>${record.workerName}</td>
+              <td class="name-cell">${record.workerName}</td>
               <td>${fmtTime(session.checkIn?.eventTime)}</td>
               <td>${session.checkIn?.method || '-'}</td>
               <td>${fmtTime(session.checkOut?.eventTime)}</td>
               <td>${session.checkOut?.method || '-'}</td>
-              <td>${workMinutes !== null ? fmtHours(workMinutes) : '-'}</td>
+              <td class="hours-cell">${workMinutes !== null ? fmtHours(workMinutes) : '-'}</td>
             </tr>`;
           }
         }
@@ -249,26 +338,89 @@ export default function AttendanceLog() {
           <meta charset="UTF-8" />
           <title>سجل الحضور اليومي - ${selectedDate}</title>
           <style>
-            body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; margin: 20px; color: #111; }
-            h1 { text-align: center; font-size: 20px; margin-bottom: 4px; }
-            .subtitle { text-align: center; font-size: 13px; color: #555; margin-bottom: 16px; }
-            table { width: 100%; border-collapse: collapse; font-size: 12px; }
-            th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: center; }
-            th { background: #f0f0f0; font-weight: bold; }
-            tr.group-row td { background: #eef2ff; font-weight: bold; text-align: right; }
-            tr.group-row .count { font-weight: normal; color: #555; font-size: 11px; }
+            :root {
+              --title-bg: #e8f0fe;
+              --title-text: #1e3a5f;
+              --subtitle-text: #64748b;
+              --header-bg: #d9e2f3;
+              --header-text: #1e3a5f;
+              --group-a-bg: #eff6ff;
+              --group-a-text: #2c5282;
+              --group-b-bg: #f0fbf7;
+              --group-b-text: #2f855a;
+              --row-alt-bg: #f8fafc;
+              --border-color: #e2e8f0;
+            }
+            * { box-sizing: border-box; }
+            body {
+              font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+              margin: 24px;
+              color: #1e293b;
+              background: #fff;
+            }
+            .report-header {
+              background: var(--title-bg);
+              border-radius: 10px;
+              padding: 16px 20px;
+              margin-bottom: 18px;
+              text-align: center;
+            }
+            .report-header h1 {
+              margin: 0 0 6px 0;
+              font-size: 21px;
+              color: var(--title-text);
+              font-weight: 700;
+            }
+            .subtitle {
+              font-size: 13px;
+              color: var(--subtitle-text);
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 12.5px;
+              border: 1px solid var(--border-color);
+              border-radius: 8px;
+              overflow: hidden;
+            }
+            th, td {
+              border: 1px solid var(--border-color);
+              padding: 8px 10px;
+              text-align: center;
+            }
+            th {
+              background: var(--header-bg);
+              color: var(--header-text);
+              font-weight: 700;
+              font-size: 12.5px;
+            }
+            td.name-cell { font-weight: 600; text-align: right; }
+            td.hours-cell { color: #334155; font-weight: 600; }
+            tr.alt-row td { background: var(--row-alt-bg); }
+            tr.group-row td {
+              font-weight: 700;
+              text-align: right;
+              padding: 7px 10px;
+            }
+            tr.group-row.group-a td { background: var(--group-a-bg); color: var(--group-a-text); }
+            tr.group-row.group-b td { background: var(--group-b-bg); color: var(--group-b-text); }
+            tr.group-row .count { font-weight: 400; font-size: 11px; opacity: 0.75; }
             @media print {
-              @page { margin: 1cm; }
-              tr.group-row { break-inside: avoid; }
+              body { margin: 10mm; }
+              @page { margin: 12mm; }
+              tr.group-row { break-inside: avoid; break-after: avoid; }
+              tr { break-inside: avoid; }
             }
           </style>
         </head>
         <body>
-          <h1>سجل الحضور اليومي</h1>
-          <div class="subtitle">
-            التاريخ: ${new Date(selectedDate).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}
-            ${selectedGroupIds.length > 0 ? ` — المجموعات: ${orderedGroups.map(g => g.name).join('، ')}` : ' — جميع المجموعات'}
-            — إجمالي السجلات: ${fullLog.length}
+          <div class="report-header">
+            <h1>سجل الحضور اليومي</h1>
+            <div class="subtitle">
+              التاريخ: ${new Date(selectedDate).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}
+              ${selectedGroupIds.length > 0 ? ` — المجموعات: ${orderedGroups.map(g => g.name).join('، ')}` : ' — جميع المجموعات'}
+              — إجمالي السجلات: ${fullLog.length}
+            </div>
           </div>
           <table>
             <thead>
@@ -298,6 +450,164 @@ export default function AttendanceLog() {
     } catch (err: any) {
       toast.error(err?.message || 'فشل تجهيز الطباعة');
     }
+  };
+
+  // طباعة سجل الفترة: اسم كل عامل ثم تفاصيل أيامه تحته مباشرة، مجمّعة حسب المجموعة
+  const handlePrintPeriod = () => {
+    if (!periodWorkers.length) {
+      toast.error('لا يوجد بيانات لطباعتها');
+      return;
+    }
+
+    let bodyHtml = '';
+    let groupToggle = false;
+    for (const group of groupedPeriodLog) {
+      groupToggle = !groupToggle;
+      const groupClass = groupToggle ? 'group-a' : 'group-b';
+      bodyHtml += `<tr class="group-row ${groupClass}"><td colspan="7">${group.name} <span class="count">(${group.workers.length} عامل)</span></td></tr>`;
+
+      for (const worker of group.workers) {
+        bodyHtml += `<tr class="worker-row">
+          <td colspan="5">${worker.workerName} (${worker.workerCode}) — ${worker.totalDays} يوم حضور</td>
+          <td>${worker.totalMinutes}</td>
+          <td>${formatMinutesLabel(worker.totalMinutes)}</td>
+        </tr>`;
+
+        let rowCounter = 0;
+        for (const day of worker.days) {
+          const sessions = day.sessions.length > 0 ? day.sessions : [{ checkIn: null, checkOut: null }];
+          const dayLabel = new Date(day.workDate).toLocaleDateString('ar-SA', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+          for (const session of sessions) {
+            rowCounter++;
+            const altClass = rowCounter % 2 === 0 ? 'alt-row' : '';
+            const checkInDate = session.checkIn?.eventTime ? new Date(session.checkIn.eventTime) : null;
+            const checkOutDate = session.checkOut?.eventTime ? new Date(session.checkOut.eventTime) : null;
+            // دقائق هذه الجلسة تحديدًا (مو إجمالي اليوم) — حتى ما تتكرر نفس القيمة لو فيه أكثر من جلسة بنفس اليوم
+            const sessionMinutes = checkInDate && checkOutDate
+              ? Math.round((checkOutDate.getTime() - checkInDate.getTime()) / 60000)
+              : null;
+            bodyHtml += `<tr class="${altClass}">
+              <td class="date-cell">${dayLabel}</td>
+              <td>${formatTime(session.checkIn?.eventTime)}</td>
+              <td>${session.checkIn?.method || '-'}</td>
+              <td>${formatTime(session.checkOut?.eventTime)}</td>
+              <td>${session.checkOut?.method || '-'}</td>
+              <td>${sessionMinutes !== null ? sessionMinutes : '-'}</td>
+              <td class="hours-cell">${sessionMinutes !== null ? formatMinutesLabel(sessionMinutes) : '-'}</td>
+            </tr>`;
+          }
+        }
+      }
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast.error('تعذر فتح نافذة الطباعة (تحقق من حاجب النوافذ المنبثقة)');
+      return;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="UTF-8" />
+        <title>سجل حضور الفترة - ${rangeStart} إلى ${rangeEnd}</title>
+        <style>
+          :root {
+            --title-bg: #e8f0fe;
+            --title-text: #1e3a5f;
+            --subtitle-text: #64748b;
+            --header-bg: #d9e2f3;
+            --header-text: #1e3a5f;
+            --group-a-bg: #eff6ff;
+            --group-a-text: #2c5282;
+            --group-b-bg: #f0fbf7;
+            --group-b-text: #2f855a;
+            --worker-bg: #fdf6e3;
+            --worker-text: #8a6d00;
+            --row-alt-bg: #f8fafc;
+            --border-color: #e2e8f0;
+          }
+          * { box-sizing: border-box; }
+          body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            margin: 24px;
+            color: #1e293b;
+            background: #fff;
+          }
+          .report-header {
+            background: var(--title-bg);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 18px;
+            text-align: center;
+          }
+          .report-header h1 {
+            margin: 0 0 6px 0;
+            font-size: 21px;
+            color: var(--title-text);
+            font-weight: 700;
+          }
+          .subtitle { font-size: 13px; color: var(--subtitle-text); }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            border: 1px solid var(--border-color);
+          }
+          th, td { border: 1px solid var(--border-color); padding: 7px 9px; text-align: center; }
+          th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+          td.date-cell { font-weight: 500; }
+          td.hours-cell { font-weight: 600; color: #334155; }
+          tr.alt-row td { background: var(--row-alt-bg); }
+          tr.group-row td { font-weight: 700; text-align: right; padding: 7px 10px; }
+          tr.group-row.group-a td { background: var(--group-a-bg); color: var(--group-a-text); }
+          tr.group-row.group-b td { background: var(--group-b-bg); color: var(--group-b-text); }
+          tr.group-row .count { font-weight: 400; font-size: 11px; opacity: 0.75; }
+          tr.worker-row td { background: var(--worker-bg); color: var(--worker-text); font-weight: 700; text-align: right; }
+          @media print {
+            body { margin: 10mm; }
+            @page { margin: 12mm; }
+            tr.group-row, tr.worker-row { break-inside: avoid; break-after: avoid; }
+            tr { break-inside: avoid; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="report-header">
+          <h1>سجل حضور الفترة</h1>
+          <div class="subtitle">
+            من ${new Date(rangeStart).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}
+            إلى ${new Date(rangeEnd).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}
+            ${selectedGroupIds.length > 0 ? ` — المجموعات: ${groupedPeriodLog.map(g => g.name).join('، ')}` : ' — جميع المجموعات'}
+            — عدد العمال: ${periodWorkers.length}
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>التاريخ / العامل</th>
+              <th>وقت الحضور</th>
+              <th>طريقة الحضور</th>
+              <th>وقت الانصراف</th>
+              <th>طريقة الانصراف</th>
+              <th>دقائق العمل</th>
+              <th>ساعات العمل</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${bodyHtml}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    };
   };
 
   const updateEventMutation = trpc.attendance.updateEvent.useMutation({
@@ -486,30 +796,80 @@ export default function AttendanceLog() {
             سجل الحضور اليومي
           </h1>
           <p className="text-muted-foreground">
-            {new Date(selectedDate).toLocaleDateString('ar-SA', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
+            {dateMode === 'day' ? (
+              new Date(selectedDate).toLocaleDateString('ar-SA', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })
+            ) : (
+              <>
+                من {new Date(rangeStart).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}
+                {' '}إلى{' '}
+                {new Date(rangeEnd).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </>
+            )}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <Input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-48"
-            />
-            {dateLockStatus?.isLocked && (
-              <Badge variant="destructive" className="flex items-center gap-1">
-                <Lock className="h-3 w-3" />
-                مغلق
-              </Badge>
-            )}
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* ✅ التبديل بين عرض يوم واحد أو فترة (من-إلى) */}
+          <div className="flex items-center rounded-lg border p-0.5 bg-muted/40">
+            <Button
+              type="button"
+              size="sm"
+              variant={dateMode === 'day' ? 'default' : 'ghost'}
+              className="h-8 px-3"
+              onClick={() => setDateMode('day')}
+            >
+              يوم واحد
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={dateMode === 'range' ? 'default' : 'ghost'}
+              className="h-8 px-3"
+              onClick={() => setDateMode('range')}
+            >
+              فترة (من-إلى)
+            </Button>
           </div>
+
+          {dateMode === 'day' ? (
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <Input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-48"
+              />
+              {dateLockStatus?.isLocked && (
+                <Badge variant="destructive" className="flex items-center gap-1">
+                  <Lock className="h-3 w-3" />
+                  مغلق
+                </Badge>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <Input
+                type="date"
+                value={rangeStart}
+                onChange={(e) => setRangeStart(e.target.value)}
+                className="w-40"
+              />
+              <span className="text-muted-foreground text-sm">إلى</span>
+              <Input
+                type="date"
+                value={rangeEnd}
+                min={rangeStart}
+                onChange={(e) => setRangeEnd(e.target.value)}
+                className="w-40"
+              />
+            </div>
+          )}
           <Popover open={isGroupFilterOpen} onOpenChange={setIsGroupFilterOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-56 justify-between font-normal">
@@ -550,28 +910,55 @@ export default function AttendanceLog() {
               </div>
             </PopoverContent>
           </Popover>
-          <Button variant="outline" onClick={() => refetch()}>
+          <Button variant="outline" onClick={() => (dateMode === 'day' ? refetch() : refetchPeriod())}>
             <RefreshCw className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="default" 
-            onClick={() => exportMutation.mutate({ 
-              date: selectedDate, 
-              groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined
-            })}
-            disabled={exportMutation.isPending || !todayLog?.length}
-          >
-            <Download className="h-4 w-4 ml-2" />
-            تصدير Excel
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handlePrint}
-            disabled={!todayLog?.length}
-          >
-            <Printer className="h-4 w-4 ml-2" />
-            طباعة
-          </Button>
+          {dateMode === 'day' ? (
+            <>
+              <Button 
+                variant="default" 
+                onClick={() => exportMutation.mutate({ 
+                  date: selectedDate, 
+                  groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined
+                })}
+                disabled={exportMutation.isPending || !todayLog?.length}
+              >
+                <Download className="h-4 w-4 ml-2" />
+                تصدير Excel
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handlePrint}
+                disabled={!todayLog?.length}
+              >
+                <Printer className="h-4 w-4 ml-2" />
+                طباعة
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="default"
+                onClick={() => exportPeriodMutation.mutate({
+                  startDate: rangeStart,
+                  endDate: rangeEnd,
+                  groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined
+                })}
+                disabled={exportPeriodMutation.isPending || !periodWorkers.length}
+              >
+                <Download className="h-4 w-4 ml-2" />
+                تصدير Excel
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handlePrintPeriod}
+                disabled={!periodWorkers.length}
+              >
+                <Printer className="h-4 w-4 ml-2" />
+                طباعة
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -667,6 +1054,7 @@ export default function AttendanceLog() {
       </div>
 
       {/* Attendance Table */}
+      {dateMode === 'day' && (
       <Card id="attendance-log-print-area">
         <CardHeader>
           <CardTitle>سجل اليوم</CardTitle>
@@ -878,6 +1266,134 @@ export default function AttendanceLog() {
           </div>
         )}
       </Card>
+      )}
+
+      {/* ✅ عرض الفترة (من-إلى): ملخص لكل عامل مع إمكانية التوسيع لتفاصيل كل يوم */}
+      {dateMode === 'range' && (
+      <Card>
+        <CardHeader>
+          <CardTitle>سجل الفترة</CardTitle>
+          <CardDescription>
+            ملخص حضور كل عامل خلال الفترة المحددة — اضغط على اسم العامل لعرض تفاصيل كل يوم
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isPeriodLoading ? (
+            <div className="text-center py-8">
+              <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+              <p className="mt-2 text-muted-foreground">جاري التحميل...</p>
+            </div>
+          ) : !periodWorkers.length ? (
+            <div className="text-center py-8">
+              <Calendar className="h-12 w-12 mx-auto text-muted-foreground opacity-50" />
+              <p className="mt-2 text-muted-foreground">لا توجد تسجيلات خلال هذه الفترة</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-right">اسم العامل</TableHead>
+                    <TableHead className="text-right">الرمز</TableHead>
+                    <TableHead className="text-right">أيام الحضور</TableHead>
+                    <TableHead className="text-right">إجمالي ساعات العمل</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {groupedPeriodLog.map((groupEntry) => (
+                    <>
+                      <TableRow key={`period-group-header-${groupEntry.key}`} className="bg-muted/50 hover:bg-muted/50">
+                        <TableCell colSpan={4} className="font-semibold text-sm py-2">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            {groupEntry.name}
+                            <Badge variant="secondary" className="font-normal">
+                              {groupEntry.workers.length} عامل
+                            </Badge>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {groupEntry.workers.map((worker: any) => {
+                        const isExpanded = expandedWorkerIds.has(worker.workerId);
+                        return (
+                          <>
+                            <TableRow
+                              key={`period-worker-${worker.workerId}`}
+                              className="cursor-pointer hover:bg-muted/30"
+                              onClick={() => toggleWorkerExpanded(worker.workerId)}
+                            >
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-1.5">
+                                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                  {worker.workerName}
+                                </div>
+                              </TableCell>
+                              <TableCell>{worker.workerCode}</TableCell>
+                              <TableCell>{worker.totalDays} يوم</TableCell>
+                              <TableCell>{formatMinutesLabel(worker.totalMinutes)}</TableCell>
+                            </TableRow>
+                            {isExpanded && (
+                              <TableRow key={`period-worker-detail-${worker.workerId}`}>
+                                <TableCell colSpan={4} className="bg-muted/20 p-0">
+                                  <div className="p-4">
+                                    <Table>
+                                      <TableHeader>
+                                        <TableRow>
+                                          <TableHead className="text-right">التاريخ</TableHead>
+                                          <TableHead className="text-right">وقت الحضور</TableHead>
+                                          <TableHead className="text-right">طريقة الحضور</TableHead>
+                                          <TableHead className="text-right">وقت الانصراف</TableHead>
+                                          <TableHead className="text-right">طريقة الانصراف</TableHead>
+                                          <TableHead className="text-right">دقائق العمل</TableHead>
+                                          <TableHead className="text-right">ساعات العمل</TableHead>
+                                        </TableRow>
+                                      </TableHeader>
+                                      <TableBody>
+                                        {worker.days.map((day: any) =>
+                                          (day.sessions.length > 0 ? day.sessions : [{ checkIn: null, checkOut: null }]).map(
+                                            (session: any, sessionIndex: number) => (
+                                              <TableRow key={`${day.workDate}-${sessionIndex}`}>
+                                                {sessionIndex === 0 && (
+                                                  <TableCell rowSpan={day.sessions.length || 1} className="align-top font-medium">
+                                                    {new Date(day.workDate).toLocaleDateString('ar-SA', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
+                                                  </TableCell>
+                                                )}
+                                                <TableCell>{formatTime(session.checkIn?.eventTime)}</TableCell>
+                                                <TableCell>{getMethodBadge(session.checkIn?.method)}</TableCell>
+                                                <TableCell>{formatTime(session.checkOut?.eventTime)}</TableCell>
+                                                <TableCell>{getMethodBadge(session.checkOut?.method)}</TableCell>
+                                                {sessionIndex === 0 && (
+                                                  <>
+                                                    <TableCell rowSpan={day.sessions.length || 1} className="align-top">
+                                                      {day.dayMinutes}
+                                                    </TableCell>
+                                                    <TableCell rowSpan={day.sessions.length || 1} className="align-top">
+                                                      {formatMinutesLabel(day.dayMinutes)}
+                                                    </TableCell>
+                                                  </>
+                                                )}
+                                              </TableRow>
+                                            )
+                                          )
+                                        )}
+                                      </TableBody>
+                                    </Table>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </>
+                        );
+                      })}
+                    </>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      )}
 
       {/* ✅ Edit Dialog — يعرض كل الجلسات */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>

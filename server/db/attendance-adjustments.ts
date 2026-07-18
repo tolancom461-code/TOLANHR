@@ -79,6 +79,13 @@ export async function updateAttendanceEvent(
   if (internalNote !== undefined) {
     updateData.note = internalNote;
   }
+  // ✅ أي تعديل يدوي على وقت الحضور/الانصراف يغيّر طريقة التسجيل إلى "يدوي"
+  // للدلالة على أن السجل تم تعديله يدوياً (فقط إذا تغيّر الوقت فعلاً)
+  const originalTime = new Date(original.eventTime).getTime();
+  const updatedTime = new Date(newTime).getTime();
+  if (originalTime !== updatedTime) {
+    updateData.method = 'manual';
+  }
   await db.update(attendanceEvents).set(updateData).where(eq(attendanceEvents.id, eventId));
   
   // Log the change
@@ -87,8 +94,8 @@ export async function updateAttendanceEvent(
     action: 'UPDATE_ATTENDANCE',
     tableName: 'attendance_events',
     recordId: eventId,
-    oldValues: JSON.stringify({ eventTime: original.eventTime, note: original.note }),
-    newValues: JSON.stringify({ eventTime: newTime, note: internalNote }),
+    oldValues: JSON.stringify({ eventTime: original.eventTime, note: original.note, method: original.method }),
+    newValues: JSON.stringify({ eventTime: newTime, note: internalNote, method: updateData.method ?? original.method }),
   });
   
   // Recalculate daily finance

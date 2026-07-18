@@ -24,7 +24,8 @@ import {
   notifications,
   pushSubscriptions,
   restaurants,
-  dailyWorkAssignments
+  dailyWorkAssignments,
+  deductionEntries
 } from "../../drizzle/schema";
 import { sendNotification, sendNotificationToRoles, notifyStageAndAdmins, ADMIN_OWNER_ROLES } from '../notifications';
 import { getRoleLabel } from '../permissions';
@@ -33,6 +34,7 @@ import type { Worker as DbWorker } from "../../drizzle/schema";
 import { ENV } from '../_core/env';
 import { getDb } from './connection';
 import { processAttendanceToFinance } from './daily-finance';
+import { getApprovedUnpostedDeductionsForPeriod, markDeductionsAsPosted, addDeductionReasonNotes } from './deductions';
 import { getDailyFinanceRecords } from './finance-entries';
 import { cleanupOrphanFinanceRecords } from './daily-finance-entries';
 import { getEffectiveGroupForWorkerOnDate } from './recalculation';
@@ -384,9 +386,37 @@ export async function createPayrollBatch(params: {
     }));
   }
 
+  // ✅ الحسومات الإدارية (شاشة "الحسومات"): نجلب كل حسم معتمد وغير مُرحّل بعد
+  // ضمن فترة هذه الدفعة، لعمال هذه الدفعة تحديداً، وندمجه في حقل "الحسومات" الخاص بكل عامل
+  const batchWorkerIds = batchItems.map((item) => item.workerId);
+  const approvedDeductions = await getApprovedUnpostedDeductionsForPeriod(
+    batchWorkerIds,
+    params.periodStart,
+    params.periodEnd
+  );
+
+  const otherDeductionsByWorker = new Map<number, number>();
+  for (const d of approvedDeductions) {
+    otherDeductionsByWorker.set(
+      d.workerId,
+      (otherDeductionsByWorker.get(d.workerId) || 0) + parseFloat(d.amount)
+    );
+  }
+
+  batchItems = batchItems.map((item) => {
+    const otherDed = otherDeductionsByWorker.get(item.workerId) || 0;
+    const adjustedNet = parseFloat(item.netAmount) - otherDed;
+    return {
+      ...item,
+      otherDeductions: otherDed.toFixed(2),
+      netAmount: adjustedNet.toFixed(2),
+    };
+  });
+
   // Calculate batch totals
   const totalAmount = batchItems.reduce((sum, item) => sum + parseFloat(item.baseAmount), 0);
   const totalDeductions = batchItems.reduce((sum, item) => sum + parseFloat(item.totalDeductions), 0);
+  const totalOtherDeductions = batchItems.reduce((sum, item) => sum + parseFloat((item as any).otherDeductions || '0'), 0);
   const totalBonuses = batchItems.reduce((sum, item) => sum + parseFloat(item.totalBonuses), 0);
 
   // Insert batch
@@ -399,6 +429,7 @@ export async function createPayrollBatch(params: {
     totalAmount: totalAmount.toFixed(2),
     totalWorkers: batchItems.length,
     totalDeductions: totalDeductions.toFixed(2),
+    totalOtherDeductions: totalOtherDeductions.toFixed(2),
     totalBonuses: totalBonuses.toFixed(2),
     status: 'draft' as const,
     createdBy: params.createdBy,
@@ -420,11 +451,27 @@ export async function createPayrollBatch(params: {
       daysWorked: item.daysWorked,
       baseAmount: item.baseAmount,
       totalDeductions: item.totalDeductions,
+      otherDeductions: (item as any).otherDeductions || '0.00',
       totalBonuses: item.totalBonuses,
       netAmount: item.netAmount,
       notes: (item as any).notes || null,
     };
       await db.insert(payrollBatchItems).values(itemToInsert as any);
+  }
+
+  // ✅ تعليم الحسومات المُدرجة كمُرحّلة (يمنع ترحيلها مرة أخرى) + إضافة سبب كل حسم كملاحظة بالدفعة
+  if (approvedDeductions.length > 0) {
+    await markDeductionsAsPosted(approvedDeductions.map((d) => d.id), batchId);
+    await addDeductionReasonNotes({
+      batchId,
+      reviewerId: params.createdBy,
+      reviewerRole: 'system',
+      deductions: approvedDeductions.map((d) => ({
+        workerId: d.workerId,
+        amount: d.amount,
+        reason: d.reason,
+      })),
+    });
   }
 
   // 🔔 إشعار الأدمن والإدارة العليا فور إنشاء الدفعة كمسودة
@@ -656,12 +703,22 @@ export async function getPayrollBatchDetails(batchId: number) {
     }
   }
 
-  // Get notes
-  const notes = await db
-    .select()
+  // Get notes — مع الاسم الكامل لكاتب الملاحظة (وليس اسم المستخدم)
+  const notesRaw = await db
+    .select({
+      note: payrollBatchNotes,
+      reviewerFullName: users.fullName,
+      reviewerUsername: users.username,
+    })
     .from(payrollBatchNotes)
+    .leftJoin(users, eq(payrollBatchNotes.reviewerId, users.id))
     .where(eq(payrollBatchNotes.batchId, batchId))
     .orderBy(desc(payrollBatchNotes.createdAt));
+
+  const notes = notesRaw.map((row) => ({
+    ...row.note,
+    reviewerFullName: row.reviewerFullName || row.reviewerUsername || null,
+  }));
 
   // Get corrections
   const corrections = await db
@@ -1198,6 +1255,13 @@ export async function deleteBatch(batchId: number, forceDelete: boolean = false)
   if (!forceDelete && batch.status !== 'draft') {
     throw new Error("Can only delete draft batches");
   }
+
+  // ✅ لو كان فيه حسومات (شاشة الحسومات) اترحّلت لهذه الدفعة، نرجّعها لحالة "معتمد"
+  // حتى تنترحّل تلقائياً بأول دفعة جديدة تُنشأ لنفس الفترة — بدل ما تضل عالقة على دفعة محذوفة
+  await db
+    .update(deductionEntries)
+    .set({ status: 'approved', postedBatchId: null, postedAt: null })
+    .where(eq(deductionEntries.postedBatchId, batchId));
 
   // Delete items first
   await db

@@ -210,10 +210,11 @@ async function startServer() {
     
     // Auto-run migration for flexible schedule feature
     try {
-      const { runMigration, runRoleEnumMigration } = await import('../db');
+      const { runMigration, runRoleEnumMigration, runDeductionsMigration } = await import('../db');
       await runMigration();
       console.log('[Migration] Successfully added flexible schedule columns');
       await runRoleEnumMigration();
+      await runDeductionsMigration();
     } catch (error: any) {
       if (error.message?.includes('duplicate column name')) {
         console.log('[Migration] Columns already exist, skipping migration');

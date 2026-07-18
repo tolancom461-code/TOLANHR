@@ -294,6 +294,8 @@ export const payrollBatchItems = mysqlTable("payroll_batch_items", {
 	daysWorked: int("days_worked").default(0),
 	baseAmount: decimal("base_amount", { precision: 10, scale: 2 }).default('0.00'),
 	totalDeductions: decimal("total_deductions", { precision: 10, scale: 2 }).default('0.00'),
+	// ✅ الحسومات الإدارية المرحّلة من شاشة "الحسومات" (منفصلة عن خصومات التأخير/الخروج المبكر التلقائية)
+	otherDeductions: decimal("other_deductions", { precision: 10, scale: 2 }).default('0.00'),
 	totalBonuses: decimal("total_bonuses", { precision: 10, scale: 2 }).default('0.00'),
 	netAmount: decimal("net_amount", { precision: 10, scale: 2 }).default('0.00'),
 	notes: text(),
@@ -304,6 +306,31 @@ export const payrollBatchItems = mysqlTable("payroll_batch_items", {
 	index("idx_payroll_items_batch_id").on(table.batchId),
 	index("idx_payroll_items_worker_id").on(table.workerId),
 	index("idx_payroll_items_batch_worker").on(table.batchId, table.workerId),
+]);
+
+// ✅ شاشة "الحسومات": حسومات إدارية يعتمدها المستخدم، وتترحّل تلقائياً لدفعة العمال المطابقة لتاريخ استحقاقها
+export const deductionEntries = mysqlTable("deduction_entries", {
+	id: int().autoincrement().notNull(),
+	workerId: int("worker_id").notNull().references(() => workers.id, { onDelete: "cascade", onUpdate: "cascade" } ),
+	amount: decimal({ precision: 10, scale: 2 }).notNull(),
+	// تاريخ الاستحقاق: يحدد أي دفعة عمال (بحسب فترتها) سيُرحَّل إليها هذا الحسم
+	dueDate: date("due_date", { mode: 'string' }).notNull(),
+	reason: text().notNull(),
+	status: mysqlEnum(['pending','approved','posted']).default('pending').notNull(),
+	approvedBy: int("approved_by").references(() => users.id, { onDelete: "set null", onUpdate: "cascade" } ),
+	approvedAt: timestamp("approved_at", { mode: 'string' }),
+	// الدفعة التي تم ترحيل هذا الحسم إليها فعلياً (يمنع تكرار الترحيل)
+	postedBatchId: int("posted_batch_id").references(() => payrollBatches.id, { onDelete: "set null", onUpdate: "cascade" } ),
+	postedAt: timestamp("posted_at", { mode: 'string' }),
+	createdBy: int("created_by").references(() => users.id, { onDelete: "set null", onUpdate: "cascade" } ),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("idx_deduction_entries_worker_id").on(table.workerId),
+	index("idx_deduction_entries_due_date").on(table.dueDate),
+	index("idx_deduction_entries_status").on(table.status),
+	index("idx_deduction_entries_posted_batch").on(table.postedBatchId),
 ]);
 
 export const payrollBatchNotes = mysqlTable("payroll_batch_notes", {
@@ -335,6 +362,8 @@ export const payrollBatches = mysqlTable("payroll_batches", {
 	totalAmount: decimal("total_amount", { precision: 12, scale: 2 }).default('0.00'),
 	totalWorkers: int("total_workers").default(0),
 	totalDeductions: decimal("total_deductions", { precision: 12, scale: 2 }).default('0.00'),
+	// ✅ إجمالي الحسومات الإدارية المرحّلة من شاشة "الحسومات" لهذه الدفعة
+	totalOtherDeductions: decimal("total_other_deductions", { precision: 12, scale: 2 }).default('0.00'),
 	totalBonuses: decimal("total_bonuses", { precision: 12, scale: 2 }).default('0.00'),
 	status: mysqlEnum(['draft','under_accountant_review','returned_from_accountant','under_financial_review','returned_from_financial_review','under_accounts_manager_review','approved','rejected_final','paid']).default('draft'),
 	rejectionCount: int("rejection_count").default(0),

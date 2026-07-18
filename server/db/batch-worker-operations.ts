@@ -91,10 +91,15 @@ export async function updateAttendanceEventForBatch(params: {
   const [original] = await db.select().from(attendanceEvents).where(eq(attendanceEvents.id, params.eventId)).limit(1);
   if (!original) throw new Error("سجل الحضور غير موجود");
 
+  // ✅ أي تعديل يدوي على الوقت يغيّر طريقة التسجيل إلى "يدوي" (فقط إذا تغيّر الوقت فعلاً)
+  const originalTime = new Date(original.eventTime).getTime();
+  const updatedTime = new Date(params.newTime).getTime();
+
   await db.update(attendanceEvents).set({
     eventTime: new Date(params.newTime),
     note: params.note || 'تم التعديل يدوياً من دفعة العمال',
     verifiedBy: params.updatedBy,
+    ...(originalTime !== updatedTime ? { method: 'manual' } : {}),
   }).where(eq(attendanceEvents.id, params.eventId));
 
   const workDate = original.workDate || getAdministrativeWorkDate(new Date(original.eventTime));

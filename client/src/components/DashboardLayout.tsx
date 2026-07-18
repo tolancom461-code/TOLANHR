@@ -74,7 +74,8 @@ import {
   Globe,
   ListChecks,
   UtensilsCrossed,
-  BarChart3
+  BarChart3,
+  Receipt
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { PWAInstallButton } from "./PWAInstallButton";
@@ -98,7 +99,7 @@ const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
   admin_affairs: [
     '/dashboard', '/executive', '/workers', '/groups',
     '/attendance', '/attendance/log', '/attendance/reports', '/work-days',
-    '/payroll/dashboard', '/payroll/batches', '/payroll/batches/coverage', '/payroll/batches/create',
+    '/payroll/dashboard', '/deductions', '/payroll/batches', '/payroll/batches/coverage', '/payroll/batches/create',
     '/finance/payroll/history', '/finance/overrides', '/payroll-report', '/finance/reports', '/finance/daily-payroll-report',
     '/finance/payment-voucher',
     '/finance/payment-voucher',
@@ -197,6 +198,7 @@ function getMenuSections(t: any) {
     label: t.nav.financialManagement,
     items: [
       { icon: Banknote, label: t.navItems.payrollDashboard, path: "/payroll/dashboard", color: "text-green-600" },
+      { icon: Receipt, label: t.navItems.deductions, path: "/deductions" },
       { icon: DollarSign, label: t.navItems.payrollBatches, path: "/payroll/batches" },
       { icon: AlertTriangle, label: t.navItems.groupCoverageReport, path: "/payroll/batches/coverage", color: "text-red-600" },
       { icon: FileText, label: t.navItems.payrollHistory, path: "/finance/payroll/history" },

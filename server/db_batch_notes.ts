@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { payrollBatchNotes } from "../drizzle/schema";
+import { payrollBatchNotes, users } from "../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 
 /**
@@ -41,11 +41,20 @@ export async function getBatchNotes(batchId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const notes = await db
-    .select()
+  // نجلب الاسم الكامل لكاتب الملاحظة من جدول المستخدمين
+  const rows = await db
+    .select({
+      note: payrollBatchNotes,
+      reviewerFullName: users.fullName,
+      reviewerUsername: users.username,
+    })
     .from(payrollBatchNotes)
+    .leftJoin(users, eq(payrollBatchNotes.reviewerId, users.id))
     .where(eq(payrollBatchNotes.batchId, batchId))
     .orderBy(desc(payrollBatchNotes.createdAt));
 
-  return notes;
+  return rows.map((row) => ({
+    ...row.note,
+    reviewerFullName: row.reviewerFullName || row.reviewerUsername || null,
+  }));
 }

@@ -108,29 +108,31 @@ export default function PayrollBatchDetails() {
         acc[groupKey] = {
           groupName: item.groupName || 'مجموعة غير محددة',
           workers: [],
-          totals: { base: 0, deductions: 0, bonuses: 0, net: 0 },
+          totals: { base: 0, deductions: 0, otherDeductions: 0, bonuses: 0, net: 0 },
         };
       }
       acc[groupKey].workers.push(item);
       acc[groupKey].totals.base += parseFloat(item.baseAmount || '0');
       acc[groupKey].totals.deductions += parseFloat(item.totalDeductions || '0');
+      acc[groupKey].totals.otherDeductions += parseFloat(item.otherDeductions || '0');
       acc[groupKey].totals.bonuses += parseFloat(item.totalBonuses || '0');
       acc[groupKey].totals.net += parseFloat(item.netAmount || '0');
       return acc;
     }, {});
     const printGroups = Object.values(groupedForPrint || {}) as any[];
     let workerNum = 0;
-    const grandTotal = { base: 0, deductions: 0, bonuses: 0, net: 0 };
+    const grandTotal = { base: 0, deductions: 0, otherDeductions: 0, bonuses: 0, net: 0 };
     printGroups.forEach((g: any) => {
       grandTotal.base += g.totals.base;
       grandTotal.deductions += g.totals.deductions;
+      grandTotal.otherDeductions += g.totals.otherDeductions;
       grandTotal.bonuses += g.totals.bonuses;
       grandTotal.net += g.totals.net;
     });
     const fmt = (n: number) => n.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     let tableRows = '';
     printGroups.forEach((group: any) => {
-      tableRows += `<tr class="group-header"><td colspan="7">${group.groupName} (${group.workers.length} عامل)</td></tr>`;
+      tableRows += `<tr class="group-header"><td colspan="8">${group.groupName} (${group.workers.length} عامل)</td></tr>`;
       group.workers.forEach((w: any) => {
         workerNum++;
         tableRows += `<tr>
@@ -138,16 +140,17 @@ export default function PayrollBatchDetails() {
           <td>${w.workerName}</td>
           <td>${fmt(parseFloat(w.baseAmount || '0'))}</td>
           <td>${fmt(parseFloat(w.totalDeductions || '0'))}</td>
+          <td>${fmt(parseFloat(w.otherDeductions || '0'))}</td>
           <td>${fmt(parseFloat(w.totalBonuses || '0'))}</td>
           <td>${fmt(parseFloat(w.netAmount || '0'))}</td>
           <td>${w.notes || '-'}</td>
         </tr>`;
       });
-      tableRows += `<tr class="group-total"><td colspan="2">إجمالي ${group.groupName}</td><td>${fmt(group.totals.base)}</td><td>${fmt(group.totals.deductions)}</td><td>${fmt(group.totals.bonuses)}</td><td>${fmt(group.totals.net)}</td><td></td></tr>`;
+      tableRows += `<tr class="group-total"><td colspan="2">إجمالي ${group.groupName}</td><td>${fmt(group.totals.base)}</td><td>${fmt(group.totals.deductions)}</td><td>${fmt(group.totals.otherDeductions)}</td><td>${fmt(group.totals.bonuses)}</td><td>${fmt(group.totals.net)}</td><td></td></tr>`;
     });
-    tableRows += `<tr class="grand-total"><td colspan="2">الإجمالي الكلي</td><td>${fmt(grandTotal.base)}</td><td>${fmt(grandTotal.deductions)}</td><td>${fmt(grandTotal.bonuses)}</td><td>${fmt(grandTotal.net)}</td><td></td></tr>`;
+    tableRows += `<tr class="grand-total"><td colspan="2">الإجمالي الكلي</td><td>${fmt(grandTotal.base)}</td><td>${fmt(grandTotal.deductions)}</td><td>${fmt(grandTotal.otherDeductions)}</td><td>${fmt(grandTotal.bonuses)}</td><td>${fmt(grandTotal.net)}</td><td></td></tr>`;
     const totalNetWords = numberToArabicWords(grandTotal.net);
-    tableRows += `<tr class="amount-words"><td colspan="7" style="background:#f0f7ff;padding:10px 12px;font-size:13px;font-weight:600;color:#1a3c6e;border-top:2px solid #4a90d9;"> الإجمالي بالأحرف: ${totalNetWords}</td></tr>`;
+    tableRows += `<tr class="amount-words"><td colspan="8" style="background:#f0f7ff;padding:10px 12px;font-size:13px;font-weight:600;color:#1a3c6e;border-top:2px solid #4a90d9;"> الإجمالي بالأحرف: ${totalNetWords}</td></tr>`;
     const periodStartDateObj = new Date(batch.batch.periodStart);
     const periodEndDateObj = new Date(batch.batch.periodEnd);
     const periodStart = periodStartDateObj.toLocaleDateString('ar-SA');
@@ -185,7 +188,7 @@ export default function PayrollBatchDetails() {
         <span>الحالة: ${batch.batch.status === 'approved' ? 'موافق عليها' : batch.batch.status}</span>
       </div>
       <table>
-        <thead><tr><th>#</th><th>العامل</th><th>المبلغ</th><th>الخصومات</th><th>الاضافي</th><th>الصافي</th><th>ملاحظات</th></tr></thead>
+        <thead><tr><th>#</th><th>العامل</th><th>المبلغ</th><th>الخصومات</th><th>الحسومات</th><th>الاضافي</th><th>الصافي</th><th>ملاحظات</th></tr></thead>
         <tbody>${tableRows}</tbody>
       </table>
       <div class="footer">تم إنشاء هذا الكشف بواسطة نظام إدارة العمالة اليومية — تاريخ الطباعة: ${new Date().toLocaleDateString('ar-SA')} | وقت الطباعة: ${new Date().toLocaleTimeString('ar-SA')}</div>
@@ -599,6 +602,7 @@ export default function PayrollBatchDetails() {
           count: 0,
           totalBase: 0,
           totalDeductions: 0,
+          totalOtherDeductions: 0,
           totalBonuses: 0,
           totalNet: 0,
         },
@@ -608,6 +612,7 @@ export default function PayrollBatchDetails() {
     acc[groupKey].summary.count += 1;
     acc[groupKey].summary.totalBase += parseFloat(item.baseAmount || '0');
     acc[groupKey].summary.totalDeductions += parseFloat(item.totalDeductions || '0');
+    acc[groupKey].summary.totalOtherDeductions += parseFloat(item.otherDeductions || '0');
     acc[groupKey].summary.totalBonuses += parseFloat(item.totalBonuses || '0');
     acc[groupKey].summary.totalNet += parseFloat(item.netAmount || '0');
     return acc;
@@ -819,6 +824,7 @@ export default function PayrollBatchDetails() {
                 <TableHead>اسم العامل / المجموعة</TableHead>
                 <TableHead>المبلغ</TableHead>
                 <TableHead>الخصومات</TableHead>
+                <TableHead>الحسومات</TableHead>
                 <TableHead>الإضافات</TableHead>
                 <TableHead>الصافي</TableHead>
                 <TableHead>ملاحظات</TableHead>
@@ -860,6 +866,9 @@ export default function PayrollBatchDetails() {
                     <TableCell className="text-red-600">
                       {group.summary.totalDeductions.toLocaleString("ar-SA", { maximumFractionDigits: 2 })} ر.س
                     </TableCell>
+                    <TableCell className="text-orange-600">
+                      {group.summary.totalOtherDeductions.toLocaleString("ar-SA", { maximumFractionDigits: 2 })} ر.س
+                    </TableCell>
                     <TableCell className="text-green-600">
                       {group.summary.totalBonuses.toLocaleString("ar-SA", { maximumFractionDigits: 2 })} ر.س
                     </TableCell>
@@ -877,6 +886,9 @@ export default function PayrollBatchDetails() {
                       <TableCell>{Number(item.baseAmount).toLocaleString("ar-SA")} ر.س</TableCell>
                       <TableCell className="text-red-600">
                         {Number(item.totalDeductions).toLocaleString("ar-SA")} ر.س
+                      </TableCell>
+                      <TableCell className="text-orange-600">
+                        {Number(item.otherDeductions || 0).toLocaleString("ar-SA")} ر.س
                       </TableCell>
                       <TableCell className="text-green-600">
                         {Number(item.totalBonuses).toLocaleString("ar-SA")} ر.س
@@ -1794,7 +1806,7 @@ function BatchNotesSection({ batchId }: { batchId: number }) {
               </div>
               <p className="text-sm whitespace-pre-wrap">{note.note}</p>
               <div className="mt-2 text-xs text-muted-foreground">
-                بواسطة: {note.reviewerRole}
+                بواسطة: {note.reviewerFullName || note.reviewerRole}
               </div>
             </div>
           ))

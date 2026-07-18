@@ -28,6 +28,7 @@ import PayOverrides from "./pages/PayOverrides";
 import FinanceEntry from "./pages/FinanceEntry";
 import PayrollManagement from "./pages/PayrollManagement";
 import PayrollBatches from "./pages/PayrollBatches";
+import Deductions from "./pages/Deductions";
 import PayrollBatchList from "./pages/payroll/PayrollBatchList";
 import PayrollBatchCreateSimple from "./pages/payroll/PayrollBatchCreateSimple";
 import PayrollBatchDetails from "./pages/payroll/PayrollBatchDetails";
@@ -218,6 +219,11 @@ function Router() {
       <Route path="/finance/payroll/history">
         <ProtectedRoute>
           <PayrollBatchHistory />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/deductions">
+        <ProtectedRoute>
+          <Deductions />
         </ProtectedRoute>
       </Route>
       <Route path="/payroll/batches">

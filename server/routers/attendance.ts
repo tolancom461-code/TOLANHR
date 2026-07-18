@@ -559,6 +559,19 @@ addFullSession: protectedProcedure
         const groupFilter = input.groupIds && input.groupIds.length > 0 ? input.groupIds : input.groupId;
         return await db.getTodayAttendanceWithPagination(groupFilter, input.date, input.page, input.limit);
       }),
+
+    // ✅ سجل الحضور لفترة (من تاريخ - إلى تاريخ): ملخص لكل عامل + تفصيل يومي (للتوسيع)
+    periodLog: protectedProcedure
+      .input(z.object({
+        startDate: z.string(), // YYYY-MM-DD
+        endDate: z.string(),   // YYYY-MM-DD
+        groupId: z.number().optional(),
+        groupIds: z.array(z.number()).optional(),
+      }))
+      .query(async ({ input }) => {
+        const groupFilter = input.groupIds && input.groupIds.length > 0 ? input.groupIds : input.groupId;
+        return await db.getAttendancePeriodLog(input.startDate, input.endDate, groupFilter);
+      }),
     
     // Get today's attendance log (old version - kept for backward compatibility)
     todayLog: protectedProcedure
@@ -879,6 +892,50 @@ addFullSession: protectedProcedure
         return {
           data: excelBuffer.toString('base64'),
           filename: `attendance-log-${input.date}.xlsx`
+        };
+      }),
+
+    // ✅ تصدير سجل الفترة (من-إلى) إلى Excel: اسم العامل ثم تفاصيل كل يوم تحته
+    exportPeriodToExcel: protectedProcedure
+      .input(z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+        groupId: z.number().optional(),
+        groupIds: z.array(z.number()).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { generatePeriodAttendanceExcel } = await import('../excel-export');
+
+        const groupFilter = input.groupIds && input.groupIds.length > 0 ? input.groupIds : input.groupId;
+
+        const periodData = await db.getAttendancePeriodLog(input.startDate, input.endDate, groupFilter);
+
+        let groupName = null;
+        if (input.groupIds && input.groupIds.length > 0) {
+          const groupList = await Promise.all(input.groupIds.map((id) => db.getGroupById(id)));
+          groupName = groupList.filter(Boolean).map((g: any) => g.name).join('، ') || null;
+        } else if (input.groupId) {
+          const group = await db.getGroupById(input.groupId);
+          groupName = group?.name || null;
+        }
+
+        const allGroups = await db.getAllGroups();
+        const groupNameById = new Map(allGroups.map((g: any) => [g.id, g.name]));
+        const workersWithGroupName = periodData.workers.map((w: any) => ({
+          ...w,
+          groupName: w.groupId != null ? (groupNameById.get(w.groupId) || 'بدون مجموعة') : 'بدون مجموعة',
+        }));
+
+        const excelBuffer = await generatePeriodAttendanceExcel(
+          input.startDate,
+          input.endDate,
+          groupName,
+          workersWithGroupName
+        );
+
+        return {
+          data: excelBuffer.toString('base64'),
+          filename: `attendance-period-${input.startDate}_to_${input.endDate}.xlsx`
         };
       }),
 });

@@ -23,6 +23,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, {
   labelAr: string;
   pages: string[];
   canCreateBatch: boolean;
+  canManageDeductions: boolean; // شاشة الحسومات: إضافة/اعتماد/حذف
   canDeleteBatch: boolean;
   canSubmitDraft: boolean; // إرسال المسودة للمحاسب (الشؤون الإدارية فقط)
   canReviewAsAccountant: boolean;
@@ -48,6 +49,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, {
     // الحارس: فقط تسجيل الحضور - بدون سجل الحضور وبدون تقارير الحضور
     pages: ["attendance"],
     canCreateBatch: false,
+    canManageDeductions: false,
     canDeleteBatch: false,
     canSubmitDraft: false,
     canReviewAsAccountant: false,
@@ -73,6 +75,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, {
     // بدون معالجة الملاحظات (operationsReview)
     pages: ["operations"],
     canCreateBatch: false,
+    canManageDeductions: false,
     canDeleteBatch: false,
     canSubmitDraft: false,
     canReviewAsAccountant: false,
@@ -98,6 +101,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, {
     // بدون معالجة الملاحظات (operationsReview)
     pages: ["operations"],
     canCreateBatch: false,
+    canManageDeductions: false,
     canDeleteBatch: false,
     canSubmitDraft: false,
     canReviewAsAccountant: false,
@@ -122,6 +126,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, {
     labelAr: "شؤون إدارية",
     pages: ["attendance", "workers", "groups", "costCenters", "payroll", "reports", "settings", "operations", "operationsReview"],
     canCreateBatch: true,
+    canManageDeductions: true,
     canDeleteBatch: true,
     canSubmitDraft: true, // الشؤون الإدارية ترسل المسودة للمحاسب
     canReviewAsAccountant: false,
@@ -148,6 +153,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, {
     // لا يملك: حذف، سجل حضور، لوحة تحكم، إنشاء دفعة، إرسال مسودة
     pages: ["workers", "groups", "costCenters", "payroll", "reports", "settings", "operations", "operationsReview", "attendanceLog"],
     canCreateBatch: false,
+    canManageDeductions: false,
     canDeleteBatch: false,
     canSubmitDraft: false, // لا يرسل المسودة - يستلمها فقط
     canReviewAsAccountant: true,
@@ -174,6 +180,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, {
     // لا يملك: حذف، إنشاء دفعات، إرسال مسودة
     pages: ["payroll", "reports", "attendanceLog"],
     canCreateBatch: false,
+    canManageDeductions: false,
     canDeleteBatch: false,
     canSubmitDraft: false, // لا يتعامل مع المسودة نهائياً
     canReviewAsAccountant: false,
@@ -200,6 +207,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, {
     // لا يملك: حذف، إنشاء دفعات، إرسال مسودة
     pages: ["payroll", "reports", "attendanceLog"],
     canCreateBatch: false,
+    canManageDeductions: false,
     canDeleteBatch: false,
     canSubmitDraft: false,
     canReviewAsAccountant: false,
@@ -224,6 +232,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, {
     labelAr: "إدارة عليا",
     pages: ["executiveDashboard"],
     canCreateBatch: false,
+    canManageDeductions: false,
     canDeleteBatch: false,
     canSubmitDraft: false,
     canReviewAsAccountant: false,
@@ -249,6 +258,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, {
     // تشغيل مطاعم: صلاحية التشغيل وإدارة المطاعم فقط، لا غير
     pages: ["restaurantOperations"],
     canCreateBatch: false,
+    canManageDeductions: false,
     canDeleteBatch: false,
     canSubmitDraft: false,
     canReviewAsAccountant: false,
@@ -274,6 +284,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, {
     // مدخل بيانات: شاشة العمال فقط (عرض، إضافة، تعديل، حذف) - لا شيء غيرها
     pages: ["workers"],
     canCreateBatch: false,
+    canManageDeductions: false,
     canDeleteBatch: false,
     canSubmitDraft: false,
     canReviewAsAccountant: false,
@@ -298,6 +309,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, {
     labelAr: "سوبر أدمن",
     pages: ["all"],
     canCreateBatch: true,
+    canManageDeductions: true,
     canDeleteBatch: true,
     canSubmitDraft: true,
     canReviewAsAccountant: true,

@@ -341,3 +341,203 @@ export async function generateAttendanceLogExcel(
   const buffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(buffer);
 }
+
+// ============================================
+// تصدير سجل الفترة (من-إلى): اسم العامل ثم تفاصيل كل يوم تحته
+// ============================================
+export async function generatePeriodAttendanceExcel(
+  startDate: string,
+  endDate: string,
+  groupName: string | null,
+  workers: Array<{
+    workerId: number;
+    workerName: string;
+    workerCode: string;
+    groupId: number | null;
+    groupName?: string;
+    totalDays: number;
+    totalMinutes: number;
+    days: Array<{
+      workDate: string;
+      dayMinutes: number;
+      sessions: Array<{
+        checkIn: { eventTime: string; method: string | null } | null;
+        checkOut: { eventTime: string; method: string | null } | null;
+      }>;
+    }>;
+  }>
+): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('سجل حضور الفترة');
+
+  worksheet.views = [{ rightToLeft: true, state: 'frozen', ySplit: 5 }];
+
+  // نفس لوحة الألوان الهادئة المستخدمة بباقي الملفات
+  const COLORS = {
+    titleBg: 'FFE8F0FE',
+    titleText: 'FF1E3A5F',
+    subtitleText: 'FF64748B',
+    headerBg: 'FFD9E2F3',
+    headerText: 'FF1E3A5F',
+    groupBgA: 'FFEFF6FF',
+    groupBgB: 'FFF0FBF7',
+    groupTextA: 'FF2C5282',
+    groupTextB: 'FF2F855A',
+    workerBg: 'FFFDF6E3',
+    workerText: 'FF8A6D00',
+    rowAltBg: 'FFF8FAFC',
+    border: 'FFE2E8F0',
+  };
+
+  worksheet.mergeCells('A1:G1');
+  const titleCell = worksheet.getCell('A1');
+  titleCell.value = `سجل حضور الفترة - من ${startDate} إلى ${endDate}`;
+  titleCell.font = { size: 16, bold: true, color: { argb: COLORS.titleText } };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  worksheet.getRow(1).height = 28;
+  for (let c = 1; c <= 7; c++) {
+    worksheet.getRow(1).getCell(c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.titleBg } };
+  }
+
+  if (groupName) {
+    worksheet.mergeCells('A2:G2');
+    const groupCell = worksheet.getCell('A2');
+    groupCell.value = `المجموعات: ${groupName}`;
+    groupCell.font = { size: 12, color: { argb: COLORS.subtitleText }, italic: true };
+    groupCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  }
+
+  worksheet.addRow([]);
+
+  const headerRow = worksheet.addRow([
+    'التاريخ / اسم العامل',
+    'وقت الحضور',
+    'طريقة الحضور',
+    'وقت الانصراف',
+    'طريقة الانصراف',
+    'دقائق العمل',
+    'ساعات العمل',
+  ]);
+  headerRow.font = { bold: true, size: 11, color: { argb: COLORS.headerText } };
+  headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+  headerRow.height = 22;
+  headerRow.eachCell((cell) => {
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.headerBg } };
+  });
+
+  const LRM = '\u200E';
+  const formatHoursLabel = (minutes: number) => {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${LRM}${h}${LRM} س ${LRM}${m}${LRM} د`;
+  };
+
+  const sortedWorkers = [...workers].sort((a, b) => {
+    const groupA = a.groupId ?? Number.MAX_SAFE_INTEGER;
+    const groupB = b.groupId ?? Number.MAX_SAFE_INTEGER;
+    if (groupA !== groupB) return groupA - groupB;
+    return (a.workerName || '').localeCompare(b.workerName || '', 'ar');
+  });
+
+  let lastGroupKey: number | string | null = '__none__' as any;
+  let groupColorToggle = false;
+
+  for (const worker of sortedWorkers) {
+    const groupKey = worker.groupId ?? 'بدون مجموعة';
+    if (groupKey !== lastGroupKey) {
+      lastGroupKey = groupKey;
+      groupColorToggle = !groupColorToggle;
+      const bg = groupColorToggle ? COLORS.groupBgA : COLORS.groupBgB;
+      const fg = groupColorToggle ? COLORS.groupTextA : COLORS.groupTextB;
+
+      const sectionRow = worksheet.addRow([`${worker.groupName || 'بدون مجموعة'}`]);
+      worksheet.mergeCells(`A${sectionRow.number}:G${sectionRow.number}`);
+      sectionRow.font = { bold: true, size: 11, color: { argb: fg } };
+      sectionRow.height = 20;
+      sectionRow.eachCell((cell) => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+      });
+      sectionRow.alignment = { horizontal: 'right', vertical: 'middle' };
+    }
+
+    const workerRow = worksheet.addRow([
+      `${worker.workerName} (${worker.workerCode}) — ${worker.totalDays} يوم حضور`,
+      '', '', '', '',
+      worker.totalMinutes,
+      formatHoursLabel(worker.totalMinutes),
+    ]);
+    worksheet.mergeCells(`A${workerRow.number}:E${workerRow.number}`);
+    workerRow.font = { bold: true, size: 11, color: { argb: COLORS.workerText } };
+    workerRow.height = 20;
+    workerRow.eachCell((cell) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.workerBg } };
+    });
+    workerRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle' };
+    workerRow.getCell(6).alignment = { horizontal: 'center', vertical: 'middle', readingOrder: 'ltr' };
+    workerRow.getCell(7).alignment = { horizontal: 'center', vertical: 'middle', readingOrder: 'rtl' };
+
+    // تفاصيل كل يوم تحت اسم العامل
+    let rowCounter = 0;
+    for (const day of worker.days) {
+      const sessions = day.sessions.length > 0 ? day.sessions : [{ checkIn: null, checkOut: null }];
+      for (const session of sessions) {
+        const checkInDate = session.checkIn?.eventTime ? new Date(session.checkIn.eventTime) : null;
+        const checkOutDate = session.checkOut?.eventTime ? new Date(session.checkOut.eventTime) : null;
+
+        // دقائق هذه الجلسة تحديدًا (مو إجمالي اليوم) — حتى ما تتكرر نفس القيمة لو فيه أكثر من جلسة بنفس اليوم
+        const sessionMinutes = checkInDate && checkOutDate
+          ? Math.round((checkOutDate.getTime() - checkInDate.getTime()) / 60000)
+          : null;
+
+        const dayLabel = new Date(day.workDate).toLocaleDateString('ar-SA', {
+          weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+        });
+
+        const row = worksheet.addRow([
+          dayLabel,
+          checkInDate ? checkInDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true }) : '-',
+          session.checkIn?.method || '-',
+          checkOutDate ? checkOutDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true }) : '-',
+          session.checkOut?.method || '-',
+          sessionMinutes !== null ? sessionMinutes : '-',
+          sessionMinutes !== null ? formatHoursLabel(sessionMinutes) : '-',
+        ]);
+        row.alignment = { horizontal: 'center', vertical: 'middle' };
+        row.getCell(1).alignment = { horizontal: 'right', vertical: 'middle' };
+        row.getCell(7).alignment = { horizontal: 'center', vertical: 'middle', readingOrder: 'rtl' };
+        row.getCell(6).alignment = { horizontal: 'center', vertical: 'middle', readingOrder: 'ltr' };
+
+        rowCounter++;
+        if (rowCounter % 2 === 0) {
+          row.eachCell((cell) => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.rowAltBg } };
+          });
+        }
+      }
+    }
+  }
+
+  worksheet.columns = [
+    { width: 26 },
+    { width: 15 },
+    { width: 15 },
+    { width: 15 },
+    { width: 15 },
+    { width: 14 },
+    { width: 16 },
+  ];
+
+  worksheet.eachRow((row) => {
+    row.eachCell((cell) => {
+      cell.border = {
+        top: { style: 'thin', color: { argb: COLORS.border } },
+        left: { style: 'thin', color: { argb: COLORS.border } },
+        bottom: { style: 'thin', color: { argb: COLORS.border } },
+        right: { style: 'thin', color: { argb: COLORS.border } },
+      };
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(buffer);
+}
