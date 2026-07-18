@@ -55,9 +55,11 @@ export const dailyFinanceRouter = router({
       .use(requireRole('super_admin', 'admin_affairs', 'accountant'))
       .mutation(async ({ input }) => {
         // Check if payroll batch exists for this date
-        const batch = await db.checkPayrollBatchForDate(input.workDate);
+        // ✅ القفل مرتبط بالتاريخ + مجموعة العامل
+        const dfWorker = await db.getWorkerById(input.workerId);
+        const batch = await db.checkPayrollBatchForDate(input.workDate, dfWorker?.groupId ?? undefined);
         if (batch) {
-          throw new Error(`لا يمكن إضافة خصومات أو إضافات بعد إنشاء دفعة العمال. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
+          throw new Error(`لا يمكن إضافة خصومات أو إضافات بعد إنشاء دفعة العمال لمجموعة هذا العامل. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
         }
         
         return await db.addFinanceEntry(

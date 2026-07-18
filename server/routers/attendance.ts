@@ -584,9 +584,25 @@ addFullSession: protectedProcedure
       }),
     
     // Check if date has approved payroll batch
+    // ✅ القفل مرتبط بالتاريخ + المجموعة: لو انمررت مجموعات، نفحص كل مجموعة على حدة
     checkDateLocked: protectedProcedure
-      .input(z.object({ date: z.string() })) // Format: YYYY-MM-DD
+      .input(z.object({
+        date: z.string(), // Format: YYYY-MM-DD
+        groupIds: z.array(z.number()).optional(),
+      }))
       .query(async ({ input }) => {
+        if (input.groupIds && input.groupIds.length > 0) {
+          for (const gId of input.groupIds) {
+            const batch = await db.checkPayrollBatchForDate(input.date, gId);
+            if (batch) {
+              return {
+                isLocked: true,
+                batch: { id: batch.id, batchCode: batch.batchCode, status: batch.status },
+              };
+            }
+          }
+          return { isLocked: false, batch: null };
+        }
         const batch = await db.checkPayrollBatchForDate(input.date);
         return {
           isLocked: !!batch,
@@ -825,10 +841,12 @@ addFullSession: protectedProcedure
         if (!event) throw new Error("سجل الحضور غير موجود");
         
         // Check if payroll batch exists for this date
+        // ✅ القفل مرتبط بالتاريخ + مجموعة العامل
         const eventDate = new Date(event.eventTime).toLocaleDateString('en-CA');
-        const batch = await db.checkPayrollBatchForDate(eventDate);
+        const evWorker = await db.getWorkerById(event.workerId);
+        const batch = await db.checkPayrollBatchForDate(eventDate, evWorker?.groupId ?? undefined);
         if (batch) {
-          throw new Error(`لا يمكن تعديل الحضور بعد إنشاء دفعة العمال. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
+          throw new Error(`لا يمكن تعديل الحضور بعد إنشاء دفعة العمال لمجموعة هذا العامل. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
         }
         
         const updateResult = await db.updateAttendanceEvent(

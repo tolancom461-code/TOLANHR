@@ -49,9 +49,12 @@ export async function addFinanceEntry(
   if (!db) throw new Error("Database not available");
   
   // Check if payroll batch exists for this date
-  const batch = await checkPayrollBatchForDate(workDate);
+  // ✅ القفل مرتبط بالتاريخ + مجموعة العامل: دفعة مجموعة أخرى لا تمنع الإضافة
+  const { workers: workersTable } = await import('../../drizzle/schema');
+  const [feWorker] = await db.select().from(workersTable).where(eq(workersTable.id, workerId)).limit(1);
+  const batch = await checkPayrollBatchForDate(workDate, feWorker?.groupId ?? undefined);
   if (batch) {
-    throw new Error(`لا يمكن إضافة خصومات أو إضافات بعد إنشاء دفعة العمال. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
+    throw new Error(`لا يمكن إضافة خصومات أو إضافات بعد إنشاء دفعة العمال لمجموعة هذا العامل. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
   }
 
   const { workerDailyFinance } = await import('../../drizzle/schema');

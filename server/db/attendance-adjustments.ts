@@ -66,10 +66,13 @@ export async function updateAttendanceEvent(
   
 // Check if payroll batch exists for this date
   // ✅ قاعدة 5 صباحاً: نستخدم اليوم الإداري بدلاً من التاريخ الميلادي
+  // ✅ القفل مرتبط بالتاريخ + مجموعة العامل: دفعة مجموعة أخرى لا تمنع التعديل
   const eventDate = getAdministrativeWorkDate(new Date(original.eventTime));
-  const batch = await checkPayrollBatchForDate(eventDate);
+  const { workers } = await import('../../drizzle/schema');
+  const [eventWorker] = await db.select().from(workers).where(eq(workers.id, original.workerId)).limit(1);
+  const batch = await checkPayrollBatchForDate(eventDate, eventWorker?.groupId ?? undefined);
   if (batch) {
-    throw new Error(`لا يمكن تعديل الحضور بعد إنشاء دفعة العمال. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
+    throw new Error(`لا يمكن تعديل الحضور بعد إنشاء دفعة العمال لمجموعة هذا العامل. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
   }
   
   // Update event

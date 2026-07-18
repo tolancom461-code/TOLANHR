@@ -57,10 +57,12 @@ export const attendanceAdjustRouter = router({
         if (!event) throw new Error("Event not found");
         
         // Check if payroll batch exists for this date
+        // ✅ القفل مرتبط بالتاريخ + مجموعة العامل
         const eventDate = new Date(event.eventTime).toLocaleDateString('en-CA');
-        const batch = await db.checkPayrollBatchForDate(eventDate);
+        const adjWorker = await db.getWorkerById(event.workerId);
+        const batch = await db.checkPayrollBatchForDate(eventDate, adjWorker?.groupId ?? undefined);
         if (batch) {
-          throw new Error(`لا يمكن تعديل الحضور بعد إنشاء دفعة العمال. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
+          throw new Error(`لا يمكن تعديل الحضور بعد إنشاء دفعة العمال لمجموعة هذا العامل. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
         }
                const result = await db.updateAttendanceEvent(
           input.eventId,

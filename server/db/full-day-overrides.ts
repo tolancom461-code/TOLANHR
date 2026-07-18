@@ -50,9 +50,12 @@ export async function setFullDayOverride(
   if (!db) throw new Error("Database not available");
   
   // Check if payroll batch exists for this date (prevent both enable and disable)
-  const batch = await checkPayrollBatchForDate(workDate);
+  // ✅ القفل مرتبط بالتاريخ + مجموعة العامل: دفعة مجموعة أخرى لا تمنع التعديل
+  const { workers: workersTable } = await import('../../drizzle/schema');
+  const [fdWorker] = await db.select().from(workersTable).where(eq(workersTable.id, workerId)).limit(1);
+  const batch = await checkPayrollBatchForDate(workDate, fdWorker?.groupId ?? undefined);
   if (batch) {
-    throw new Error(`لا يمكن تعديل اعتماد الحضور الكامل بعد إنشاء دفعة العمال. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
+    throw new Error(`لا يمكن تعديل اعتماد الحضور الكامل بعد إنشاء دفعة العمال لمجموعة هذا العامل. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
   }
 
   const { workerDailyFinance } = await import('../../drizzle/schema');

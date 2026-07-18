@@ -38,21 +38,41 @@ import { getDb } from './connection';
 // ============================================
 
 // Check if payroll batch exists for a date (excluding cancelled and unlocked)
-export async function checkPayrollBatchForDate(date: string) {
+export async function checkPayrollBatchForDate(date: string, groupId?: number) {
   const db = await getDb();
   if (!db) return null;
+
+  const baseConditions = and(
+    sql`${payrollBatches.periodStart} <= ${date}`,
+    sql`${payrollBatches.periodEnd} >= ${date}`,
+    sql`${payrollBatches.status} != 'cancelled'`,
+    sql`(${payrollBatches.isUnlocked} IS NULL OR ${payrollBatches.isUnlocked} = FALSE)`
+  );
+
+  // ✅ القفل مرتبط بالتاريخ + المجموعة: لو انمررت مجموعة، الدفعة تقفل التاريخ
+  // فقط إذا كانت تشمل فعلياً عمالاً من نفس المجموعة (فحص عبر بنود الدفعة)
+  if (groupId !== undefined && groupId !== null) {
+    const result = await db
+      .select()
+      .from(payrollBatches)
+      .where(
+        and(
+          baseConditions,
+          sql`EXISTS (
+            SELECT 1 FROM payroll_batch_items pbi
+            WHERE pbi.batch_id = ${payrollBatches.id}
+              AND pbi.group_id = ${groupId}
+          )`
+        )
+      )
+      .limit(1);
+    return result.length > 0 ? result[0] : null;
+  }
 
   const result = await db
     .select()
     .from(payrollBatches)
-    .where(
-      and(
-        sql`${payrollBatches.periodStart} <= ${date}`,
-        sql`${payrollBatches.periodEnd} >= ${date}`,
-        sql`${payrollBatches.status} != 'cancelled'`,
-        sql`(${payrollBatches.isUnlocked} IS NULL OR ${payrollBatches.isUnlocked} = FALSE)`
-      )
-    )
+    .where(baseConditions)
     .limit(1);
   
   return result.length > 0 ? result[0] : null;

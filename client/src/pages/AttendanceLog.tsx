@@ -71,9 +71,12 @@ export default function AttendanceLog() {
     setExpandedWorkerIds(new Set());
   }, [rangeStart, rangeEnd, selectedGroupIds, dateMode]);
   
-  // Check if selected date is locked
+  // Check if selected date is locked (✅ مرتبط بالمجموعات المختارة بالفلتر)
   const { data: dateLockStatus } = trpc.attendance.checkDateLocked.useQuery(
-    { date: selectedDate },
+    {
+      date: selectedDate,
+      groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined,
+    },
     { enabled: !!selectedDate }
   );
 

@@ -34,9 +34,11 @@ export const payOverridesRouter = router({
         if (!ctx.user) throw new Error("Not authenticated");
         
         // Check if payroll batch exists for this date
-        const batch = await db.checkPayrollBatchForDate(input.overrideDate);
+        // ✅ القفل مرتبط بالتاريخ + مجموعة العامل
+        const poWorker = await db.getWorkerById(input.workerId);
+        const batch = await db.checkPayrollBatchForDate(input.overrideDate, poWorker?.groupId ?? undefined);
         if (batch) {
-          throw new Error(`لا يمكن إضافة خصومات أو إضافات بعد إنشاء دفعة العمال. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
+          throw new Error(`لا يمكن إضافة خصومات أو إضافات بعد إنشاء دفعة العمال لمجموعة هذا العامل. يجب حذف المسودة أولاً (دفعة رقم: ${batch.batchCode})`);
         }
         
         // Get worker name for audit log
