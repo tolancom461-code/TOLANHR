@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatusBadge } from "@/components/payroll/StatusBadge";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { 
   ArrowLeft, 
   CheckCircle, 
@@ -64,10 +65,33 @@ export default function PayrollBatchReview({ role }: PayrollBatchReviewProps) {
 
   const utils = trpc.useUtils();
   const { data: batch, isLoading } = trpc.payroll.getDetails.useQuery({ batchId });
+  const { user } = useAuth();
+  const actualRole = user?.role;
+  const batchStatus = batch?.batch?.status;
+
+  // ✅ نحدد الإجراء الفعلي حسب دور المستخدم الحقيقي ومرحلة الدفعة الفعلية —
+  // مو حسب الرابط اللي وصل منه (URL) — عشان المراجع المالي يقدر يعتمد
+  // حتى لو الدفعة لسا بمرحلة المحاسب (تجاوز اختياري)
+  const canActAsAccountant = batchStatus === 'under_accountant_review' && actualRole === 'accountant';
+  const canActAsAuditorSkip = batchStatus === 'under_accountant_review' && actualRole === 'auditor';
+  const canActAsAuditorNormal = batchStatus === 'under_financial_review' && actualRole === 'auditor';
+  const canActAsFinanceManager = batchStatus === 'under_accounts_manager_review' && actualRole === 'finance_manager';
+  const isSuperAdmin = actualRole === 'super_admin';
+
+  const canTakeAction =
+    isSuperAdmin || canActAsAccountant || canActAsAuditorSkip || canActAsAuditorNormal || canActAsFinanceManager;
+
+  // اسم الإجراء الفعلي المستخدم بالـ tRPC، مبني على الحالة الحقيقية للدفعة والدور الحقيقي
+  const effectiveEndpoint: 'accountant' | 'financial_reviewer' | 'accounts_manager' =
+    (batchStatus === 'under_accountant_review' && (actualRole === 'accountant' || isSuperAdmin) && !canActAsAuditorSkip)
+      ? 'accountant'
+      : batchStatus === 'under_accounts_manager_review'
+      ? 'accounts_manager'
+      : 'financial_reviewer'; // يغطي: مرحلة المراجع الطبيعية + تجاوز المراجع لمرحلة المحاسب
 
   const approveMutation = trpc.payroll[
-    role === "accountant" ? "accountantApprove" :
-    role === "financial_reviewer" ? "financialReviewerApprove" :
+    effectiveEndpoint === "accountant" ? "accountantApprove" :
+    effectiveEndpoint === "financial_reviewer" ? "financialReviewerApprove" :
     "accountsManagerApprove"
   ].useMutation({
     onSuccess: () => {
@@ -83,8 +107,8 @@ export default function PayrollBatchReview({ role }: PayrollBatchReviewProps) {
   });
 
   const rejectMutation = trpc.payroll[
-    role === "accountant" ? "accountantReject" :
-    role === "financial_reviewer" ? "financialReviewerReject" :
+    effectiveEndpoint === "accountant" ? "accountantReject" :
+    effectiveEndpoint === "financial_reviewer" ? "financialReviewerReject" :
     "accountsManagerReject"
   ].useMutation({
     onSuccess: () => {
@@ -140,8 +164,8 @@ export default function PayrollBatchReview({ role }: PayrollBatchReviewProps) {
   }
 
   const roleTitle = 
-    role === "accountant" ? "مراجعة المحاسب" :
-    role === "financial_reviewer" ? "مراجعة المراجع المالي" :
+    effectiveEndpoint === "accountant" ? "مراجعة المحاسب" :
+    effectiveEndpoint === "financial_reviewer" ? (canActAsAuditorSkip ? "اعتماد المراجع المالي (بدون مرور بالمحاسب)" : "مراجعة المراجع المالي") :
     "اعتماد مدير الحسابات";
 
   // ✅ تجميع العمال حسب المجموعة (نفس نظام صفحة المسودة)
@@ -401,23 +425,29 @@ export default function PayrollBatchReview({ role }: PayrollBatchReviewProps) {
           <CardTitle>إجراءات المراجعة</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-3 justify-end">
-            <Button
-              variant="outline"
-              className="text-red-600 border-red-600 hover:bg-red-50"
-              onClick={() => setShowRejectDialog(true)}
-            >
-              <XCircle className="h-4 w-4 ml-2" />
-              رفض الدفعة
-            </Button>
-            <Button
-              className="bg-green-600 hover:bg-green-700"
-              onClick={() => setShowApproveDialog(true)}
-            >
-              <CheckCircle className="h-4 w-4 ml-2" />
-              اعتماد الدفعة
-            </Button>
-          </div>
+          {canTakeAction ? (
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                className="text-red-600 border-red-600 hover:bg-red-50"
+                onClick={() => setShowRejectDialog(true)}
+              >
+                <XCircle className="h-4 w-4 ml-2" />
+                رفض الدفعة
+              </Button>
+              <Button
+                className="bg-green-600 hover:bg-green-700"
+                onClick={() => setShowApproveDialog(true)}
+              >
+                <CheckCircle className="h-4 w-4 ml-2" />
+                اعتماد الدفعة
+              </Button>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-2">
+              لا تملك صلاحية اتخاذ إجراء على هذه الدفعة بمرحلتها الحالية
+            </p>
+          )}
         </CardContent>
       </Card>
 

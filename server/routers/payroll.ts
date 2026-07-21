@@ -8,7 +8,7 @@ import { publicProcedure, protectedProcedure, adminProcedure, router, requireRol
 import * as db from "../db";
 import { sql, and, eq, gte, desc } from "drizzle-orm";
 import { attendanceEvents, type UserRole } from "../../drizzle/schema";
-import { ROLE_PERMISSIONS, hasPageAccess, canApproveBatchAtStage, cannotSelfReview } from "../permissions";
+import { ROLE_PERMISSIONS, hasPageAccess, canApproveBatchAtStage, canRejectBatchAtStage, cannotSelfReview } from "../permissions";
 import { generateAttendanceExcel, generatePayrollExcel, type AttendanceReportRow, type PayrollReportRow } from "../excelExport";
 import { parseGroupsFromExcel, parseWorkersFromExcel, generateGroupsExcelTemplate, generateWorkersExcelTemplate, generateGroupsExcelExport, generateWorkersExcelExport } from "../excelImportExport";
 import * as analytics from "../analytics";
@@ -473,7 +473,12 @@ export const payrollRouter = router({
           throw new TRPCError({ code: 'FORBIDDEN', message: 'فقط المراجع المالي يمكنه إرسال الدفعة للمدير المالي' });
         }
         const approvalResult = await db.submitBatchForApproval(input.batchId, ctx.user.id, input.reason);
-        await db.logAudit({ userId: ctx.user.id, action: 'SUBMIT_FOR_APPROVAL', tableName: 'payroll_batches', recordId: input.batchId });
+        await db.logAudit({
+          userId: ctx.user.id,
+          action: (approvalResult as any).skippedAccountant ? 'SUBMIT_FOR_APPROVAL_SKIP_ACCOUNTANT' : 'SUBMIT_FOR_APPROVAL',
+          tableName: 'payroll_batches',
+          recordId: input.batchId,
+        });
         return approvalResult;
       }),
     
@@ -491,14 +496,19 @@ export const payrollRouter = router({
         return approveFinalResult;
       }),
     
-    // Workflow: Reject batch (المدير المالي يرفض → تعود draft للشؤون الإدارية)
+    // Workflow: Reject batch (رفض حسب المرحلة → تعود draft للشؤون الإدارية)
     rejectBatchFinal: protectedProcedure
       .input(z.object({ batchId: z.number(), reason: z.string() }))
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("Not authenticated");
         const userRole = ctx.user.role as UserRole;
-        if (!ROLE_PERMISSIONS[userRole]?.canApproveAsFM) {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'فقط المدير المالي يمكنه رفض الدفعة في هذه المرحلة' });
+        // ✅ الرفض حسب المرحلة: كل مرحلة يرفضها أصحاب صلاحيتها
+        // (المحاسب أو المراجع بمرحلة المحاسب، المراجع بمرحلته، المدير المالي بمرحلته)
+        const rejDetails = await db.getPayrollBatchDetails(input.batchId);
+        if (!rejDetails?.batch) throw new TRPCError({ code: 'NOT_FOUND', message: 'الدفعة غير موجودة' });
+        const rejCheck = canRejectBatchAtStage(userRole, rejDetails.batch.status || '');
+        if (!rejCheck.allowed) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: rejCheck.reason || 'لا تملك صلاحية رفض الدفعة في هذه المرحلة' });
         }
         const rejectFinalResult = await db.rejectBatch(input.batchId, ctx.user.id, input.reason);
         await db.logAudit({ userId: ctx.user.id, action: 'REJECT_BATCH_FINAL', tableName: 'payroll_batches', recordId: input.batchId, newValues: { reason: input.reason } });

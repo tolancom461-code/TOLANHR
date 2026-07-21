@@ -102,9 +102,9 @@ describe("Security - Role-Based Access Control (RBAC)", () => {
       expect(result.allowed).toBe(false);
     });
 
-    it("auditor CANNOT act on under_accountant_review stage", () => {
+    it("auditor CAN act on under_accountant_review stage (optional skip of accountant)", () => {
       const result = canApproveBatchAtStage("auditor", "under_accountant_review");
-      expect(result.allowed).toBe(false);
+      expect(result.allowed).toBe(true);
     });
 
     it("auditor CAN act on under_financial_review stage", () => {
@@ -183,8 +183,8 @@ describe("Security - Role-Based Access Control (RBAC)", () => {
       expect(canRejectBatchAtStage("finance_manager", "under_accounts_manager_review").allowed).toBe(true);
     });
 
-    it("auditor CANNOT reject at wrong stages", () => {
-      expect(canRejectBatchAtStage("auditor", "under_accountant_review").allowed).toBe(false);
+    it("auditor CAN reject at accountant stage (optional skip), CANNOT at FM stage", () => {
+      expect(canRejectBatchAtStage("auditor", "under_accountant_review").allowed).toBe(true);
       expect(canRejectBatchAtStage("auditor", "under_accounts_manager_review").allowed).toBe(false);
     });
 

@@ -390,9 +390,11 @@ export function canApproveBatchAtStage(role: UserRole, currentStatus: string): {
       return { allowed: false, reason: "فقط الشؤون الإدارية يمكنهم إرسال الدفعة للمراجعة" };
     
     case "under_accountant_review":
-      // فقط المحاسب يمكنه مراجعة الدفعة في هذه المرحلة
+      // المحاسب يمكنه المراجعة في هذه المرحلة
+      // ✅ والمراجع المالي أيضاً يمكنه الاعتماد مباشرة (تجاوز اختياري لمرحلة المحاسب)
       if (perms.canReviewAsAccountant) return { allowed: true };
-      return { allowed: false, reason: "فقط المحاسب المالي يمكنه مراجعة الدفعة في هذه المرحلة" };
+      if (perms.canReviewAsAuditor) return { allowed: true };
+      return { allowed: false, reason: "فقط المحاسب المالي أو المراجع المالي يمكنهما مراجعة الدفعة في هذه المرحلة" };
     
     case "under_financial_review":
       // فقط المراجع يمكنه مراجعة الدفعة في هذه المرحلة (بعد اعتماد المحاسب)
@@ -422,7 +424,9 @@ export function canRejectBatchAtStage(role: UserRole, currentStatus: string): { 
   switch (currentStatus) {
     case "under_accountant_review":
       if (perms.canReviewAsAccountant) return { allowed: true };
-      return { allowed: false, reason: "فقط المحاسب المالي يمكنه رفض الدفعة في هذه المرحلة" };
+      // ✅ المراجع المالي يمكنه الرفض من مرحلة المحاسب أيضاً (مقابل صلاحية الاعتماد المباشر)
+      if (perms.canReviewAsAuditor) return { allowed: true };
+      return { allowed: false, reason: "فقط المحاسب المالي أو المراجع المالي يمكنهما رفض الدفعة في هذه المرحلة" };
     
     case "under_financial_review":
       if (perms.canReviewAsAuditor) return { allowed: true };

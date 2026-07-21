@@ -144,9 +144,9 @@ describe("RBAC - Batch Approval Workflow (New Sequential Flow)", () => {
       expect(canRejectBatchAtStage("accountant", "under_accountant_review").allowed).toBe(true);
     });
 
-    it("auditor CANNOT act at accountant review stage", () => {
-      expect(canApproveBatchAtStage("auditor", "under_accountant_review").allowed).toBe(false);
-      expect(canRejectBatchAtStage("auditor", "under_accountant_review").allowed).toBe(false);
+    it("auditor CAN act at accountant review stage (optional skip of accountant)", () => {
+      expect(canApproveBatchAtStage("auditor", "under_accountant_review").allowed).toBe(true);
+      expect(canRejectBatchAtStage("auditor", "under_accountant_review").allowed).toBe(true);
     });
 
     it("finance_manager CANNOT act at accountant review stage", () => {

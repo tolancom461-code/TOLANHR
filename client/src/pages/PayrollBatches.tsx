@@ -706,6 +706,31 @@ export default function PayrollBatches() {
                     </>
                   )}
                   
+                  {/* ✅ المراجع المالي يمكنه الاعتماد مباشرة من مرحلة المحاسب (تجاوز اختياري)
+                      — الاعتماد يُسجّل باسمه وتنتقل الدفعة مباشرة للمدير المالي */}
+                  {batchDetails.batch.status === 'under_accountant_review' && canReviewAsAuditor && !canReviewAsAccountant && (
+                    <>
+                      <Button 
+                        onClick={() => {
+                          setSelectedBatchId(batchDetails.batch.id);
+                          setShowSubmitForApprovalDialog(true);
+                        }}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        اعتماد المراجع المالي وإرسال للمدير المالي
+                      </Button>
+                      <Button 
+                        variant="destructive"
+                        onClick={() => {
+                          setSelectedBatchId(batchDetails.batch.id);
+                          setShowRejectDialog(true);
+                        }}
+                      >
+                        رفض (إرجاع للشؤون الإدارية)
+                      </Button>
+                    </>
+                  )}
+                  
                   {/* Financial Review Stage: المراجع فقط - اعتماد (إرسال للمدير المالي) + رفض (تعود draft) */}
                   {batchDetails.batch.status === 'under_financial_review' && canReviewAsAuditor && (
                     <>

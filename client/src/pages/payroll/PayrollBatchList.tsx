@@ -122,7 +122,7 @@ export default function PayrollBatchList() {
               </TableCell>
               <TableCell className="hidden">{batch.workerCount}</TableCell>
               <TableCell>
-                {(Number(batch.totalAmount || 0) - Number(batch.totalDeductions || 0) + Number(batch.totalBonuses || 0)).toLocaleString("ar-SA")} ر.س
+                {Number(batch.netAmount || 0).toLocaleString("ar-SA")} ر.س
               </TableCell>
               <TableCell>
                 <StatusBadge status={batch.status} />

@@ -102,7 +102,12 @@ export async function submitBatchForApproval(batchId: number, userId: number, re
   
   const [batch] = await db.select().from(payrollBatches).where(eq(payrollBatches.id, batchId)).limit(1);
   if (!batch) throw new Error('Batch not found');
-  if (batch.status !== 'under_financial_review') throw new Error('Batch must be under financial review');
+  // ✅ المراجع المالي يقدر يعتمد الدفعة حتى لو لسا بمرحلة المحاسب (تجاوز اختياري لمرحلة المحاسب)
+  // بالحالتين الاعتماد يُسجّل باسم المراجع وتنتقل الدفعة مباشرة للمدير المالي
+  const skippedAccountant = batch.status === 'under_accountant_review';
+  if (batch.status !== 'under_financial_review' && !skippedAccountant) {
+    throw new Error('Batch must be under financial review');
+  }
   
   await db.update(payrollBatches)
     .set({
@@ -117,12 +122,14 @@ export async function submitBatchForApproval(batchId: number, userId: number, re
   await notifyStageAndAdmins({
     stageRole: 'finance_manager',
     title: "📤 دفعة رواتب بانتظار الاعتماد النهائي",
-    message: `اعتمد ${auditorLabel} الدفعة ${batch.batchCode} وأرسلها للاعتماد النهائي.`,
+    message: skippedAccountant
+      ? `اعتمد ${auditorLabel} الدفعة ${batch.batchCode} (اعتماد المراجع المالي — بدون مرور بمرحلة المحاسب) وأرسلها للاعتماد النهائي.`
+      : `اعتمد ${auditorLabel} الدفعة ${batch.batchCode} وأرسلها للاعتماد النهائي.`,
     type: 'info',
     link: `/payroll/batches/${batchId}`,
   });
   
-  return { success: true };
+  return { success: true, skippedAccountant };
 }
 
 export async function approveBatch(batchId: number, userId: number) {

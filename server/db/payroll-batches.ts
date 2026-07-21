@@ -974,7 +974,10 @@ export async function financialReviewerApproveBatch(batchId: number, reviewerId:
     throw new Error("Batch not found");
   }
 
-  if (batch.status !== 'under_financial_review') {
+  // ✅ المراجع المالي يقدر يعتمد الدفعة سواء كانت بمرحلة المراجعة المالية العادية،
+  // أو لسا بمرحلة المحاسب (تجاوز اختياري لمرحلة المحاسب) — بالحالتين تنتقل للمدير المالي
+  const skippedAccountant = batch.status === 'under_accountant_review';
+  if (batch.status !== 'under_financial_review' && !skippedAccountant) {
     throw new Error("Batch is not under financial review");
   }
 
@@ -987,7 +990,17 @@ export async function financialReviewerApproveBatch(batchId: number, reviewerId:
     })
     .where(eq(payrollBatches.id, batchId));
 
-  return { success: true };
+  if (skippedAccountant) {
+    await db.insert(payrollBatchNotes).values({
+      batchId,
+      reviewerId,
+      reviewerRole: 'financial_reviewer',
+      noteType: 'info',
+      note: 'تم اعتماد الدفعة من المراجع المالي مباشرة دون المرور بمرحلة مراجعة المحاسب.',
+    });
+  }
+
+  return { success: true, skippedAccountant };
 }
 
 /**
@@ -1014,8 +1027,9 @@ export async function financialReviewerRejectBatch(params: {
     throw new Error("Batch not found");
   }
 
-  if (batch.status !== 'under_financial_review') {
-    throw new Error("Batch is not under financial review");
+  // ✅ نفس منطق الاعتماد: المراجع يقدر يرفض سواء بمرحلته العادية أو بمرحلة المحاسب (تجاوز اختياري)
+  if (batch.status !== 'under_financial_review' && batch.status !== 'under_accountant_review') {
+    throw new Error("Batch is not under financial or accountant review");
   }
 
   const newRejectionCount = (batch.rejectionCount || 0) + 1;
@@ -1144,6 +1158,7 @@ let query = db
     totalAmount: payrollBatches.totalAmount,
     totalWorkers: payrollBatches.totalWorkers,
     totalDeductions: payrollBatches.totalDeductions,
+    totalOtherDeductions: payrollBatches.totalOtherDeductions,
     totalBonuses: payrollBatches.totalBonuses,
     costCenterId: payrollBatches.costCenterId,
     groupId: payrollBatches.groupId,
@@ -1154,6 +1169,10 @@ let query = db
     rejectionCount: payrollBatches.rejectionCount,
     isUnlocked: payrollBatches.isUnlocked,
     costCenterName: sql<string>`COALESCE(${costCenters.name}, 'All')`,
+    // ✅ الصافي: مجموع صافي كل عامل (payroll_batch_items.net_amount) —
+    // نفس المصدر بالضبط اللي تستخدمه بطاقة "الصافي" داخل تفاصيل الدفعة،
+    // بدل ما يُعاد حسابه بمعادلة مستقلة (فتضمن تطابق القيمتين دائمًا)
+    netAmount: sql<string>`(SELECT COALESCE(SUM(pbi.net_amount), 0) FROM payroll_batch_items pbi WHERE pbi.batch_id = ${payrollBatches.id})`,
   })
   .from(payrollBatches)
   .leftJoin(costCenters, eq(payrollBatches.costCenterId, costCenters.id))
