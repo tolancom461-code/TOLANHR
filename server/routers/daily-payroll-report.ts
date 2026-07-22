@@ -46,4 +46,25 @@ export const dailyPayrollReportRouter = router({
         const { getDailyPayrollGroups } = await import('../dailyPayrollReport');
         return await getDailyPayrollGroups(input.costCenterId);
       }),
+
+    exportPdf: protectedProcedure
+      .input(z.object({
+        periodStart: z.string(),
+        periodEnd: z.string(),
+        costCenterId: z.number().optional(),
+        groupIds: z.array(z.number()).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { generateDailyPayrollReportPdf } = await import('../dailyPayrollReportPdf');
+        const buffer = await generateDailyPayrollReportPdf({
+          periodStart: input.periodStart,
+          periodEnd: input.periodEnd,
+          costCenterId: input.costCenterId ?? undefined,
+          groupIds: input.groupIds,
+        });
+        return {
+          data: buffer.toString('base64'),
+          filename: `daily-payroll-report_${input.periodStart}_${input.periodEnd}.pdf`,
+        };
+      }),
 });

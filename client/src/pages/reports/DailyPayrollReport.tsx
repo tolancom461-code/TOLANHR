@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Printer, FileText, FileCheck } from 'lucide-react';
+import { FileText, FileCheck } from 'lucide-react';
 
 // تحويل الأرقام إلى كلمات عربية
 function numberToArabicWords(num: number): string {
@@ -33,15 +33,16 @@ function numberToArabicWords(num: number): string {
   const intPart = Math.floor(num);
   const decPart = Math.round((num - intPart) * 100);
 
-  let result = '';
-  if (intPart >= 1000000) {
-    result += convertBelow1000(Math.floor(intPart / 1000000)) + ' مليون ';
-  }
-  if (intPart >= 1000) {
-    const thousands = Math.floor((intPart % 1000000) / 1000);
-    if (thousands > 0) result += convertBelow1000(thousands) + ' ألف ';
-  }
-  result += convertBelow1000(intPart % 1000);
+  const millions = Math.floor(intPart / 1000000);
+  const thousands = Math.floor((intPart % 1000000) / 1000);
+  const remainder = intPart % 1000;
+
+  const chunks: string[] = [];
+  if (millions > 0) chunks.push(`${convertBelow1000(millions)} مليون`);
+  if (thousands > 0) chunks.push(`${convertBelow1000(thousands)} ألف`);
+  if (remainder > 0) chunks.push(convertBelow1000(remainder));
+
+  let result = chunks.join(' و');
   result += ' ريال سعودي';
   if (decPart > 0) {
     result += ` و${convertBelow1000(decPart)} هللة`;
@@ -67,8 +68,6 @@ export default function DailyPayrollReport() {
   const [queryEnabled, setQueryEnabled] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
-  // Report number
-  const reportNumber = `RPT-${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   const issueTime = today.toLocaleTimeString('ar-SA');
   const issueDate = today.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -114,8 +113,33 @@ export default function DailyPayrollReport() {
   const totalBonuses = reportData?.reduce((s, r) => s + r.totalBonuses, 0) || 0;
   const totalNet = reportData?.reduce((s, r) => s + r.totalNet, 0) || 0;
 
-  const handlePrint = () => {
-    window.print();
+  const exportPdfMutation = trpc.dailyPayrollReport.exportPdf.useMutation();
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+
+  const handleExportPdf = async () => {
+    setIsExportingPdf(true);
+    try {
+      const result = await exportPdfMutation.mutateAsync({
+        periodStart: startDate,
+        periodEnd: endDate,
+        costCenterId: selectedCostCenterId,
+        groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined,
+      });
+      const byteChars = atob(result.data);
+      const byteNumbers = new Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([new Uint8Array(byteNumbers)], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = result.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
 
   return (
@@ -186,13 +210,14 @@ export default function DailyPayrollReport() {
 
       {/* زر الطباعة */}
       {reportData && reportData.length > 0 && (
-        <div className="no-print flex justify-end mb-4">
+        <div className="no-print flex justify-end gap-3 mb-4">
           <Button
-            onClick={handlePrint}
+            onClick={handleExportPdf}
+            disabled={isExportingPdf}
             className="bg-blue-700 hover:bg-blue-800 text-white flex items-center gap-2"
           >
-            <Printer className="h-4 w-4" />
-            طباعة التقرير
+            <FileCheck className="h-4 w-4" />
+            {isExportingPdf ? 'جاري إنشاء الملف...' : 'تنزيل PDF رسمي'}
           </Button>
         </div>
       )}
@@ -229,11 +254,6 @@ export default function DailyPayrollReport() {
                   <span className="font-semibold">{issueTime}</span>
                 </div>
 
-                <div className="flex justify-between gap-4">
-                  <span className="opacity-80">رقم التقرير:</span>
-                  <span className="font-semibold">{reportNumber}</span>
-                </div>
-
               </div>
 
               {/* منتصف: العنوان */}
@@ -268,28 +288,37 @@ export default function DailyPayrollReport() {
               <div className="text-center py-20 text-gray-400">جاري تحميل البيانات...</div>
             ) : reportData && reportData.length > 0 ? (
               <>
-                <table className="w-full border-collapse border border-gray-200 text-sm mb-8">
+                <table className="w-full border-collapse border border-gray-200 text-sm mb-8 table-fixed">
+                  <colgroup>
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '27%' }} />
+                    <col style={{ width: '12%' }} />
+                    <col style={{ width: '14%' }} />
+                    <col style={{ width: '14%' }} />
+                    <col style={{ width: '14%' }} />
+                    <col style={{ width: '14%' }} />
+                  </colgroup>
                   <thead>
                     <tr className="bg-gray-100 text-blue-900">
-                      <th className="border border-gray-300 p-3 text-center w-12">#</th>
-                      <th className="border border-gray-300 p-3 text-right">المجموعة</th>
-                      <th className="border border-gray-300 p-3 text-center">عدد العمال</th>
-                      <th className="border border-gray-300 p-3 text-center">المبلغ</th>
-                      <th className="border border-gray-300 p-3 text-center">الخصومات</th>
-                      <th className="border border-gray-300 p-3 text-center">الإضافي</th>
-                      <th className="border border-gray-300 p-3 text-center bg-blue-50">صافي المبلغ</th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center w-12">#</th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-right">المجموعة</th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center">عدد العمال</th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center">المبلغ</th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center">الخصومات</th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center">الإضافي</th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center bg-blue-50">صافي المبلغ</th>
                     </tr>
                   </thead>
                   <tbody>
                     {reportData.map((row) => (
                       <tr key={row.rowIndex} className="hover:bg-gray-50 transition-colors">
-                        <td className="border border-gray-300 p-3 text-center font-mono">{row.rowIndex}</td>
-                        <td className="border border-gray-300 p-3 font-bold">{row.groupName}</td>
-                        <td className="border border-gray-300 p-3 text-center">{row.workerCount}</td>
-                        <td className="border border-gray-300 p-3 text-center">{formatCurrency(row.totalSalary)}</td>
-                        <td className="border border-gray-300 p-3 text-center text-red-600">{formatCurrency(row.totalDeductions)}</td>
-                        <td className="border border-gray-300 p-3 text-center text-green-600">{formatCurrency(row.totalBonuses)}</td>
-                        <td className="border border-gray-300 p-3 text-center font-black bg-blue-50/50">{formatCurrency(row.totalNet)}</td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center font-mono">{row.rowIndex}</td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] font-bold">{row.groupName}</td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center">{row.workerCount}</td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center">{formatCurrency(row.totalSalary)}</td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center text-red-600">{formatCurrency(row.totalDeductions)}</td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center text-green-600">{formatCurrency(row.totalBonuses)}</td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center font-black bg-blue-50/50">{formatCurrency(row.totalNet)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -305,7 +334,7 @@ export default function DailyPayrollReport() {
 
     <td
       colSpan={2}
-      className={`p-4 text-center text-lg border ${
+      className={`px-4 py-[0.8rem] text-center text-lg border ${
         costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
           ? 'border-[#B92D38]'
           : 'border-blue-900'
@@ -315,7 +344,7 @@ export default function DailyPayrollReport() {
     </td>
 
     <td
-      className={`p-4 text-center text-lg border ${
+      className={`px-4 py-[0.8rem] text-center text-lg border ${
         costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
           ? 'border-[#B92D38]'
           : 'border-blue-900'
@@ -325,7 +354,7 @@ export default function DailyPayrollReport() {
     </td>
 
     <td
-      className={`p-4 text-center text-lg border ${
+      className={`px-4 py-[0.8rem] text-center text-lg border ${
         costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
           ? 'border-[#B92D38]'
           : 'border-blue-900'
@@ -335,7 +364,7 @@ export default function DailyPayrollReport() {
     </td>
 
     <td
-      className={`p-4 text-center text-lg border ${
+      className={`px-4 py-[0.8rem] text-center text-lg border ${
         costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
           ? 'border-[#B92D38]'
           : 'border-blue-900'
@@ -345,7 +374,7 @@ export default function DailyPayrollReport() {
     </td>
 
     <td
-      className={`p-4 text-center text-lg border ${
+      className={`px-4 py-[0.8rem] text-center text-lg border ${
         costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
           ? 'border-[#B92D38]'
           : 'border-blue-900'
@@ -355,7 +384,7 @@ export default function DailyPayrollReport() {
     </td>
 
     <td
-      className={`p-4 text-center text-xl border ${
+      className={`px-4 py-[0.8rem] text-center text-xl border ${
         costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
           ? 'bg-[#A32631] border-[#A32631]'
           : 'bg-blue-800 border-blue-900'
@@ -369,96 +398,64 @@ export default function DailyPayrollReport() {
                 </table>
 
                 {/* التفقيط */}
-                <div className="bg-blue-50 border-r-4 border-blue-800 p-4 mb-12">
+                <div className="bg-blue-50 border-r-4 border-blue-800 p-4 mb-6">
                   <span className="text-blue-800 font-bold ml-2">المبلغ كتابة:</span>
                   <span className="text-lg font-black">{numberToArabicWords(totalNet)}</span>
                 </div>
 
 {/* ===== التوقيعات ===== */}
-<div className="grid grid-cols-6 gap-3 mt-12 text-center">
+<div className="grid grid-cols-6 gap-3 mt-6 text-center">
 
-  <div className="space-y-3">
-
-    <div className="h-10"></div>
-
-    <div className="border-t border-gray-400 pt-2">
-      <p className="font-bold text-sm">
-        إعداد
-      </p>
-    </div>
-
+  <div className="flex flex-col h-full justify-between">
+    <p className="font-bold text-sm">
+      إعداد
+    </p>
+    <div className="h-10 border-b border-gray-400"></div>
   </div>
 
-  <div className="space-y-3">
-
-    <div className="h-10"></div>
-
-    <div className="border-t border-gray-400 pt-2">
-      <p className="font-bold text-sm">
-        مراجعة أولى
-      </p>
-    </div>
-
+  <div className="flex flex-col h-full justify-between">
+    <p className="font-bold text-sm">
+      مراجعة أولى
+    </p>
+    <div className="h-10 border-b border-gray-400"></div>
   </div>
 
-  <div className="space-y-3">
-
-    <div className="h-10"></div>
-
-    <div className="border-t border-gray-400 pt-2">
-      <p className="font-bold text-sm">
-        المراجع المالي
-      </p>
-    </div>
-
+  <div className="flex flex-col h-full justify-between">
+    <p className="font-bold text-sm">
+      المراجع المالي
+    </p>
+    <div className="h-10 border-b border-gray-400"></div>
   </div>
 
-  <div className="space-y-3">
-
-    <div className="h-10"></div>
-
-    <div className="border-t border-gray-400 pt-2">
-      <p className="font-bold text-sm">
-        رئيس الحسابات
-      </p>
-    </div>
-
+  <div className="flex flex-col h-full justify-between">
+    <p className="font-bold text-sm">
+      رئيس الحسابات
+    </p>
+    <div className="h-10 border-b border-gray-400"></div>
   </div>
 
-  <div className="space-y-3">
-
-    <div className="h-10"></div>
-
-    <div className="border-t border-gray-400 pt-2">
-
+  <div className="flex flex-col h-full justify-between">
+    <div>
       <p className="font-bold text-sm">
         تدقيق ومراجعة
       </p>
-
       <p className="text-xs mt-1 whitespace-nowrap">
         م. سعد الزكري
       </p>
-
     </div>
-
+    <div className="h-10 border-b border-gray-400"></div>
   </div>
 
-  <div className="space-y-3">
-
-    <div className="h-10"></div>
-
-    <div className="border-t border-gray-400 pt-2">
-
+  <div className="flex flex-col h-full justify-between">
+    <div>
       <p className="font-extrabold text-sm">
         الرئيس التنفيذي
       </p>
-
       <p className="text-xs font-extrabold mt-1 whitespace-nowrap">
         م. زكري بن عبدالله الزكري
       </p>
-
     </div>
-
+    <div className="h-10 border-b border-gray-400"></div>
   </div>
 
 </div>

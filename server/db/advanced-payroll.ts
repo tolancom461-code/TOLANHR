@@ -222,6 +222,7 @@ export async function aggregatePayrollData(
         eq(payOverrides.status, 'approved')
       )
     );
+  console.log('[aggregatePayrollData] workerId=', workerId, 'periodStart=', periodStart, 'periodEnd=', periodEnd, 'overrides found=', overrides.length, overrides);
 
   // Calculate totals
   const daysWorked = dailyFinances.length;

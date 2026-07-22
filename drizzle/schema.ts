@@ -248,6 +248,7 @@ export const payOverrides = mysqlTable("pay_overrides", {
 	overrideType: mysqlEnum("override_type", ['bonus','deduction','advance','emergency_call']).notNull(),
 	amount: decimal({ precision: 10, scale: 2 }).notNull(),
 	reason: text(),
+	notes: text(),
 	status: mysqlEnum(['pending','approved','rejected']).default('pending'),
 	approvedBy: int("approved_by").references(() => users.id, { onDelete: "set null", onUpdate: "cascade" } ),
 	approvedAt: timestamp("approved_at", { mode: 'string' }),
