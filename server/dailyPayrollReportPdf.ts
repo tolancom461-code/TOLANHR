@@ -123,10 +123,13 @@ function buildReportHtml({ rows, companyName, isRed, periodStart, periodEnd }: B
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet" />
 <style>
   * { box-sizing: border-box; }
   body {
-    font-family: "Arial", "Tahoma", sans-serif;
+    font-family: "Cairo", "Arial", "Tahoma", sans-serif;
     margin: 0;
     padding: 0;
     color: #1f2937;
@@ -306,6 +309,8 @@ export async function generateDailyPayrollReportPdf(input: {
   try {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
+    // ✅ التأكد من اكتمال تحميل الخط العربي فعلياً قبل توليد PDF
+    await page.evaluateHandle("document.fonts.ready");
     const pdfBuffer = await page.pdf({
       format: "A4",
       landscape: true,
