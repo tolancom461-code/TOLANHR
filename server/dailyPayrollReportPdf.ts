@@ -167,19 +167,19 @@ function buildReportHtml({ rows, companyName, isRed, periodStart, periodEnd }: B
     font-size: 13px;
   }
   .content { padding: 16.524px 24px 18.36px 24px; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 14.688px; table-layout: fixed; }
-  col.n1 { width: 5%; } col.n2 { width: 27%; } col.n3 { width: 12%; }
-  col.n4 { width: 14%; } col.n5 { width: 14%; } col.n6 { width: 14%; } col.n7 { width: 14%; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 14.688px; table-layout: fixed; line-height: 1.3; }
+  col.n1 { width: 4%; } col.n2 { width: 20%; } col.n3 { width: 11%; }
+  col.n4 { width: 16%; } col.n5 { width: 16%; } col.n6 { width: 16%; } col.n7 { width: 17%; }
   thead tr { background: #f3f4f6; color: #1e3a8a; }
   th, td.c { border: 1px solid #d1d5db; }
-  th { padding: 8.64px 12px; text-align: center; }
-  tbody td.c { padding: 5.8752px 12px; }
+  th { padding: 8.64px 8px; text-align: center; white-space: nowrap; }
+  tbody td.c { padding: 4.5px 8px; }
   th.right { text-align: right; }
   th.net-head { background: #eff6ff; }
   .net-cell { background: rgba(239,246,255,0.5); font-weight: 900; }
   .sar-small { font-size: 50%; }
-  td.center { text-align: center; }
-  td.bold { font-weight: 700; }
+  td.center { text-align: center; white-space: nowrap; }
+  td.bold { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   td.mono { font-family: "Courier New", monospace; }
   td.red { color: #dc2626; }
   td.green { color: #16a34a; }
@@ -189,11 +189,12 @@ function buildReportHtml({ rows, companyName, isRed, periodStart, periodEnd }: B
     color: #ffffff;
     font-weight: 700;
     border: 1px solid ${darkColor};
-    padding: 7.8336px 16px;
+    padding: 7.8336px 8px;
     text-align: center;
-    font-size: 16px;
+    font-size: 15px;
+    white-space: nowrap;
   }
-  tfoot td.net-total { background: ${mainColor}; font-size: 18px; }
+  tfoot td.net-total { background: ${mainColor}; font-size: 16px; }
   .amount-words {
     background: #eff6ff;
     border-right: 4px solid ${mainColor};
