@@ -158,9 +158,15 @@ export default function Users() {
 
   const handleSaveRole = () => {
     if (!selectedUser || !selectedRole) return;
+    const reason = window.prompt('يرجى إدخال سبب تغيير الدور (إلزامي لسجل التدقيق):');
+    if (!reason || !reason.trim()) {
+      toast.error('سبب تغيير الدور إلزامي — لم يتم الحفظ');
+      return;
+    }
     updateRole.mutate({
       userId: selectedUser.id,
       role: selectedRole as any,
+      reason: reason.trim(),
     });
   };
 
@@ -346,7 +352,14 @@ export default function Users() {
                                     <AlertDialogFooter>
                                       <AlertDialogCancel>إلغاء</AlertDialogCancel>
                                       <AlertDialogAction
-                                        onClick={() => deleteUser.mutate({ id: user.id })}
+                                        onClick={() => {
+                                          const reason = window.prompt('يرجى إدخال سبب حذف المستخدم (إلزامي لسجل التدقيق):');
+                                          if (!reason || !reason.trim()) {
+                                            toast.error('سبب الحذف إلزامي — لم يتم الحذف');
+                                            return;
+                                          }
+                                          deleteUser.mutate({ id: user.id, reason: reason.trim() });
+                                        }}
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                       >
                                         حذف

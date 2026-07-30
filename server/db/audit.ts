@@ -48,9 +48,14 @@ export async function logAudit(params: {
   oldValues?: any;
   newValues?: any;
   ipAddress?: string;
+  /**
+   * معاملة Drizzle اختيارية — لو مُررت، تصير كتابة السجل القديم جزءاً من
+   * نفس الـ transaction الخاصة بعملية v2 (فترة التشغيل المزدوج، قسم 12).
+   */
+  tx?: any;
 }) {
   try {
-    const db = await getDb();
+    const db = params.tx ?? (await getDb());
     if (!db) return;
     await db.insert(auditLog).values({
       userId: params.userId || null,
@@ -64,6 +69,8 @@ export async function logAudit(params: {
   } catch (error) {
     console.error('[logAudit] Error logging audit:', error);
     // Don't throw - audit logging should never break the main operation
+    // (إلا لو كنا داخل transaction خاصة بـ v2 التي تتطلب rollback عند الفشل —
+    // في هذه الحالة raise سيحدث من استدعاء logAuditV2 المرافق، وليس من هنا)
   }
 }
 

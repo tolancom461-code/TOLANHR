@@ -1,4 +1,4 @@
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, index, foreignKey, int, decimal, date, mysqlEnum, text, timestamp, varchar, tinyint, unique, primaryKey } from "drizzle-orm/mysql-core"
+import { mysqlTable, mysqlSchema, AnyMySqlColumn, index, uniqueIndex, foreignKey, int, bigint, smallint, decimal, date, datetime, char, json, mysqlEnum, text, timestamp, varchar, tinyint, unique, primaryKey } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
 
 export const assignmentSettlements = mysqlTable("assignment_settlements", {
@@ -63,6 +63,73 @@ export const auditLog = mysqlTable("audit_log", {
 	index("idx_audit_user_id").on(table.userId),
 	index("idx_audit_action").on(table.action),
 	index("idx_audit_created_at").on(table.createdAt),
+]);
+
+// ============================================
+// سجل التدقيق الجديد (Audit Log V2)
+// جدول مستقل تماماً عن audit_log القديم — append-only، لا يُعدَّل ولا يُحذف من التطبيق.
+// راجع: وثيقة متطلبات سجل التدقيق الجديد v1.0
+// ============================================
+export const auditLogV2 = mysqlTable("audit_log_v2", {
+	id: bigint({ mode: 'number', unsigned: true }).autoincrement().notNull(),
+
+	// هوية الحدث
+	eventUuid: char("event_uuid", { length: 36 }).notNull(),
+	loggedAt: datetime("logged_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+	businessEventAt: datetime("business_event_at", { mode: 'string', fsp: 6 }),
+
+	// تصنيف العملية
+	actionCategory: varchar("action_category", { length: 32 }).notNull(),
+	actionName: varchar("action_name", { length: 100 }).notNull(),
+	description: varchar({ length: 500 }).notNull(),
+
+	// الكيان المتأثر
+	schemaName: varchar("schema_name", { length: 64 }).default('tolan_workforce').notNull(),
+	tableName: varchar("table_name", { length: 100 }).notNull(),
+	entityType: varchar("entity_type", { length: 100 }).notNull(),
+	recordId: bigint("record_id", { mode: 'number' }),
+	recordKey: json("record_key").notNull(),
+
+	// المنفذ ومصدر العملية
+	actorUserId: bigint("actor_user_id", { mode: 'number' }),
+	actorSnapshot: json("actor_snapshot").notNull(),
+	source: varchar({ length: 32 }).default('WEB').notNull(),
+	ipAddress: varchar("ip_address", { length: 45 }),
+	userAgent: text("user_agent"),
+	sessionId: varchar("session_id", { length: 100 }),
+	requestId: char("request_id", { length: 36 }).notNull(),
+	transactionId: char("transaction_id", { length: 36 }),
+	parentEventUuid: char("parent_event_uuid", { length: 36 }),
+	batchId: varchar("batch_id", { length: 100 }),
+
+	// القيم والتغييرات
+	beforeValues: json("before_values"),
+	afterValues: json("after_values"),
+	changedFields: json("changed_fields"),
+	reasonCode: varchar("reason_code", { length: 50 }),
+	reasonText: varchar("reason_text", { length: 500 }),
+
+	// تواريخ السجل الأصلي المتأثر
+	recordCreatedAt: datetime("record_created_at", { mode: 'string', fsp: 6 }),
+	recordUpdatedAt: datetime("record_updated_at", { mode: 'string', fsp: 6 }),
+	recordDeletedAt: datetime("record_deleted_at", { mode: 'string', fsp: 6 }),
+
+	// إضافات ومنع العبث
+	metadata: json(),
+	legacyAuditId: bigint("legacy_audit_id", { mode: 'number' }),
+	rowHash: char("row_hash", { length: 64 }).notNull(),
+	previousHash: char("previous_hash", { length: 64 }),
+	schemaVersion: smallint("schema_version").default(1).notNull(),
+},
+(table) => [
+	uniqueIndex("uq_audit_v2_event_uuid").on(table.eventUuid),
+	index("idx_audit_v2_entity_lookup").on(table.tableName, table.recordId, table.loggedAt),
+	index("idx_audit_v2_actor").on(table.actorUserId),
+	index("idx_audit_v2_action").on(table.actionName),
+	index("idx_audit_v2_request").on(table.requestId),
+	index("idx_audit_v2_parent_event").on(table.parentEventUuid),
+	index("idx_audit_v2_batch").on(table.batchId),
+	index("idx_audit_v2_logged_at").on(table.loggedAt),
 ]);
 
 export const costCenters = mysqlTable("cost_centers", {

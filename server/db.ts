@@ -5,6 +5,7 @@
 // ============================================
 
 export * from './db/audit';
+export * from './db/audit-v2';
 export * from './db/connection';
 export * from './db/users';
 export * from './db/roles';

@@ -37,16 +37,16 @@ import { getDb } from './connection';
 // User Cost Centers (RBAC)
 // ============================================
 
-export async function assignUserCostCenters(userId: number, costCenterIds: number[]) {
-  const db = await getDb();
-  if (!db) throw new Error('Database not available');
+export async function assignUserCostCenters(userId: number, costCenterIds: number[], tx?: any) {
+  const database = tx ?? (await getDb());
+  if (!database) throw new Error('Database not available');
   
   // Delete existing assignments
-  await db.delete(userCostCenters).where(eq(userCostCenters.userId, userId));
+  await database.delete(userCostCenters).where(eq(userCostCenters.userId, userId));
   
   // Insert new assignments
   if (costCenterIds.length > 0) {
-    await db.insert(userCostCenters).values(
+    await database.insert(userCostCenters).values(
       costCenterIds.map(ccId => ({
         userId,
         costCenterId: ccId,

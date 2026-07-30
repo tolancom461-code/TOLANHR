@@ -425,38 +425,89 @@ addFullSession: protectedProcedure
     deletePunchEvent: protectedProcedure
       .input(z.object({
         eventId: z.number(),
-        reason: z.string().optional(),
+        // السبب إلزامي عند حذف بصمة حضور — FR-008 / AC-004 بوثيقة سجل التدقيق v2.
+        // الواجهتان الحاليتان (AttendanceLog.tsx وPunchesReviewCenter.tsx) ترسلان
+        // سبباً دائماً بالفعل، فهذا لا يغيّر أي سلوك حقيقي بالواجهة.
+        reason: z.string().min(1, 'سبب حذف بصمة الحضور إلزامي'),
       }))
       .use(requirePermissionFlag('canEditAttendanceLog'))
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("Not authenticated");
-        
+
         const { attendanceEvents } = await import('../../drizzle/schema');
         const database = await db.getDb();
         if (!database) throw new Error('Database not available');
-        
+
         // Get event before deleting for audit
         const { eq } = await import('drizzle-orm');
         const [oldEvent] = await database.select().from(attendanceEvents).where(eq(attendanceEvents.id, input.eventId)).limit(1);
-        
-        // Delete the event
-        await database.delete(attendanceEvents).where(eq(attendanceEvents.id, input.eventId));
-        
-        // Get worker name for audit log
-        let workerName = `عامل غير معروف`;
-        if (oldEvent?.workerId) {
-          const worker = await db.getWorkerById(oldEvent.workerId);
-          workerName = worker?.fullName || `عامل رقم ${oldEvent.workerId}`;
+
+        if (!oldEvent) {
+          throw new Error('سجل الحضور غير موجود أو تم حذفه مسبقاً');
         }
-        
-        // Audit log
-        await db.logAudit({
-          userId: ctx.user.id,
-          action: 'DELETE_ATTENDANCE',
-          tableName: 'attendance_events',
-          recordId: input.eventId,
-          oldValues: oldEvent ? { workerId: oldEvent.workerId, workerName: workerName, eventType: oldEvent.eventType, eventTime: oldEvent.eventTime } : null,
-          newValues: input.reason ? { reason: input.reason } : null,
+
+        // Get worker info for audit log (كود واسم العامل يُحفظان كلقطة ثابتة،
+        // لأن العامل قد يُحذف أو تتغيّر بياناته لاحقاً — FR-012)
+        const worker = await db.getWorkerById(oldEvent.workerId);
+        const workerName = worker?.fullName || `عامل رقم ${oldEvent.workerId}`;
+        const workerCode = worker?.code || null;
+
+        const eventTypeLabel = oldEvent.eventType === 'check_in' ? 'حضور' : oldEvent.eventType === 'check_out' ? 'انصراف' : oldEvent.eventType;
+        const actorName = ctx.user.fullName || ctx.user.username;
+
+        // ============================================================
+        // الحذف + سجل التدقيق (القديم والجديد) داخل معاملة واحدة ذرية:
+        // إما أن تنجح جميعاً معاً، أو تتراجع جميعاً معاً (مبدأ الذرية، FR الأساسي).
+        // ============================================================
+        const beforeSnapshot = {
+          id: oldEvent.id,
+          workerId: oldEvent.workerId,
+          workerCode,
+          workerName,
+          eventType: oldEvent.eventType,
+          eventTime: oldEvent.eventTime,
+          workDate: oldEvent.workDate,
+          method: oldEvent.method,
+          note: oldEvent.note,
+          isAutomatic: oldEvent.isAutomatic,
+          createdAt: oldEvent.createdAt,
+        };
+
+        await database.transaction(async (tx: any) => {
+          // 1) تنفيذ الحذف الفعلي
+          await tx.delete(attendanceEvents).where(eq(attendanceEvents.id, input.eventId));
+
+          // 2) السجل القديم (خلال فترة التشغيل المزدوج)
+          await db.logAudit({
+            userId: ctx.user!.id,
+            action: 'DELETE_ATTENDANCE',
+            tableName: 'attendance_events',
+            recordId: input.eventId,
+            oldValues: { workerId: oldEvent.workerId, workerName, eventType: oldEvent.eventType, eventTime: oldEvent.eventTime },
+            newValues: { reason: input.reason },
+            tx,
+          });
+
+          // 3) السجل الجديد audit_log_v2
+          await db.logAuditV2({
+            actionCategory: 'DELETE',
+            actionName: 'DELETE_ATTENDANCE',
+            description: `${actorName} قام بحذف بصمة ${eventTypeLabel} للعامل ${workerName}${workerCode ? ` (${workerCode})` : ''} - وقت البصمة: ${oldEvent.eventTime} - السبب: ${input.reason}`,
+            tableName: 'attendance_events',
+            entityType: 'attendance',
+            recordId: input.eventId,
+            recordKey: { workerId: oldEvent.workerId, workerCode, eventType: oldEvent.eventType },
+            actor: db.actorFromUser(ctx.user),
+            source: 'WEB',
+            req: ctx.req,
+            requestId: ctx.requestId,
+            beforeValues: beforeSnapshot,
+            afterValues: null,
+            reasonText: input.reason,
+            businessEventAt: typeof oldEvent.eventTime === 'string' ? oldEvent.eventTime : new Date(oldEvent.eventTime).toISOString(),
+            recordDeletedAt: new Date().toISOString(),
+            tx,
+          });
         });
         
         // ✅ إعادة حساب أو حذف السجل المالي
