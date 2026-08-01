@@ -100,7 +100,7 @@ describe("CEO report aggregation", () => {
     });
 
     expect(sections).toHaveLength(2);
-    expect(sections[0].title).toBe("تقرير كشف العمالة اليومية");
+    expect(sections[0].title).toBe("المصاريف ليوم الخميس");
     expect(sections[0].rows.map(row => row.category)).toEqual([
       "morning",
       "evening",
@@ -123,12 +123,29 @@ describe("CEO report aggregation", () => {
 
     expect(sections).toHaveLength(4);
     expect(sections.map(section => section.title)).toEqual([
-      "تقرير كشف العمالة اليومية",
-      "تقرير كشف العمالة اليومية",
-      "تقرير كشف العمالة اليومية",
-      "تقرير كشف العمالة اليومية",
+      "المصاريف ليوم الخميس",
+      "المصاريف ليوم الخميس",
+      "المصاريف ليوم الخميس",
+      "المصاريف ليوم الخميس",
     ]);
     expect(sections.every(section => section.rows.length === 1)).toBe(true);
+  });
+
+  it("uses a custom report title for every generated section", () => {
+    const sections = createCeoReportSections({
+      rows,
+      costCenters: [{ id: 1, name: "تولان" }],
+      morningGroupIds: [11],
+      eveningGroupIds: [12],
+      selectedShifts: ["morning", "evening"],
+      mergeShifts: false,
+      reportTitle: "مصاريف يوم الجمعة",
+    });
+
+    expect(sections.map(section => section.title)).toEqual([
+      "مصاريف يوم الجمعة",
+      "مصاريف يوم الجمعة",
+    ]);
   });
 
   it("keeps the selected section but hides an aggregate row whose totals are zero", () => {

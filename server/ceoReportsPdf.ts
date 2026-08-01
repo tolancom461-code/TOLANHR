@@ -323,6 +323,7 @@ export async function generateCeoReportsPdf(input: {
   eveningGroupIds: number[];
   selectedShifts: CeoShiftCategory[];
   mergeShifts: boolean;
+  reportTitle: string;
 }): Promise<Buffer> {
   const [allRows, costCenters] = await Promise.all([
     getCeoReportsData(input.periodStart, input.periodEnd, input.costCenterIds),
@@ -339,6 +340,7 @@ export async function generateCeoReportsPdf(input: {
     eveningGroupIds: input.eveningGroupIds,
     selectedShifts: input.selectedShifts,
     mergeShifts: input.mergeShifts,
+    reportTitle: input.reportTitle,
   });
 
   if (sections.length === 0) {

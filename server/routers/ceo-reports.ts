@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
+import { CEO_REPORT_TITLE } from "../../shared/ceoReportsAggregation";
 
 const shiftCategorySchema = z.enum(["morning", "evening"]);
 const costCenterIdsSchema = z.array(z.number().int().positive()).min(1);
@@ -45,6 +46,7 @@ export const ceoReportsRouter = router({
         eveningGroupIds: z.array(z.number()).default([]),
         selectedShifts: z.array(shiftCategorySchema).min(1),
         mergeShifts: z.boolean(),
+        reportTitle: z.string().trim().min(1).max(200).default(CEO_REPORT_TITLE),
       })
     )
     .mutation(async ({ input }) => {

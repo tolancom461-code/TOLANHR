@@ -49,7 +49,7 @@ export const CEO_SHIFT_LABELS: Record<CeoShiftCategory, string> = {
   evening: "مصاريف التشغيل المسائي",
 };
 
-export const CEO_REPORT_TITLE = "تقرير كشف العمالة اليومية";
+export const CEO_REPORT_TITLE = "المصاريف ليوم الخميس";
 
 /**
  * يجمع المجموعات المصنفة صباحياً أو مسائياً فقط.
@@ -117,9 +117,10 @@ export function aggregateCeoReportByShift(
 
 export function getCeoReportSectionTitle(
   _categories: CeoShiftCategory[],
-  _costCenterName: string
+  _costCenterName: string,
+  reportTitle?: string
 ): string {
-  return CEO_REPORT_TITLE;
+  return reportTitle?.trim() || CEO_REPORT_TITLE;
 }
 
 /**
@@ -135,6 +136,7 @@ export function createCeoReportSections(input: {
   eveningGroupIds: number[];
   selectedShifts: CeoShiftCategory[];
   mergeShifts: boolean;
+  reportTitle?: string;
 }): CeoReportSection[] {
   const selectedShiftSet = new Set(input.selectedShifts);
   const selectedShifts = CEO_SHIFT_CATEGORIES.filter(category =>
@@ -164,7 +166,11 @@ export function createCeoReportSections(input: {
       costCenterName: costCenter.name,
       costCenterCode: costCenter.code,
       categories,
-      title: getCeoReportSectionTitle(categories, costCenter.name),
+      title: getCeoReportSectionTitle(
+        categories,
+        costCenter.name,
+        input.reportTitle
+      ),
       rows: aggregateRows.filter(row => categories.includes(row.category)),
     }));
   });

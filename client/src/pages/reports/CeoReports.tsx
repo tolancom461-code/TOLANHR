@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { FileText, FileCheck } from "lucide-react";
 import {
+  CEO_REPORT_TITLE,
   createCeoReportSections,
   type CeoReportSection,
   type CeoShiftCategory,
@@ -291,6 +292,7 @@ export default function CeoReports() {
     firstDay.toLocaleDateString("en-CA")
   );
   const [endDate, setEndDate] = useState(today.toLocaleDateString("en-CA"));
+  const [reportTitle, setReportTitle] = useState(CEO_REPORT_TITLE);
   const [costCenterSelection, setCostCenterSelection] = useState("all");
   const [shiftSelection, setShiftSelection] = useState<
     "morning" | "evening" | "both"
@@ -350,6 +352,7 @@ export default function CeoReports() {
         eveningGroupIds,
         selectedShifts,
         mergeShifts,
+        reportTitle,
       }),
     [
       reportData,
@@ -358,6 +361,7 @@ export default function CeoReports() {
       eveningGroupIds,
       selectedShifts,
       mergeShifts,
+      reportTitle,
     ]
   );
 
@@ -440,6 +444,7 @@ export default function CeoReports() {
         eveningGroupIds,
         selectedShifts,
         mergeShifts,
+        reportTitle: reportTitle.trim() || CEO_REPORT_TITLE,
       });
       const byteChars = atob(result.data);
       const byteNumbers = new Array(byteChars.length);
@@ -469,6 +474,16 @@ export default function CeoReports() {
           <FileText className="h-5 w-5" />
           إعدادات التقرير
         </h2>
+
+        <div className="mb-4 space-y-1">
+          <Label>عنوان التقرير</Label>
+          <Input
+            value={reportTitle}
+            maxLength={200}
+            onChange={event => setReportTitle(event.target.value)}
+            placeholder={CEO_REPORT_TITLE}
+          />
+        </div>
 
         <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
           <div className="space-y-1">
