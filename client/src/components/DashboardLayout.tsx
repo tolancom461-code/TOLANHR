@@ -102,6 +102,7 @@ const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
     '/payroll/dashboard', '/deductions', '/payroll/batches', '/payroll/batches/coverage', '/payroll/batches/create',
     '/financial-recalculation',
     '/finance/payroll/history', '/finance/overrides', '/payroll-report', '/finance/reports', '/finance/daily-payroll-report',
+    '/finance/ceo-reports', '/finance/daily-attendance-reports',
     '/finance/payment-voucher',
     '/finance/payment-voucher',
     '/finance/payment-voucher',
@@ -116,6 +117,7 @@ const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
     '/attendance/log', '/attendance/reports',
     '/payroll/dashboard', '/payroll/batches', '/payroll/batches/coverage',
     '/finance/payroll/history', '/finance/overrides', '/payroll-report', '/finance/reports', '/finance/daily-payroll-report',
+    '/finance/ceo-reports', '/finance/daily-attendance-reports',
     '/finance/payment-voucher',
     '/finance/payment-voucher',
     '/finance/payment-voucher',
@@ -128,6 +130,7 @@ const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
   auditor: [
     '/payroll/dashboard', '/payroll/batches', '/payroll/batches/coverage',
     '/finance/payroll/history', '/payroll-report', '/finance/reports', '/finance/daily-payroll-report',
+    '/finance/ceo-reports', '/finance/daily-attendance-reports',
     '/attendance/log', '/attendance/reports',
     '/audit-log',
     '/profile',
@@ -136,6 +139,7 @@ const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
   finance_manager: [
     '/payroll/dashboard', '/payroll/batches', '/payroll/batches/coverage',
     '/finance/payroll/history', '/payroll-report', '/finance/reports', '/finance/daily-payroll-report',
+    '/finance/ceo-reports', '/finance/daily-attendance-reports',
     '/finance/cost-center-report',
     '/attendance/log', '/attendance/reports',
     '/audit-log',

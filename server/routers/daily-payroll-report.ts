@@ -19,9 +19,12 @@ import ExcelJS from "exceljs";
 import path from "path";
 import { fileURLToPath } from "url";
 
+const reportAccess = requireRole('admin_affairs', 'accountant', 'auditor', 'finance_manager');
+
   // Daily Payroll Report
 export const dailyPayrollReportRouter = router({
     getReport: protectedProcedure
+      .use(reportAccess)
       .input(z.object({
         periodStart: z.string(),
         periodEnd: z.string(),
@@ -39,6 +42,7 @@ export const dailyPayrollReportRouter = router({
       }),
 
     getGroups: protectedProcedure
+      .use(reportAccess)
       .input(z.object({
         costCenterId: z.number().optional(),
       }))
@@ -48,6 +52,7 @@ export const dailyPayrollReportRouter = router({
       }),
 
     exportPdf: protectedProcedure
+      .use(reportAccess)
       .input(z.object({
         periodStart: z.string(),
         periodEnd: z.string(),

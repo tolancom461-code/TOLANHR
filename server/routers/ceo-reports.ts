@@ -1,12 +1,14 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { protectedProcedure, requireRole, router } from "../_core/trpc";
 import { CEO_REPORT_TITLE } from "../../shared/ceoReportsAggregation";
 
 const shiftCategorySchema = z.enum(["morning", "evening"]);
 const costCenterIdsSchema = z.array(z.number().int().positive()).min(1);
+const reportAccess = requireRole("admin_affairs", "accountant", "auditor", "finance_manager");
 
 export const ceoReportsRouter = router({
   getReport: protectedProcedure
+    .use(reportAccess)
     .input(
       z.object({
         periodStart: z.string(),
@@ -26,6 +28,7 @@ export const ceoReportsRouter = router({
     }),
 
   getGroups: protectedProcedure
+    .use(reportAccess)
     .input(
       z.object({
         costCenterIds: costCenterIdsSchema,
@@ -37,6 +40,7 @@ export const ceoReportsRouter = router({
     }),
 
   exportPdf: protectedProcedure
+    .use(reportAccess)
     .input(
       z.object({
         periodStart: z.string(),

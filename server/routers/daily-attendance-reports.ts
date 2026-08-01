@@ -1,8 +1,11 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { protectedProcedure, requireRole, router } from "../_core/trpc";
+
+const reportAccess = requireRole("admin_affairs", "accountant", "auditor", "finance_manager");
 
 export const dailyAttendanceReportsRouter = router({
   getReport: protectedProcedure
+    .use(reportAccess)
     .input(z.object({
       periodStart: z.string(),
       periodEnd: z.string(),
@@ -22,6 +25,7 @@ export const dailyAttendanceReportsRouter = router({
     }),
 
   getGroups: protectedProcedure
+    .use(reportAccess)
     .input(z.object({
       costCenterId: z.number().optional(),
     }))
@@ -31,6 +35,7 @@ export const dailyAttendanceReportsRouter = router({
     }),
 
   exportPdf: protectedProcedure
+    .use(reportAccess)
     .input(z.object({
       periodStart: z.string(),
       periodEnd: z.string(),

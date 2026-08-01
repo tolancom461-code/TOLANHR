@@ -82,6 +82,13 @@ const LazyGroupCoverageReport = lazy(() => import("./pages/payroll/GroupCoverage
 const LazyPayrollBatchCreateSimple = lazy(() => import("./pages/payroll/PayrollBatchCreateSimple"));
 const LazyPayrollBatchDetails = lazy(() => import("./pages/payroll/PayrollBatchDetails"));
 
+const FINANCIAL_REPORT_ROLES = [
+  "admin_affairs",
+  "accountant",
+  "auditor",
+  "finance_manager",
+] as const;
+
 function Router() {
   return (
     <Switch>
@@ -270,17 +277,17 @@ function Router() {
         </ProtectedRoute>
       </Route>
       <Route path="/finance/daily-payroll-report">
-        <ProtectedRoute>
+        <ProtectedRoute allowedRoles={FINANCIAL_REPORT_ROLES}>
           <DailyPayrollReport />
         </ProtectedRoute>
       </Route>
       <Route path="/finance/ceo-reports">
-        <ProtectedRoute>
+        <ProtectedRoute allowedRoles={FINANCIAL_REPORT_ROLES}>
           <CeoReports />
         </ProtectedRoute>
       </Route>
       <Route path="/finance/daily-attendance-reports">
-        <ProtectedRoute>
+        <ProtectedRoute allowedRoles={FINANCIAL_REPORT_ROLES}>
           <DailyAttendanceReports />
         </ProtectedRoute>
       </Route>
