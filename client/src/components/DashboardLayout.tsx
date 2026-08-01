@@ -205,7 +205,8 @@ function getMenuSections(t: any) {
       { icon: FileText, label: t.navItems.payrollHistory, path: "/finance/payroll/history" },
       { icon: Wallet, label: t.navItems.payOverrides, path: "/finance/overrides" },
       { icon: FileCheck, label: t.navItems.dailyPayrollReport, path: "/finance/daily-payroll-report" },
-      { icon: TrendingUp, label: t.navItems.financialReports, path: "/finance/reports" },
+      { icon: FileCheck, label: t.navItems.ceoReports, path: "/finance/ceo-reports" },
+      { icon: FileCheck, label: t.navItems.dailyAttendanceReports, path: "/finance/daily-attendance-reports" },
       { icon: FileText, label: t.navItems.paymentVoucher, path: "/finance/payment-voucher" },
     ]
   },

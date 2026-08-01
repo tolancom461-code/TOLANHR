@@ -1,24 +1,71 @@
-import { useState, useRef } from 'react';
-import { trpc } from '@/lib/trpc';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { FileText, FileCheck } from 'lucide-react';
+import { useState, useRef } from "react";
+import { trpc } from "@/lib/trpc";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { FileText, FileCheck } from "lucide-react";
 
 // تحويل الأرقام إلى كلمات عربية
 function numberToArabicWords(num: number): string {
-  if (num === 0) return 'صفر ريال سعودي';
+  if (num === 0) return "صفر ريال سعودي";
 
-  const ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة',
-    'عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر',
-    'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
-  const tens = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
-  const hundreds = ['', 'مائة', 'مئتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
+  const ones = [
+    "",
+    "واحد",
+    "اثنان",
+    "ثلاثة",
+    "أربعة",
+    "خمسة",
+    "ستة",
+    "سبعة",
+    "ثمانية",
+    "تسعة",
+    "عشرة",
+    "أحد عشر",
+    "اثنا عشر",
+    "ثلاثة عشر",
+    "أربعة عشر",
+    "خمسة عشر",
+    "ستة عشر",
+    "سبعة عشر",
+    "ثمانية عشر",
+    "تسعة عشر",
+  ];
+  const tens = [
+    "",
+    "",
+    "عشرون",
+    "ثلاثون",
+    "أربعون",
+    "خمسون",
+    "ستون",
+    "سبعون",
+    "ثمانون",
+    "تسعون",
+  ];
+  const hundreds = [
+    "",
+    "مائة",
+    "مئتان",
+    "ثلاثمائة",
+    "أربعمائة",
+    "خمسمائة",
+    "ستمائة",
+    "سبعمائة",
+    "ثمانمائة",
+    "تسعمائة",
+  ];
 
   function convertBelow1000(n: number): string {
-    if (n === 0) return '';
+    if (n === 0) return "";
     if (n < 20) return ones[n];
     if (n < 100) {
       const ten = Math.floor(n / 10);
@@ -27,7 +74,9 @@ function numberToArabicWords(num: number): string {
     }
     const h = Math.floor(n / 100);
     const rest = n % 100;
-    return rest === 0 ? hundreds[h] : `${hundreds[h]} و${convertBelow1000(rest)}`;
+    return rest === 0
+      ? hundreds[h]
+      : `${hundreds[h]} و${convertBelow1000(rest)}`;
   }
 
   const intPart = Math.floor(num);
@@ -42,34 +91,44 @@ function numberToArabicWords(num: number): string {
   if (thousands > 0) chunks.push(`${convertBelow1000(thousands)} ألف`);
   if (remainder > 0) chunks.push(convertBelow1000(remainder));
 
-  let result = chunks.join(' و');
-  result += ' ريال سعودي';
+  let result = chunks.join(" و");
+  result += " ريال سعودي";
   if (decPart > 0) {
     result += ` و${convertBelow1000(decPart)} هللة`;
   }
-  result += ' فقط لا غير';
+  result += " فقط لا غير";
   return result.trim();
 }
 
 function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('ar-SA', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount) + ' ر.س';
+  return (
+    new Intl.NumberFormat("ar-SA", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount) + " ر.س"
+  );
 }
 
 export default function DailyPayrollReport() {
   const today = new Date();
   const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-  const [startDate, setStartDate] = useState(firstDay.toLocaleDateString('en-CA'));
-  const [endDate, setEndDate] = useState(today.toLocaleDateString('en-CA'));
-  const [selectedCostCenterId, setSelectedCostCenterId] = useState<number | undefined>();
+  const [startDate, setStartDate] = useState(
+    firstDay.toLocaleDateString("en-CA")
+  );
+  const [endDate, setEndDate] = useState(today.toLocaleDateString("en-CA"));
+  const [selectedCostCenterId, setSelectedCostCenterId] = useState<
+    number | undefined
+  >();
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
   const [queryEnabled, setQueryEnabled] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
-  const issueTime = today.toLocaleTimeString('ar-SA');
-  const issueDate = today.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+  const issueTime = today.toLocaleTimeString("ar-SA");
+  const issueDate = today.toLocaleDateString("ar-SA", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   const { data: costCenters } = trpc.costCenters.list.useQuery();
   const { data: groups } = trpc.dailyPayrollReport.getGroups.useQuery(
@@ -77,15 +136,16 @@ export default function DailyPayrollReport() {
     { enabled: true }
   );
 
-  const { data: reportData, isLoading } = trpc.dailyPayrollReport.getReport.useQuery(
-    {
-      periodStart: startDate,
-      periodEnd: endDate,
-      costCenterId: selectedCostCenterId,
-      groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined,
-    },
-    { enabled: queryEnabled }
-  );
+  const { data: reportData, isLoading } =
+    trpc.dailyPayrollReport.getReport.useQuery(
+      {
+        periodStart: startDate,
+        periodEnd: endDate,
+        costCenterId: selectedCostCenterId,
+        groupIds: selectedGroupIds.length > 0 ? selectedGroupIds : undefined,
+      },
+      { enabled: queryEnabled }
+    );
 
   const handleSelectAllGroups = () => {
     if (groups) setSelectedGroupIds(groups.map(g => g.id));
@@ -102,14 +162,15 @@ export default function DailyPayrollReport() {
   };
 
   const handleCostCenterChange = (val: string) => {
-    const id = val === 'all' ? undefined : parseInt(val);
+    const id = val === "all" ? undefined : parseInt(val);
     setSelectedCostCenterId(id);
     setSelectedGroupIds([]);
     setQueryEnabled(false);
   };
 
   const totalSalary = reportData?.reduce((s, r) => s + r.totalSalary, 0) || 0;
-  const totalDeductions = reportData?.reduce((s, r) => s + r.totalDeductions, 0) || 0;
+  const totalDeductions =
+    reportData?.reduce((s, r) => s + r.totalDeductions, 0) || 0;
   const totalBonuses = reportData?.reduce((s, r) => s + r.totalBonuses, 0) || 0;
   const totalNet = reportData?.reduce((s, r) => s + r.totalNet, 0) || 0;
 
@@ -127,10 +188,13 @@ export default function DailyPayrollReport() {
       });
       const byteChars = atob(result.data);
       const byteNumbers = new Array(byteChars.length);
-      for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
-      const blob = new Blob([new Uint8Array(byteNumbers)], { type: 'application/pdf' });
+      for (let i = 0; i < byteChars.length; i++)
+        byteNumbers[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([new Uint8Array(byteNumbers)], {
+        type: "application/pdf",
+      });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = result.filename;
       document.body.appendChild(link);
@@ -144,7 +208,6 @@ export default function DailyPayrollReport() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-gray-50 p-4">
-
       {/* قسم الفلاتر - يُخفى عند الطباعة */}
       <div className="no-print bg-white rounded-xl shadow p-6 mb-6 border border-blue-100">
         <h2 className="text-lg font-bold text-blue-800 mb-4 flex items-center gap-2">
@@ -155,11 +218,19 @@ export default function DailyPayrollReport() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div className="space-y-1">
             <Label>من تاريخ</Label>
-            <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+            <Input
+              type="date"
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+            />
           </div>
           <div className="space-y-1">
             <Label>إلى تاريخ</Label>
-            <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+            <Input
+              type="date"
+              value={endDate}
+              onChange={e => setEndDate(e.target.value)}
+            />
           </div>
           <div className="space-y-1">
             <Label>مركز التكلفة</Label>
@@ -170,7 +241,9 @@ export default function DailyPayrollReport() {
               <SelectContent>
                 <SelectItem value="all">جميع مراكز التكلفة</SelectItem>
                 {costCenters?.map(cc => (
-                  <SelectItem key={cc.id} value={cc.id.toString()}>{cc.name}</SelectItem>
+                  <SelectItem key={cc.id} value={cc.id.toString()}>
+                    {cc.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -189,13 +262,28 @@ export default function DailyPayrollReport() {
         {groups && groups.length > 0 && (
           <div className="border border-blue-100 rounded-lg p-4 bg-blue-50">
             <div className="flex items-center gap-3 mb-3">
-              <span className="font-semibold text-blue-800 text-sm">تصفية المجموعات:</span>
-              <button onClick={handleSelectAllGroups} className="text-xs text-blue-600 hover:underline">تحديد الكل</button>
-              <button onClick={handleDeselectAllGroups} className="text-xs text-red-500 hover:underline">إلغاء الكل</button>
+              <span className="font-semibold text-blue-800 text-sm">
+                تصفية المجموعات:
+              </span>
+              <button
+                onClick={handleSelectAllGroups}
+                className="text-xs text-blue-600 hover:underline"
+              >
+                تحديد الكل
+              </button>
+              <button
+                onClick={handleDeselectAllGroups}
+                className="text-xs text-red-500 hover:underline"
+              >
+                إلغاء الكل
+              </button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
               {groups.map(g => (
-                <label key={g.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                <label
+                  key={g.id}
+                  className="flex items-center gap-2 text-sm cursor-pointer"
+                >
                   <Checkbox
                     checked={selectedGroupIds.includes(g.id)}
                     onCheckedChange={() => toggleGroup(g.id)}
@@ -217,7 +305,7 @@ export default function DailyPayrollReport() {
             className="bg-blue-700 hover:bg-blue-800 text-white flex items-center gap-2"
           >
             <FileCheck className="h-4 w-4" />
-            {isExportingPdf ? 'جاري إنشاء الملف...' : 'تنزيل PDF رسمي'}
+            {isExportingPdf ? "جاري إنشاء الملف..." : "تنزيل PDF رسمي"}
           </Button>
         </div>
       )}
@@ -229,21 +317,18 @@ export default function DailyPayrollReport() {
           id="print-report"
           className="bg-white shadow-lg rounded-xl print-area"
         >
-
           {/* ===== الهيدر ===== */}
-<div
-  className={`report-header text-white p-6 rounded-t-xl ${
-    costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
-      ? 'bg-[#B92D38]'
-      : 'bg-blue-800'
-  }`}
->
-
+          <div
+            className={`report-header text-white p-6 rounded-t-xl ${
+              costCenters?.find(cc => cc.id === selectedCostCenterId)?.code ===
+              "CC06"
+                ? "bg-[#B92D38]"
+                : "bg-blue-800"
+            }`}
+          >
             <div className="relative flex justify-center items-start">
-
               {/* يمين: بيانات التقرير */}
               <div className="absolute right-0 text-sm space-y-1 bg-white/10 backdrop-blur-sm rounded-lg p-3 min-w-[220px]">
-
                 <div className="flex justify-between gap-4">
                   <span className="opacity-80">تاريخ الإصدار:</span>
                   <span className="font-semibold">{issueDate}</span>
@@ -253,16 +338,16 @@ export default function DailyPayrollReport() {
                   <span className="opacity-80">وقت الإصدار:</span>
                   <span className="font-semibold">{issueTime}</span>
                 </div>
-
               </div>
 
               {/* منتصف: العنوان */}
               <div className="text-center">
-
                 <h1 className="text-2xl font-black mb-1">
-                  حديقة الوطن - {selectedCostCenterId
-                    ? costCenters?.find(cc => cc.id === selectedCostCenterId)?.name || 'شركة تولان الدولية'
-                    : 'شركة تولان الدولية'}
+                  حديقة الوطن -{" "}
+                  {selectedCostCenterId
+                    ? costCenters?.find(cc => cc.id === selectedCostCenterId)
+                        ?.name || "شركة تولان الدولية"
+                    : "شركة تولان الدولية"}
                 </h1>
 
                 <h2 className="text-xl font-bold opacity-90">
@@ -275,200 +360,196 @@ export default function DailyPayrollReport() {
                   إلى:
                   <span className="font-bold"> {endDate} </span>
                 </div>
-
               </div>
-
             </div>
-
           </div>
 
           {/* ===== المحتوى ===== */}
           <div className="p-8">
             {isLoading ? (
-              <div className="text-center py-20 text-gray-400">جاري تحميل البيانات...</div>
+              <div className="text-center py-20 text-gray-400">
+                جاري تحميل البيانات...
+              </div>
             ) : reportData && reportData.length > 0 ? (
               <>
                 <table className="w-full border-collapse border border-gray-200 text-sm mb-8 table-fixed">
                   <colgroup>
-                    <col style={{ width: '5%' }} />
-                    <col style={{ width: '27%' }} />
-                    <col style={{ width: '12%' }} />
-                    <col style={{ width: '14%' }} />
-                    <col style={{ width: '14%' }} />
-                    <col style={{ width: '14%' }} />
-                    <col style={{ width: '14%' }} />
+                    <col style={{ width: "5%" }} />
+                    <col style={{ width: "27%" }} />
+                    <col style={{ width: "12%" }} />
+                    <col style={{ width: "14%" }} />
+                    <col style={{ width: "14%" }} />
+                    <col style={{ width: "14%" }} />
+                    <col style={{ width: "14%" }} />
                   </colgroup>
                   <thead>
                     <tr className="bg-gray-100 text-blue-900">
-                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center w-12">#</th>
-                      <th className="border border-gray-300 px-3 py-[0.6rem] text-right">المجموعة</th>
-                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center">عدد العمال</th>
-                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center">المبلغ</th>
-                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center">الخصومات</th>
-                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center">الإضافي</th>
-                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center bg-blue-50">صافي المبلغ</th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center w-12">
+                        #
+                      </th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-right">
+                        المجموعة
+                      </th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center">
+                        عدد العمال
+                      </th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center">
+                        المبلغ
+                      </th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center">
+                        الخصومات
+                      </th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center">
+                        الإضافي
+                      </th>
+                      <th className="border border-gray-300 px-3 py-[0.6rem] text-center bg-blue-50">
+                        صافي المبلغ
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {reportData.map((row) => (
-                      <tr key={row.rowIndex} className="hover:bg-gray-50 transition-colors">
-                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center font-mono">{row.rowIndex}</td>
-                        <td className="border border-gray-300 px-3 py-[0.6rem] font-bold">{row.groupName}</td>
-                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center">{row.workerCount}</td>
-                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center">{formatCurrency(row.totalSalary)}</td>
-                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center text-red-600">{formatCurrency(row.totalDeductions)}</td>
-                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center text-green-600">{formatCurrency(row.totalBonuses)}</td>
-                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center font-black bg-blue-50/50">{formatCurrency(row.totalNet)}</td>
+                    {reportData.map(row => (
+                      <tr
+                        key={row.rowIndex}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center font-mono">
+                          {row.rowIndex}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] font-bold">
+                          {row.groupName}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center">
+                          {row.workerCount}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center">
+                          {formatCurrency(row.totalSalary)}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center text-red-600">
+                          {formatCurrency(row.totalDeductions)}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center text-green-600">
+                          {formatCurrency(row.totalBonuses)}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-[0.6rem] text-center font-black bg-blue-50/50">
+                          {formatCurrency(row.totalNet)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
+                    <tr
+                      className={`text-white font-bold ${
+                        costCenters?.find(cc => cc.id === selectedCostCenterId)
+                          ?.code === "CC06"
+                          ? "bg-[#B92D38]"
+                          : "bg-blue-900"
+                      }`}
+                    >
+                      <td
+                        colSpan={2}
+                        className={`px-4 py-[0.8rem] text-center text-lg border ${
+                          costCenters?.find(
+                            cc => cc.id === selectedCostCenterId
+                          )?.code === "CC06"
+                            ? "border-[#B92D38]"
+                            : "border-blue-900"
+                        }`}
+                      >
+                        الإجمالي
+                      </td>
 
-  <tr
-    className={`text-white font-bold ${
-      costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
-        ? 'bg-[#B92D38]'
-        : 'bg-blue-900'
-    }`}
-  >
+                      <td
+                        className={`px-4 py-[0.8rem] text-center text-lg border ${
+                          costCenters?.find(
+                            cc => cc.id === selectedCostCenterId
+                          )?.code === "CC06"
+                            ? "border-[#B92D38]"
+                            : "border-blue-900"
+                        }`}
+                      >
+                        {reportData.reduce((s, r) => s + r.workerCount, 0)}
+                      </td>
 
-    <td
-      colSpan={2}
-      className={`px-4 py-[0.8rem] text-center text-lg border ${
-        costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
-          ? 'border-[#B92D38]'
-          : 'border-blue-900'
-      }`}
-    >
-      الإجمالي
-    </td>
+                      <td
+                        className={`px-4 py-[0.8rem] text-center text-lg border ${
+                          costCenters?.find(
+                            cc => cc.id === selectedCostCenterId
+                          )?.code === "CC06"
+                            ? "border-[#B92D38]"
+                            : "border-blue-900"
+                        }`}
+                      >
+                        {formatCurrency(totalSalary)}
+                      </td>
 
-    <td
-      className={`px-4 py-[0.8rem] text-center text-lg border ${
-        costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
-          ? 'border-[#B92D38]'
-          : 'border-blue-900'
-      }`}
-    >
-      {reportData.reduce((s, r) => s + r.workerCount, 0)}
-    </td>
+                      <td
+                        className={`px-4 py-[0.8rem] text-center text-lg border ${
+                          costCenters?.find(
+                            cc => cc.id === selectedCostCenterId
+                          )?.code === "CC06"
+                            ? "border-[#B92D38]"
+                            : "border-blue-900"
+                        }`}
+                      >
+                        {formatCurrency(totalDeductions)}
+                      </td>
 
-    <td
-      className={`px-4 py-[0.8rem] text-center text-lg border ${
-        costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
-          ? 'border-[#B92D38]'
-          : 'border-blue-900'
-      }`}
-    >
-      {formatCurrency(totalSalary)}
-    </td>
+                      <td
+                        className={`px-4 py-[0.8rem] text-center text-lg border ${
+                          costCenters?.find(
+                            cc => cc.id === selectedCostCenterId
+                          )?.code === "CC06"
+                            ? "border-[#B92D38]"
+                            : "border-blue-900"
+                        }`}
+                      >
+                        {formatCurrency(totalBonuses)}
+                      </td>
 
-    <td
-      className={`px-4 py-[0.8rem] text-center text-lg border ${
-        costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
-          ? 'border-[#B92D38]'
-          : 'border-blue-900'
-      }`}
-    >
-      {formatCurrency(totalDeductions)}
-    </td>
-
-    <td
-      className={`px-4 py-[0.8rem] text-center text-lg border ${
-        costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
-          ? 'border-[#B92D38]'
-          : 'border-blue-900'
-      }`}
-    >
-      {formatCurrency(totalBonuses)}
-    </td>
-
-    <td
-      className={`px-4 py-[0.8rem] text-center text-xl border ${
-        costCenters?.find(cc => cc.id === selectedCostCenterId)?.code === 'CC06'
-          ? 'bg-[#A32631] border-[#A32631]'
-          : 'bg-blue-800 border-blue-900'
-      }`}
-    >
-      {formatCurrency(totalNet)}
-    </td>
-
-  </tr>
-</tfoot>
+                      <td
+                        className={`px-4 py-[0.8rem] text-center text-xl border ${
+                          costCenters?.find(
+                            cc => cc.id === selectedCostCenterId
+                          )?.code === "CC06"
+                            ? "bg-[#A32631] border-[#A32631]"
+                            : "bg-blue-800 border-blue-900"
+                        }`}
+                      >
+                        {formatCurrency(totalNet)}
+                      </td>
+                    </tr>
+                  </tfoot>
                 </table>
 
                 {/* التفقيط */}
                 <div className="bg-blue-50 border-r-4 border-blue-800 p-4 mb-6">
-                  <span className="text-blue-800 font-bold ml-2">المبلغ كتابة:</span>
-                  <span className="text-lg font-black">{numberToArabicWords(totalNet)}</span>
+                  <span className="text-blue-800 font-bold ml-2">
+                    المبلغ كتابة:
+                  </span>
+                  <span className="text-lg font-black">
+                    {numberToArabicWords(totalNet)}
+                  </span>
                 </div>
 
-{/* ===== التوقيعات ===== */}
-<div className="grid grid-cols-6 gap-3 mt-6 text-center">
-
-  <div className="flex flex-col h-full justify-between">
-    <p className="font-bold text-sm">
-      إعداد
-    </p>
-    <div className="h-10 border-b border-gray-400"></div>
-  </div>
-
-  <div className="flex flex-col h-full justify-between">
-    <p className="font-bold text-sm">
-      مراجعة أولى
-    </p>
-    <div className="h-10 border-b border-gray-400"></div>
-  </div>
-
-  <div className="flex flex-col h-full justify-between">
-    <p className="font-bold text-sm">
-      المراجع المالي
-    </p>
-    <div className="h-10 border-b border-gray-400"></div>
-  </div>
-
-  <div className="flex flex-col h-full justify-between">
-    <p className="font-bold text-sm">
-      رئيس الحسابات
-    </p>
-    <div className="h-10 border-b border-gray-400"></div>
-  </div>
-
-  <div className="flex flex-col h-full justify-between">
-    <div>
-      <p className="font-bold text-sm">
-        تدقيق ومراجعة
-      </p>
-      <p className="text-xs mt-1 whitespace-nowrap">
-        م. سعد الزكري
-      </p>
-    </div>
-    <div className="h-10 border-b border-gray-400"></div>
-  </div>
-
-  <div className="flex flex-col h-full justify-between">
-    <div>
-      <p className="font-extrabold text-sm">
-        الرئيس التنفيذي
-      </p>
-      <p className="text-xs font-extrabold mt-1 whitespace-nowrap">
-        م. زكري بن عبدالله الزكري
-      </p>
-    </div>
-    <div className="h-10 border-b border-gray-400"></div>
-  </div>
-
-</div>
+                {/* ===== التوقيعات ===== */}
+                <div className="grid grid-cols-6 gap-3 mt-6 text-center">
+                  <div className="flex flex-col h-full justify-between">
+                    <p className="font-bold text-sm">إعداد</p>
+                    <div className="h-10 border-b border-gray-400"></div>
+                  </div>
+                </div>
               </>
             ) : (
               <div className="text-center py-16 text-gray-400">
                 <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
                 <p>لا توجد بيانات للفترة المحددة</p>
-                <p className="text-sm mt-1">تأكد من وجود دفعات رواتب معتمدة في هذه الفترة</p>
+                <p className="text-sm mt-1">
+                  تأكد من وجود دفعات رواتب معتمدة في هذه الفترة
+                </p>
               </div>
             )}
           </div>
-
         </div>
       )}
 

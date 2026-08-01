@@ -51,8 +51,8 @@ describe('PayrollBatchHistory - Requirements Verification', () => {
   });
 
   describe('Details Dialog Structure', () => {
-    it('should have signature column as the last column in details table', () => {
-      // The details table headers should include "توقيع المستلم" as last column
+    it('should have notes column as the last column in details table', () => {
+      // The details table headers should include "ملاحظات" as last column
       const tableHeaders = [
         'العامل',
         'أيام العمل',
@@ -60,18 +60,18 @@ describe('PayrollBatchHistory - Requirements Verification', () => {
         'الخصومات',
         'المكافآت',
         'الصافي',
-        'توقيع المستلم',
+        'ملاحظات',
       ];
       
-      expect(tableHeaders[tableHeaders.length - 1]).toBe('توقيع المستلم');
-      expect(tableHeaders).toContain('توقيع المستلم');
+      expect(tableHeaders[tableHeaders.length - 1]).toBe('ملاحظات');
+      expect(tableHeaders).toContain('ملاحظات');
     });
 
-    it('should include signature column in print output', () => {
-      const printHeaders = ['#', 'العامل', 'الرمز', 'أيام العمل', 'المستحق', 'الخصومات', 'المكافآت', 'الصافي', 'توقيع المستلم'];
+    it('should include notes column in print output', () => {
+      const printHeaders = ['#', 'العامل', 'الرمز', 'أيام العمل', 'المستحق', 'الخصومات', 'المكافآت', 'الصافي', 'ملاحظات'];
       
-      expect(printHeaders).toContain('توقيع المستلم');
-      expect(printHeaders[printHeaders.length - 1]).toBe('توقيع المستلم');
+      expect(printHeaders).toContain('ملاحظات');
+      expect(printHeaders[printHeaders.length - 1]).toBe('ملاحظات');
     });
   });
 

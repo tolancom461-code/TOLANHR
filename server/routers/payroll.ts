@@ -147,7 +147,6 @@ export const payrollRouter = router({
     listBatches: protectedProcedure
       .input(z.object({
         costCenterId: z.number().optional(),
-        groupId: z.number().optional(),
         startDate: z.string().optional(),
         endDate: z.string().optional(),
         page: z.number().default(1),
@@ -156,7 +155,6 @@ export const payrollRouter = router({
       .query(async ({ input }) => {
         const filters: any = {};
         if (input.costCenterId) filters.costCenterId = input.costCenterId;
-        if (input.groupId) filters.groupId = input.groupId;
         if (input.startDate) filters.startDate = new Date(input.startDate);
         if (input.endDate) filters.endDate = new Date(input.endDate);
         
@@ -178,9 +176,18 @@ export const payrollRouter = router({
     
     // List batches by status
     listBatchesByStatus: protectedProcedure
-      .input(z.object({ status: z.string() }))
+      .input(z.object({
+        status: z.string(),
+        costCenterId: z.number().optional(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+      }))
       .query(async ({ input }) => {
-        return await db.getBatchesByStatus(input.status);
+        const filters: any = {};
+        if (input.costCenterId) filters.costCenterId = input.costCenterId;
+        if (input.startDate) filters.startDate = new Date(input.startDate);
+        if (input.endDate) filters.endDate = new Date(input.endDate);
+        return await db.getBatchesByStatus(input.status, filters);
       }),
 
     // تقرير تغطية المجموعات: المجموعات التي فاتها إنشاء دفعة رواتب حسب الحضور الفعلي

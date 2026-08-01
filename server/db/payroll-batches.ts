@@ -1140,7 +1140,6 @@ export async function getBatchesByStatus(
   status?: string,
   filters?: {
     costCenterId?: number;
-    groupId?: number;
     startDate?: Date;
     endDate?: Date;
   }
@@ -1186,36 +1185,9 @@ let batches = await query;
     batches = batches.filter(b => b.status === status);
   }
 
-  // Filter by cost center or group
-  if (filters?.costCenterId || filters?.groupId) {
-    // Get batch IDs that match the filters
-    const itemsQuery = db
-      .select({ batchId: payrollBatchItems.batchId })
-      .from(payrollBatchItems)
-      .innerJoin(workers, eq(payrollBatchItems.workerId, workers.id))
-      .innerJoin(groups, eq(workers.groupId, groups.id));
-
-    let items = await itemsQuery;
-
-    if (filters.groupId) {
-      items = items.filter(item => {
-        // We need to get the group for each worker
-        return true; // Will be filtered below
-      });
-    }
-
-    if (filters.costCenterId) {
-      items = items.filter(item => {
-        // Will be filtered below
-        return true;
-      });
-    }
-
-    // Get unique batch IDs
-    const matchingBatchIds = new Set(items.map(item => item.batchId));
-
-    // Filter batches by matching IDs
-    batches = batches.filter(b => matchingBatchIds.has(b.id));
+  // Filter by the cost center stored directly on the payroll batch.
+  if (filters?.costCenterId) {
+    batches = batches.filter(b => b.costCenterId === filters.costCenterId);
   }
 
   // Filter by date range
@@ -1294,7 +1266,6 @@ export async function deleteBatch(batchId: number, forceDelete: boolean = false)
 
   return { success: true };
 }
-
 
 
 

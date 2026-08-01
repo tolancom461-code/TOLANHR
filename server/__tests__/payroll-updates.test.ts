@@ -52,11 +52,11 @@ describe('Report Footer - Print Time Format', () => {
   });
 });
 
-describe('Batch Details - Signature Column', () => {
-  it('should have signature column as last column in print template', () => {
+describe('Batch Details - Notes Column', () => {
+  it('should have notes column as last column in print template', () => {
     // Verify the column header exists in the expected order
-    const headers = ['#', 'العامل', 'الرمز', 'أيام العمل', 'المستحق', 'الخصومات', 'المكافآت', 'الصافي', 'توقيع الاستلام'];
-    expect(headers[headers.length - 1]).toBe('توقيع الاستلام');
+    const headers = ['#', 'العامل', 'الرمز', 'أيام العمل', 'المستحق', 'الخصومات', 'المكافآت', 'الصافي', 'ملاحظات'];
+    expect(headers[headers.length - 1]).toBe('ملاحظات');
     expect(headers.length).toBe(9);
   });
 });

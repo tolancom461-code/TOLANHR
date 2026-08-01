@@ -51,6 +51,8 @@ import { backupRouter } from './backup';
 import { migrationRouter } from './migration';
 import { financialRecalculationRouter } from './financial-recalculation';
 import { dailyPayrollReportRouter } from './daily-payroll-report';
+import { ceoReportsRouter } from './ceo-reports';
+import { dailyAttendanceReportsRouter } from './daily-attendance-reports';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -197,6 +199,8 @@ export const appRouter = router({
 
   // Daily Payroll Report
   dailyPayrollReport: dailyPayrollReportRouter,
+  ceoReports: ceoReportsRouter,
+  dailyAttendanceReports: dailyAttendanceReportsRouter,
 });
 
 export type AppRouter = typeof appRouter;

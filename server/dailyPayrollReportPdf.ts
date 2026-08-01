@@ -10,13 +10,50 @@ function numberToArabicWords(num: number): string {
   if (num === 0) return "صفر ريال سعودي";
 
   const ones = [
-    "", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة",
-    "عشرة", "أحد عشر", "اثنا عشر", "ثلاثة عشر", "أربعة عشر", "خمسة عشر", "ستة عشر",
-    "سبعة عشر", "ثمانية عشر", "تسعة عشر",
+    "",
+    "واحد",
+    "اثنان",
+    "ثلاثة",
+    "أربعة",
+    "خمسة",
+    "ستة",
+    "سبعة",
+    "ثمانية",
+    "تسعة",
+    "عشرة",
+    "أحد عشر",
+    "اثنا عشر",
+    "ثلاثة عشر",
+    "أربعة عشر",
+    "خمسة عشر",
+    "ستة عشر",
+    "سبعة عشر",
+    "ثمانية عشر",
+    "تسعة عشر",
   ];
-  const tens = ["", "", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون"];
+  const tens = [
+    "",
+    "",
+    "عشرون",
+    "ثلاثون",
+    "أربعون",
+    "خمسون",
+    "ستون",
+    "سبعون",
+    "ثمانون",
+    "تسعون",
+  ];
   const hundreds = [
-    "", "مائة", "مئتان", "ثلاثمائة", "أربعمائة", "خمسمائة", "ستمائة", "سبعمائة", "ثمانمائة", "تسعمائة",
+    "",
+    "مائة",
+    "مئتان",
+    "ثلاثمائة",
+    "أربعمائة",
+    "خمسمائة",
+    "ستمائة",
+    "سبعمائة",
+    "ثمانمائة",
+    "تسعمائة",
   ];
 
   function convertBelow1000(n: number): string {
@@ -29,7 +66,9 @@ function numberToArabicWords(num: number): string {
     }
     const h = Math.floor(n / 100);
     const rest = n % 100;
-    return rest === 0 ? hundreds[h] : `${hundreds[h]} و${convertBelow1000(rest)}`;
+    return rest === 0
+      ? hundreds[h]
+      : `${hundreds[h]} و${convertBelow1000(rest)}`;
   }
 
   const intPart = Math.floor(num);
@@ -90,9 +129,19 @@ interface BuildHtmlParams {
   periodEnd: string;
 }
 
-function buildReportHtml({ rows, companyName, isRed, periodStart, periodEnd }: BuildHtmlParams): string {
+function buildReportHtml({
+  rows,
+  companyName,
+  isRed,
+  periodStart,
+  periodEnd,
+}: BuildHtmlParams): string {
   const now = new Date();
-  const issueDate = now.toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" });
+  const issueDate = now.toLocaleDateString("ar-SA", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
   const issueTime = now.toLocaleTimeString("ar-SA");
 
   const totalSalary = rows.reduce((s, r) => s + r.totalSalary, 0);
@@ -106,7 +155,7 @@ function buildReportHtml({ rows, companyName, isRed, periodStart, periodEnd }: B
 
   const bodyRows = rows
     .map(
-      (row) => `
+      row => `
       <tr>
         <td class="c center mono">${row.rowIndex}</td>
         <td class="c bold">${escapeHtml(row.groupName)}</td>
@@ -207,8 +256,6 @@ function buildReportHtml({ rows, companyName, isRed, periodStart, periodEnd }: B
   .signatures { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-top: 15.12px; text-align: center; }
   .signatures .slot { padding-bottom: 9px; border-bottom: 1px solid #9ca3af; }
   .signatures .role { font-weight: 700; font-size: 13px; margin: 0; }
-  .signatures .role.exec { font-weight: 900; }
-  .signatures .name { font-size: 11px; margin-top: 4px; white-space: nowrap; }
   @page { size: A4 landscape; margin: 1cm; }
 </style>
 </head>
@@ -259,11 +306,6 @@ function buildReportHtml({ rows, companyName, isRed, periodStart, periodEnd }: B
     </div>
     <div class="signatures">
       <div class="slot"><p class="role">إعداد</p></div>
-      <div class="slot"><p class="role">مراجعة أولى</p></div>
-      <div class="slot"><p class="role">المراجع المالي</p></div>
-      <div class="slot"><p class="role">رئيس الحسابات</p></div>
-      <div class="slot"><p class="role">تدقيق ومراجعة</p><p class="name">م. سعد الزكري</p></div>
-      <div class="slot"><p class="role exec">الرئيس التنفيذي</p><p class="name">م. زكري بن عبدالله الزكري</p></div>
     </div>`
         : `<div style="text-align:center; padding: 60px 0; color:#9ca3af;">لا توجد بيانات للفترة المحددة</div>`
     }
@@ -283,7 +325,12 @@ export async function generateDailyPayrollReportPdf(input: {
   groupIds?: number[];
 }): Promise<Buffer> {
   const [rows, costCenters] = await Promise.all([
-    getDailyPayrollReport(input.periodStart, input.periodEnd, input.costCenterId, input.groupIds),
+    getDailyPayrollReport(
+      input.periodStart,
+      input.periodEnd,
+      input.costCenterId,
+      input.groupIds
+    ),
     db.getAllCostCenters(),
   ]);
 

@@ -31,29 +31,18 @@ export default function PayrollBatchList() {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     costCenterId: undefined as number | undefined,
-    groupId: undefined as number | undefined,
     startDate: "",
     endDate: "",
   });
   
   const utils = trpc.useUtils();
   
-  // Fetch cost centers and groups for filters
+  // Fetch cost centers for filtering
   const { data: costCenters, isLoading: loadingCostCenters } = trpc.costCenters.list.useQuery();
-  
-  // Get groups filtered by cost center
-  const { data: filteredGroups, isLoading: loadingGroups } = trpc.groups.listByCostCenter.useQuery(
-    { costCenterId: filters.costCenterId },
-    { enabled: true }
-  );
-  
-  // Also keep allGroups for backward compatibility
-  const allGroups = filteredGroups;
   
   // Build query params
   const queryParams: any = {};
   if (filters.costCenterId) queryParams.costCenterId = filters.costCenterId;
-  if (filters.groupId) queryParams.groupId = filters.groupId;
   if (filters.startDate) queryParams.startDate = filters.startDate;
   if (filters.endDate) queryParams.endDate = filters.endDate;
   
@@ -63,9 +52,9 @@ export default function PayrollBatchList() {
     limit: 100,
   });
   const allBatches = paginatedBatches?.data || [];
-  const { data: draftBatches } = trpc.payroll.listBatchesByStatus.useQuery({ status: "draft" });
-  const { data: pendingBatches } = trpc.payroll.listBatchesByStatus.useQuery({ status: "under_accountant_review" });
-  const { data: approvedBatches } = trpc.payroll.listBatchesByStatus.useQuery({ status: "approved" });
+  const { data: draftBatches } = trpc.payroll.listBatchesByStatus.useQuery({ status: "draft", ...queryParams });
+  const { data: pendingBatches } = trpc.payroll.listBatchesByStatus.useQuery({ status: "under_accountant_review", ...queryParams });
+  const { data: approvedBatches } = trpc.payroll.listBatchesByStatus.useQuery({ status: "approved", ...queryParams });
 
   const deleteMutation = trpc.payroll.deleteBatch.useMutation({
     onSuccess: () => {
@@ -213,10 +202,10 @@ export default function PayrollBatchList() {
             <CardTitle>فلاتر البحث</CardTitle>
           </CardHeader>
           <CardContent>
-            {loadingCostCenters || loadingGroups ? (
+            {loadingCostCenters ? (
               <FilterSkeleton />
             ) : (
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Cost Center Filter */}
               <div>
                 <Label>مركز التكلفة</Label>
@@ -229,7 +218,6 @@ export default function PayrollBatchList() {
                     setFilters({
                       ...filters,
                       costCenterId: value === "all" ? undefined : Number(value),
-                      groupId: undefined, // Reset group when cost center changes
                     });
                   }}
                 >
@@ -241,41 +229,6 @@ export default function PayrollBatchList() {
                     {costCenters && costCenters.length > 0 && costCenters.map((cc) => (
                       <SelectItem key={cc.id} value={cc.id.toString()}>
                         {cc.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                )}
-              </div>
-
-              {/* Group Filter */}
-              <div>
-                <Label>المجموعة</Label>
-                {loadingGroups ? (
-                  <SelectSkeleton />
-                ) : (
-                <Select
-                  value={filters.groupId?.toString() || "all"}
-                  onValueChange={(value) => {
-                    setFilters({
-                      ...filters,
-                      groupId: value === "all" ? undefined : Number(value),
-                    });
-                  }}
-                  disabled={!filters.costCenterId}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={
-                      filters.costCenterId
-                        ? "جميع المجموعات"
-                        : "اختر مركز التكلفة أولاً"
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">جميع المجموعات</SelectItem>
-                    {filteredGroups && filteredGroups.length > 0 && filteredGroups.map((group) => (
-                      <SelectItem key={group.id} value={group.id.toString()}>
-                        {group.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -312,7 +265,6 @@ export default function PayrollBatchList() {
                 onClick={() => {
                   setFilters({
                     costCenterId: undefined,
-                    groupId: undefined,
                     startDate: "",
                     endDate: "",
                   });

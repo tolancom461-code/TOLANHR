@@ -43,6 +43,8 @@ import ExecutiveFinanceDashboard from "./pages/ExecutiveFinanceDashboard";
 import FinancialReports from "./pages/reports/FinancialReports";
 import CostCenterReport from "./pages/reports/CostCenterReport";
 import DailyPayrollReport from "./pages/reports/DailyPayrollReport";
+import CeoReports from "./pages/reports/CeoReports";
+import DailyAttendanceReports from "./pages/reports/DailyAttendanceReports";
 import PayrollReport from "./pages/PayrollReport";
 import LocalLogin from "./pages/LocalLogin";
 import OperationalFlagsSimple from "./pages/OperationalFlagsSimple";
@@ -270,6 +272,16 @@ function Router() {
       <Route path="/finance/daily-payroll-report">
         <ProtectedRoute>
           <DailyPayrollReport />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/finance/ceo-reports">
+        <ProtectedRoute>
+          <CeoReports />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/finance/daily-attendance-reports">
+        <ProtectedRoute>
+          <DailyAttendanceReports />
         </ProtectedRoute>
       </Route>
       <Route path="/finance/payment-voucher">

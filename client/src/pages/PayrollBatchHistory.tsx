@@ -183,7 +183,7 @@ export default function PayrollBatchHistory() {
             <td style="color:red">${parseFloat(item.totalDeductions?.toString() || '0').toFixed(2)}</td>
             <td style="color:green">${parseFloat(item.totalBonuses?.toString() || '0').toFixed(2)}</td>
             <td style="font-weight:bold">${parseFloat(item.netAmount?.toString() || '0').toFixed(2)}</td>
-            <td class="signature-col"></td>
+            <td class="notes-col"></td>
           </tr>
         `;
       }).join('');
@@ -224,7 +224,7 @@ export default function PayrollBatchHistory() {
           .total-row { font-weight: bold; background-color: #e8e8e8; }
           .group-header { background-color: #d4e6f1; font-weight: bold; font-size: 14px; }
           .group-total { background-color: #eaf2f8; font-weight: bold; font-size: 12px; }
-          .signature-col { width: 120px; min-height: 40px; }
+          .notes-col { width: 120px; min-height: 40px; }
           .footer { text-align: center; font-size: 11px; color: #666; margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px; }
           @media print { body { padding: 0; } }
         </style>
@@ -249,7 +249,7 @@ export default function PayrollBatchHistory() {
               <th>الخصومات</th>
               <th>الاضافي</th>
               <th>الصافي</th>
-              <th>توقيع المستلم</th>
+              <th>ملاحظات</th>
             </tr>
           </thead>
           <tbody>
@@ -586,14 +586,17 @@ export default function PayrollBatchHistory() {
 
       {/* Details Dialog */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent
+          dir="rtl"
+          className="h-[70vh] max-h-[70vh] w-[calc(100vw-1rem)] max-w-none grid-rows-[auto_minmax(0,1fr)] overflow-hidden p-4 sm:w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)] sm:p-6"
+        >
           <DialogHeader>
             <DialogTitle>
               تفاصيل الدفعة: {batchDetails?.batch?.batchCode}
             </DialogTitle>
           </DialogHeader>
           {batchDetails && (
-            <div className="space-y-4">
+            <div className="min-h-0 space-y-4 overflow-y-auto overflow-x-hidden px-1">
               {/* Batch Info */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
@@ -632,21 +635,22 @@ export default function PayrollBatchHistory() {
               </div>
 
               {/* Items Table - Grouped by Group */}
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-right">العامل</TableHead>
-                    <TableHead className="text-right">أيام العمل</TableHead>
-                    <TableHead className="text-right">المستحق</TableHead>
-                    <TableHead className="text-right">الخصومات</TableHead>
-                    <TableHead className="text-right">الاضافي</TableHead>
-                    <TableHead className="text-right">الصافي</TableHead>
-                    <TableHead className="text-right w-[120px]">توقيع المستلم</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {groupedItems.map((group) => (
-                    <>
+              <div className="w-full overflow-x-auto rounded-md border">
+                <Table className="min-w-[900px]">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-right">العامل</TableHead>
+                      <TableHead className="text-right">أيام العمل</TableHead>
+                      <TableHead className="text-right">المستحق</TableHead>
+                      <TableHead className="text-right">الخصومات</TableHead>
+                      <TableHead className="text-right">الاضافي</TableHead>
+                      <TableHead className="text-right">الصافي</TableHead>
+                      <TableHead className="text-right w-[120px]">ملاحظات</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {groupedItems.map((group) => (
+                      <>
                       {/* Group Header */}
                       <TableRow key={`group-${group.groupName}`} className="bg-blue-50 hover:bg-blue-50">
                         <TableCell colSpan={7} className="font-bold text-blue-800">
@@ -676,7 +680,7 @@ export default function PayrollBatchHistory() {
                             {parseFloat(item.netAmount?.toString() || '0').toFixed(2)}
                           </TableCell>
                           <TableCell className="w-[120px]">
-                            {/* عمود فارغ للتوقيع اليدوي */}
+                            {/* عمود فارغ لإضافة ملاحظات يدوية */}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -698,10 +702,11 @@ export default function PayrollBatchHistory() {
                         </TableCell>
                         <TableCell></TableCell>
                       </TableRow>
-                    </>
-                  ))}
-                </TableBody>
-              </Table>
+                      </>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           )}
         </DialogContent>
