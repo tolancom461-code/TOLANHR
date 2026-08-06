@@ -538,17 +538,23 @@ addFullSession: protectedProcedure
     confirmAttendance: protectedProcedure
       .input(z.object({ 
         workerId: z.number(),
-        ipAddress: z.string().optional(),
         deviceInfo: z.string().optional(),
         eventType: z.enum(['check_in', 'check_out']).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
+        // ✅ استخراج IP من طلب السيرفر مباشرة بدل انتظار خدمة خارجية من المتصفح
+        // (يدعم x-forwarded-for خلف بروكسي/لود بالانسر، وإلا يرجع للـ IP المباشر للاتصال)
+        const forwardedFor = ctx.req.headers['x-forwarded-for'];
+        const serverIp = (
+          Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor?.split(',')[0].trim()
+        ) || ctx.req.socket?.remoteAddress || null;
+
         const result = await db.recordAttendanceWithAdministrativeDay(
           input.workerId,
           'qr',
           undefined,
           ctx.user?.id,
-          input.ipAddress,
+          serverIp || undefined,
           input.deviceInfo,
           input.eventType
         );

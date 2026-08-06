@@ -19,13 +19,14 @@ import {
   RefreshCw,
   Users,
   IdCard,
-  Briefcase
+  Briefcase,
+  AlertTriangle
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import QRScanner from '@/components/QRScanner';
-import { getDeviceAndNetworkInfo } from '@/lib/deviceInfo';
+import { getDeviceInfo } from '@/lib/deviceInfo';
 
 export default function AttendanceScanner() {
   const { user } = useAuth();
@@ -42,6 +43,8 @@ export default function AttendanceScanner() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [cardDialog, setCardDialog] = useState<'present' | 'absent' | 'late' | null>(null);
   const [cardFilterGroupId, setCardFilterGroupId] = useState<number | undefined>();
+  const [cooldownDialogOpen, setCooldownDialogOpen] = useState(false);
+  const cooldownAutoCloseRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Play success beep sound
   const playSuccessBeep = () => {
@@ -104,6 +107,13 @@ export default function AttendanceScanner() {
       inputRef.current.focus();
     }
   }, [mode]);
+
+  // Cleanup cooldown popup auto-close timer on unmount
+  useEffect(() => {
+    return () => {
+      if (cooldownAutoCloseRef.current) clearTimeout(cooldownAutoCloseRef.current);
+    };
+  }, []);
   
   const handleQRScan = async (qrData: string) => {
     if (isProcessing) return;
@@ -136,11 +146,12 @@ export default function AttendanceScanner() {
     
     setIsProcessing(true);
     try {
-      const { ipAddress, deviceInfo } = await getDeviceAndNetworkInfo();
+      // ✅ تمت إزالة استدعاء خدمة IP الخارجية (ipify) — الـ IP يُستخرج الآن
+      // من جانب السيرفر مباشرة، فلا يوجد أي تأخير هنا قبل إرسال الطلب
+      const deviceInfo = getDeviceInfo();
       
       const result = await confirmAttendanceMutation.mutateAsync({
         workerId: workerData.worker.id,
-        ipAddress: ipAddress || undefined,
         deviceInfo,
         eventType: chosenEventType,
       });
@@ -173,10 +184,12 @@ export default function AttendanceScanner() {
       const errorMessage = error.message || 'حدث خطأ أثناء التسجيل';
       
       if (errorMessage.includes('حركتين متتاليتين')) {
-        toast.error(errorMessage, {
-          duration: 5000,
-          description: 'يجب الانتظار دقيقة كاملة بين البصمتين',
-        });
+        // Show as a prominent popup instead of a toast — easy to miss otherwise
+        setCooldownDialogOpen(true);
+        if (cooldownAutoCloseRef.current) clearTimeout(cooldownAutoCloseRef.current);
+        cooldownAutoCloseRef.current = setTimeout(() => {
+          setCooldownDialogOpen(false);
+        }, 5000);
       } else if (errorMessage.includes('متتالي') || errorMessage.includes('مسجل ك')) {
         toast.error(errorMessage, {
           duration: 5000,
@@ -598,6 +611,46 @@ export default function AttendanceScanner() {
                 </div>
               )}
             </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cooldown Warning Dialog — replaces the toast for the 3-minute duplicate-punch rule */}
+      <Dialog
+        open={cooldownDialogOpen}
+        onOpenChange={(open) => {
+          setCooldownDialogOpen(open);
+          if (!open && cooldownAutoCloseRef.current) {
+            clearTimeout(cooldownAutoCloseRef.current);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md border-2 border-orange-400">
+          <div className="text-center space-y-4 py-4">
+            <div className="flex justify-center">
+              <AlertTriangle className="h-16 w-16 text-orange-500" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-orange-600 mb-2">
+                يرجى الانتظار
+              </h3>
+              <p className="text-base text-foreground">
+                عذراً، لا يمكن تسجيل حركتين متتاليتين خلال أقل من 3 دقائق.
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                يجب الانتظار 3 دقائق كاملة بين البصمتين.
+              </p>
+            </div>
+            <Button
+              size="lg"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+              onClick={() => {
+                setCooldownDialogOpen(false);
+                if (cooldownAutoCloseRef.current) clearTimeout(cooldownAutoCloseRef.current);
+              }}
+            >
+              حسناً
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

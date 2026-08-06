@@ -13,6 +13,7 @@
 
 import { eq, and, gte, lte, desc, sql } from "drizzle-orm";
 import { getDb } from "./db";
+import { TRPCError } from "@trpc/server";
 
 /**
  * حساب تاريخ اليوم الإداري بناءً على قاعدة 5 صباحاً
@@ -179,32 +180,38 @@ export async function recordAttendanceWithAdministrativeDay(
   forcedEventType?: 'check_in' | 'check_out'  // ✅ التعديل: اختيار الحارس
 ) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: "Database not available" });
 
   const { attendanceEvents, workers } = await import('../drizzle/schema');
   
   // التحقق من وجود العامل
   const [worker] = await db.select().from(workers).where(eq(workers.id, workerId)).limit(1);
-  if (!worker) throw new Error("العامل غير موجود");
+  if (!worker) throw new TRPCError({ code: 'NOT_FOUND', message: "العامل غير موجود" });
   
   const eventTime = new Date();
   const workDate = getAdministrativeWorkDate(eventTime);
   
-  // 🔥 القاعدة 1: منع أي بصمة خلال 60 ثانية من آخر بصمة
-  const sixtySecondsAgo = new Date(eventTime.getTime() - 60 * 1000);
+  // 🔥 القاعدة 1: منع أي بصمة خلال 3 دقائق من آخر بصمة
+  const cooldownSecondsAgo = new Date(eventTime.getTime() - 180 * 1000);
   const recentPunches = await db.select()
     .from(attendanceEvents)
     .where(
       and(
         eq(attendanceEvents.workerId, workerId),
-        gte(attendanceEvents.eventTime, sixtySecondsAgo)
+        gte(attendanceEvents.eventTime, cooldownSecondsAgo)
       )
     )
     .orderBy(desc(attendanceEvents.eventTime))
     .limit(1);
   
   if (recentPunches.length > 0) {
-    throw new Error('عذراً، لا يمكن تسجيل حركتين متتاليتين خلال نفس الدقيقة، يرجى الانتظار.');
+    // ✅ TRPCError بكود BAD_REQUEST يرجع HTTP 400 — لا يُعاد المحاولة تلقائياً
+    // من resilientFetch بالفرونت (التي تعيد المحاولة فقط على 5xx/429/403)،
+    // فتصل رسالة الرفض فوراً بدل انتظار 3 محاولات × 3 ثوانٍ
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'عذراً، لا يمكن تسجيل حركتين متتاليتين خلال أقل من 3 دقائق، يرجى الانتظار.',
+    });
   }
   
   // 🔥 القاعدة 2: البحث عن آخر حضور في آخر 15 ساعة فقط
