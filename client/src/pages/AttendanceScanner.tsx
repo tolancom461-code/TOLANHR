@@ -530,42 +530,71 @@ export default function AttendanceScanner() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {(cardWorkers || []).map((w: any) => (
-                    <div key={w.workerId} className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/40 hover:bg-muted/70 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <User className="h-4 w-4 text-primary" />
+                  {(cardWorkers || []).map((w: any) => {
+                    // Sessions beyond the first are rendered as extra rows below the main row
+                    const extraSessions = cardDialog === 'present' && Array.isArray(w.sessions) ? w.sessions.slice(1) : [];
+                    return (
+                    <div key={w.workerId} className="space-y-1">
+                      <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/40 hover:bg-muted/70 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <User className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{w.workerName}</span>
+                            <span className="font-mono text-xs text-muted-foreground">{w.workerCode}</span>
+                          </div>
                         </div>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{w.workerName}</span>
-                          <span className="font-mono text-xs text-muted-foreground">{w.workerCode}</span>
-                        </div>
+                        {cardDialog === 'present' && (
+                          <div className="flex items-center gap-3 text-xs">
+                            <div className="flex flex-col items-center">
+                              <span className="text-muted-foreground">حضور</span>
+                              <span className="font-mono font-medium text-green-600">
+                                {w.checkInTime
+                                  ? new Date(w.checkInTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+                                  : '—'}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center">
+                              <span className="text-muted-foreground">انصراف</span>
+                              <span className={`font-mono font-medium ${w.checkOutTime ? 'text-blue-600' : 'text-orange-500'}`}>
+                                {w.checkOutTime
+                                  ? new Date(w.checkOutTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+                                  : 'لم ينصرف بعد'}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {cardDialog !== 'present' && (
+                          <span className="font-mono text-sm text-muted-foreground">{w.workerCode}</span>
+                        )}
                       </div>
-                      {cardDialog === 'present' && (
-                        <div className="flex items-center gap-3 text-xs">
-                          <div className="flex flex-col items-center">
-                            <span className="text-muted-foreground">حضور</span>
-                            <span className="font-mono font-medium text-green-600">
-                              {w.checkInTime
-                                ? new Date(w.checkInTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
-                                : '—'}
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-center">
-                            <span className="text-muted-foreground">انصراف</span>
-                            <span className={`font-mono font-medium ${w.checkOutTime ? 'text-blue-600' : 'text-orange-500'}`}>
-                              {w.checkOutTime
-                                ? new Date(w.checkOutTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
-                                : 'لم ينصرف بعد'}
-                            </span>
+                      {extraSessions.map((s: any, idx: number) => (
+                        <div key={idx} className="flex items-center justify-between py-1.5 pr-3 pl-10 rounded-lg bg-muted/20">
+                          <span className="text-[11px] text-muted-foreground">الجلسة {idx + 2}</span>
+                          <div className="flex items-center gap-3 text-xs">
+                            <div className="flex flex-col items-center">
+                              <span className="text-muted-foreground">حضور</span>
+                              <span className="font-mono font-medium text-green-600">
+                                {s.checkInTime
+                                  ? new Date(s.checkInTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+                                  : '—'}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center">
+                              <span className="text-muted-foreground">انصراف</span>
+                              <span className={`font-mono font-medium ${s.checkOutTime ? 'text-blue-600' : 'text-orange-500'}`}>
+                                {s.checkOutTime
+                                  ? new Date(s.checkOutTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+                                  : 'لم ينصرف بعد'}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      )}
-                      {cardDialog !== 'present' && (
-                        <span className="font-mono text-sm text-muted-foreground">{w.workerCode}</span>
-                      )}
+                      ))}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </ScrollArea>

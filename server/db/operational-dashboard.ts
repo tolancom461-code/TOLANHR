@@ -88,26 +88,50 @@ export async function getPresentWorkers(workDateStr: string, groupId?: number, c
     workersList = workersList.filter(w => w.costCenterId === costCenterId);
   }
 
-// Map check-in and check-out times
-  const checkInMap = new Map<number, Date>();
-  const checkOutMap = new Map<number, Date>();
+// Build ordered sessions per worker (each check_in starts a session,
+  // the following check_out closes it — supports multiple check-in/out pairs per day)
+  const eventsByWorker = new Map<number, { eventTime: Date; eventType: string }[]>();
   for (const e of allEvents) {
-    if (e.eventType === 'check_in') {
-      if (!checkInMap.has(e.workerId) || e.eventTime < checkInMap.get(e.workerId)!) {
-        checkInMap.set(e.workerId, e.eventTime);
-      }
-    } else if (e.eventType === 'check_out') {
-      if (!checkOutMap.has(e.workerId) || e.eventTime > checkOutMap.get(e.workerId)!) {
-        checkOutMap.set(e.workerId, e.eventTime);
-      }
-    }
+    if (!eventsByWorker.has(e.workerId)) eventsByWorker.set(e.workerId, []);
+    eventsByWorker.get(e.workerId)!.push({ eventTime: e.eventTime, eventType: e.eventType });
   }
 
-  return workersList.map(w => ({
-    ...w,
-    checkInTime: checkInMap.get(w.workerId) || null,
-    checkOutTime: checkOutMap.get(w.workerId) || null,
-  }));
+  const sessionsMap = new Map<number, { checkInTime: Date; checkOutTime: Date | null }[]>();
+  for (const [workerId, events] of eventsByWorker.entries()) {
+    // Normalize to real Date instances before sorting/comparing — eventTime may come back
+    // as a string depending on the mysql2 driver's date handling
+    const sorted = [...events]
+      .map(e => ({ ...e, eventTime: new Date(e.eventTime) }))
+      .sort((a, b) => a.eventTime.getTime() - b.eventTime.getTime());
+    const sessions: { checkInTime: Date; checkOutTime: Date | null }[] = [];
+    let openSession: { checkInTime: Date; checkOutTime: Date | null } | null = null;
+    for (const ev of sorted) {
+      if (ev.eventType === 'check_in') {
+        openSession = { checkInTime: ev.eventTime, checkOutTime: null };
+        sessions.push(openSession);
+      } else if (ev.eventType === 'check_out') {
+        if (openSession && openSession.checkOutTime === null) {
+          openSession.checkOutTime = ev.eventTime;
+        }
+        // check_out with no open session (edge case / bad data) is ignored
+      }
+    }
+    sessionsMap.set(workerId, sessions);
+  }
+
+  return workersList.map(w => {
+    const sessions = sessionsMap.get(w.workerId) || [];
+    const firstSession = sessions[0] || null;
+    const lastSession = sessions[sessions.length - 1] || null;
+    return {
+      ...w,
+      // Kept for backward compatibility: first check-in and last check-out overall
+      checkInTime: firstSession?.checkInTime || null,
+      checkOutTime: lastSession?.checkOutTime || null,
+      // Full ordered list of sessions for this worker on this work date
+      sessions,
+    };
+  });
 }
 
 /**

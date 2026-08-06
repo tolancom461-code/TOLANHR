@@ -1,6 +1,36 @@
 import puppeteer from "puppeteer";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { getDailyAttendanceReportData } from "./dailyAttendanceReports";
 import { groupDailyAttendanceRows, computeDailyAttendanceGrandTotals } from "../shared/dailyAttendanceReportGrouping";
+
+let cachedArabicFontCss: string | undefined;
+
+function getArabicFontCss(): string {
+  if (cachedArabicFontCss !== undefined) return cachedArabicFontCss;
+
+  const fontPath = [
+    resolve(process.cwd(), "server/fonts/NotoSansArabic-Regular.ttf"),
+    resolve(process.cwd(), "dist/fonts/NotoSansArabic-Regular.ttf"),
+  ].find(existsSync);
+
+  if (!fontPath) {
+    cachedArabicFontCss = "";
+    return cachedArabicFontCss;
+  }
+
+  const fontBase64 = readFileSync(fontPath).toString("base64");
+  cachedArabicFontCss = `
+    @font-face {
+      font-family: "Noto Sans Arabic Embedded";
+      src: url("data:font/ttf;base64,${fontBase64}") format("truetype");
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: block;
+    }
+  `;
+  return cachedArabicFontCss;
+}
 
 // ============================================
 // أدوات تنسيق (نسخة خادم مطابقة لنسخة العميل)
@@ -76,6 +106,7 @@ interface BuildHtmlParams {
 function buildReportHtml({ rows, periodStart, periodEnd, printedBy }: BuildHtmlParams): string {
   const groupBlocks = groupDailyAttendanceRows(rows);
   const grandTotals = computeDailyAttendanceGrandTotals(rows);
+  const arabicFontCss = getArabicFontCss();
 
   const now = new Date();
   const printDate = now.toLocaleDateString('en-GB').replace(/\//g, '-');
@@ -124,7 +155,8 @@ function buildReportHtml({ rows, periodStart, periodEnd, printedBy }: BuildHtmlP
 <meta charset="UTF-8" />
 <title>كشف العمالة اليومية</title>
 <style>
-  body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; padding: 20px; direction: rtl; color: #1f2937; }
+  ${arabicFontCss}
+  body { font-family: 'Noto Sans Arabic Embedded', 'Segoe UI', Tahoma, Arial, sans-serif; padding: 20px; direction: rtl; color: #1f2937; }
   table { width: 100%; border-collapse: collapse; margin-top: 20px; }
   th, td { border: 1px solid #333; padding: 8px; text-align: right; font-size: 13px; }
   th { background-color: #f0f0f0; font-weight: bold; }
