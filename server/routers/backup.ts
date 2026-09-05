@@ -42,23 +42,15 @@ export const backupRouter = router({
         workbook.created = new Date();
         
         const arabicLabels: Record<string, string> = {
-          users: 'المستخدمين', workers: 'العمال', worker_archive: 'أرشيف العمال', groups: 'المجموعات',
+          users: 'المستخدمين', workers: 'العمال', groups: 'المجموعات',
           cost_centers: 'مراكز التكلفة', attendance_events: 'سجل الحضور',
           payroll_batches: 'دفعات الرواتب', payroll_batch_items: 'عناصر الرواتب',
           operational_flags: 'البلاغات التشغيلية', temporary_assignments: 'الانتدابات المؤقتة',
-          assignment_settlements: 'تسويات الانتدابات', daily_work_assignments: 'تكليفات العمل اليومية',
           audit_log: 'سجل التدقيق', pay_overrides: 'التجاوزات المالية',
-          payment_vouchers: 'سندات الصرف', deduction_entries: 'قيود الخصم',
           group_schedules: 'جداول المجموعات', worker_daily_finance: 'المالية اليومية',
           payroll_batch_notes: 'ملاحظات الرواتب', payroll_batch_corrections: 'تصحيحات الرواتب',
-          payroll_batch_sequences: 'تسلسل دفعات الرواتب',
           work_days: 'أيام العمل', deduction_rules: 'قواعد الخصم',
-          user_cost_centers: 'مراكز تكلفة المستخدمين', restaurants: 'المطاعم',
-          jobs: 'المسميات الوظيفية', devices: 'الأجهزة',
-          roles: 'الأدوار', permissions: 'الصلاحيات', role_permissions: 'صلاحيات الأدوار',
-          user_roles: 'أدوار المستخدمين', user_permissions: 'صلاحيات المستخدمين',
-          settings: 'إعدادات النظام', login_sessions: 'جلسات الدخول',
-          notifications: 'الإشعارات', push_subscriptions: 'اشتراكات الإشعارات',
+          user_cost_centers: 'مراكز تكلفة المستخدمين',
         };
         
         for (const [tableName, rows] of Object.entries(data)) {

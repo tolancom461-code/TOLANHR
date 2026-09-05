@@ -24,21 +24,7 @@ import {
   notifications,
   pushSubscriptions,
   restaurants,
-  dailyWorkAssignments,
-  // ✅ الجداول التي كانت مفقودة من النسخ الاحتياطي
-  devices,
-  payrollBatchSequences,
-  jobs,
-  loginSessions,
-  paymentVouchers,
-  deductionEntries,
-  permissions,
-  rolePermissions,
-  roles,
-  settings,
-  userPermissions,
-  userRoles,
-  workerArchive,
+  dailyWorkAssignments
 } from "../../drizzle/schema";
 import { sendNotification, sendNotificationToRoles, notifyStageAndAdmins, ADMIN_OWNER_ROLES } from '../notifications';
 import { getRoleLabel } from '../permissions';
@@ -58,44 +44,20 @@ export async function getBackupTableInfo() {
   const database = await getDb();
   if (!database) return [];
   
-  // ✅ تم تحديث القائمة لتشمل كل الـ36 جدولاً بقاعدة البيانات (لا يوجد أي جدول مستثنى)
   const tables = [
     { name: 'users', label: 'المستخدمين', table: users },
     { name: 'workers', label: 'العمال', table: workers },
-    { name: 'worker_archive', label: 'أرشيف العمال', table: workerArchive },
     { name: 'groups', label: 'المجموعات', table: groups },
     { name: 'cost_centers', label: 'مراكز التكلفة', table: costCenters },
     { name: 'attendance_events', label: 'سجل الحضور', table: attendanceEvents },
-    { name: 'work_days', label: 'أيام العمل', table: workDays },
-    { name: 'group_schedules', label: 'جداول المجموعات', table: groupSchedules },
-    { name: 'worker_daily_finance', label: 'المالية اليومية', table: workerDailyFinance },
-    { name: 'payroll_batches', label: 'دفعات الرواتب', table: payrollBatches },
-    { name: 'payroll_batch_items', label: 'عناصر دفعات الرواتب', table: payrollBatchItems },
-    { name: 'payroll_batch_notes', label: 'ملاحظات دفعات الرواتب', table: payrollBatchNotes },
-    { name: 'payroll_batch_corrections', label: 'تصحيحات دفعات الرواتب', table: payrollBatchCorrections },
-    { name: 'payroll_batch_sequences', label: 'تسلسل دفعات الرواتب', table: payrollBatchSequences },
-    { name: 'pay_overrides', label: 'التجاوزات المالية', table: payOverrides },
-    { name: 'payment_vouchers', label: 'سندات الصرف', table: paymentVouchers },
-    { name: 'deduction_rules', label: 'قواعد الخصم', table: deductionRules },
-    { name: 'deduction_entries', label: 'قيود الخصم', table: deductionEntries },
+    { name: 'payroll_batches', label: 'دفعات العمال', table: payrollBatches },
+    { name: 'payroll_batch_items', label: 'عناصر المبلغ', table: payrollBatchItems },
     { name: 'operational_flags', label: 'البلاغات التشغيلية', table: operationalFlags },
     { name: 'temporary_assignments', label: 'الانتدابات المؤقتة', table: temporaryAssignments },
-    { name: 'assignment_settlements', label: 'تسويات الانتدابات', table: assignmentSettlements },
-    { name: 'daily_work_assignments', label: 'تكليفات العمل اليومية', table: dailyWorkAssignments },
-    { name: 'restaurants', label: 'المطاعم', table: restaurants },
-    { name: 'jobs', label: 'المسميات الوظيفية', table: jobs },
-    { name: 'devices', label: 'الأجهزة', table: devices },
-    { name: 'user_cost_centers', label: 'مراكز تكلفة المستخدمين', table: userCostCenters },
-    { name: 'roles', label: 'الأدوار', table: roles },
-    { name: 'permissions', label: 'الصلاحيات', table: permissions },
-    { name: 'role_permissions', label: 'صلاحيات الأدوار', table: rolePermissions },
-    { name: 'user_roles', label: 'أدوار المستخدمين', table: userRoles },
-    { name: 'user_permissions', label: 'صلاحيات المستخدمين', table: userPermissions },
-    { name: 'settings', label: 'إعدادات النظام', table: settings },
-    { name: 'login_sessions', label: 'جلسات الدخول', table: loginSessions },
     { name: 'audit_log', label: 'سجل التدقيق', table: auditLog },
-    { name: 'notifications', label: 'الإشعارات', table: notifications },
-    { name: 'push_subscriptions', label: 'اشتراكات الإشعارات', table: pushSubscriptions },
+    { name: 'pay_overrides', label: 'التجاوزات المالية', table: payOverrides },
+    { name: 'group_schedules', label: 'جداول المجموعات', table: groupSchedules },
+    { name: 'worker_daily_finance', label: 'المالية اليومية', table: workerDailyFinance },
   ];
   
   const results = [];
@@ -122,22 +84,15 @@ export async function exportTablesData(tableNames: string[]) {
   if (!database) return {};
   
   const tableMap: Record<string, any> = {
-    users, workers, worker_archive: workerArchive, groups, costCenters: costCenters, 
-    attendance_events: attendanceEvents, work_days: workDays,
-    payroll_batches: payrollBatches, payroll_batch_items: payrollBatchItems,
-    payroll_batch_notes: payrollBatchNotes, payroll_batch_corrections: payrollBatchCorrections,
-    payroll_batch_sequences: payrollBatchSequences,
-    operational_flags: operationalFlags, temporary_assignments: temporaryAssignments,
-    assignment_settlements: assignmentSettlements, daily_work_assignments: dailyWorkAssignments,
-    restaurants, jobs, devices,
-    audit_log: auditLog, pay_overrides: payOverrides, payment_vouchers: paymentVouchers,
-    group_schedules: groupSchedules, worker_daily_finance: workerDailyFinance,
-    cost_centers: costCenters, deduction_rules: deductionRules, deduction_entries: deductionEntries,
+    users, workers, groups, costCenters: costCenters, 
+    attendance_events: attendanceEvents, payroll_batches: payrollBatches,
+    payroll_batch_items: payrollBatchItems, operational_flags: operationalFlags,
+    temporary_assignments: temporaryAssignments, audit_log: auditLog,
+    pay_overrides: payOverrides, group_schedules: groupSchedules,
+    worker_daily_finance: workerDailyFinance, payroll_batch_notes: payrollBatchNotes,
+    payroll_batch_corrections: payrollBatchCorrections, work_days: workDays,
+    cost_centers: costCenters, deduction_rules: deductionRules,
     user_cost_centers: userCostCenters,
-    roles, permissions, role_permissions: rolePermissions,
-    user_roles: userRoles, user_permissions: userPermissions,
-    settings, login_sessions: loginSessions,
-    notifications, push_subscriptions: pushSubscriptions,
   };
   
   const result: Record<string, any[]> = {};
@@ -162,44 +117,24 @@ export async function exportFullSqlDump() {
   const database = await getDb();
   if (!database) return '';
   
-  // ✅ القائمة الكاملة لكل جداول قاعدة البيانات (36 جدولاً) بدون استثناء
   const allTables = [
     { name: 'cost_centers', table: costCenters },
     { name: 'users', table: users },
     { name: 'groups', table: groups },
     { name: 'group_schedules', table: groupSchedules },
     { name: 'workers', table: workers },
-    { name: 'worker_archive', table: workerArchive },
     { name: 'attendance_events', table: attendanceEvents },
     { name: 'work_days', table: workDays },
     { name: 'worker_daily_finance', table: workerDailyFinance },
     { name: 'pay_overrides', table: payOverrides },
-    { name: 'payment_vouchers', table: paymentVouchers },
-    { name: 'deduction_rules', table: deductionRules },
-    { name: 'deduction_entries', table: deductionEntries },
     { name: 'payroll_batches', table: payrollBatches },
     { name: 'payroll_batch_items', table: payrollBatchItems },
     { name: 'payroll_batch_notes', table: payrollBatchNotes },
     { name: 'payroll_batch_corrections', table: payrollBatchCorrections },
-    { name: 'payroll_batch_sequences', table: payrollBatchSequences },
     { name: 'operational_flags', table: operationalFlags },
     { name: 'temporary_assignments', table: temporaryAssignments },
-    { name: 'assignment_settlements', table: assignmentSettlements },
-    { name: 'daily_work_assignments', table: dailyWorkAssignments },
-    { name: 'restaurants', table: restaurants },
-    { name: 'jobs', table: jobs },
-    { name: 'devices', table: devices },
-    { name: 'user_cost_centers', table: userCostCenters },
-    { name: 'roles', table: roles },
-    { name: 'permissions', table: permissions },
-    { name: 'role_permissions', table: rolePermissions },
-    { name: 'user_roles', table: userRoles },
-    { name: 'user_permissions', table: userPermissions },
-    { name: 'settings', table: settings },
-    { name: 'login_sessions', table: loginSessions },
     { name: 'audit_log', table: auditLog },
-    { name: 'notifications', table: notifications },
-    { name: 'push_subscriptions', table: pushSubscriptions },
+    { name: 'user_cost_centers', table: userCostCenters },
   ];
   
   let sqlDump = `-- Tolan Workforce Backup\n-- Date: ${new Date().toISOString()}\n-- ============================================\n\n`;

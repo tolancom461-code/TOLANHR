@@ -18,6 +18,15 @@ import PDFDocument from "pdfkit";
 import ExcelJS from "exceljs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { storagePut } from "../storage";
+import { canManageWorkerPhotos } from "@shared/workerPhotoPolicy";
+import { buildWorkerPhotoStorageKey, decodeWorkerPhotoBase64 } from "../worker-photos";
+import { ENV } from "../_core/env";
+
+function canCurrentUserManageWorkerPhotos(user: any): boolean {
+  const isOwner = Boolean(ENV.ownerOpenId && user?.openId === ENV.ownerOpenId);
+  return canManageWorkerPhotos(user?.role, isOwner);
+}
 
   // Workers Management
 export const workersRouter = router({
@@ -71,12 +80,26 @@ export const workersRouter = router({
       .use(requirePermissionFlag('canManageWorkers'))
       .mutation(async ({ input, ctx }) => {
         try {
+          // Legacy photoUrl remains readable in the schema for compatibility,
+          // but new photos must pass through the validated upload workflow.
+          if (input.photoUrl) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'إضافة صورة العامل تتم من خلال خيار رفع الصورة فقط',
+            });
+          }
+
+          // Keep photo updates isolated to uploadPhoto. Existing stored URLs
+          // remain untouched, but create never writes photo_url directly.
+          const workerInput = { ...input };
+          delete workerInput.photoUrl;
+
           // Generate QR token
           const qrToken = `WRK-${input.code}-${Date.now()}`;
           const manualCode = input.code.toUpperCase();
           
           const id = await db.createWorker({
-            ...input,
+            ...workerInput,
             qrToken,
             manualCode,
             hireDate: input.hireDate ? new Date(input.hireDate) : null,
@@ -91,6 +114,7 @@ export const workersRouter = router({
           });
           return { id, qrToken, success: true };
         } catch (error: any) {
+          if (error instanceof TRPCError) throw error;
           throw new TRPCError({
             code: 'BAD_REQUEST',
             message: error.message || 'فشل إنشاء العامل',
@@ -115,6 +139,33 @@ export const workersRouter = router({
       .mutation(async ({ input, ctx }) => {
         const { id, ...data } = input;
         const oldWorker = await db.getWorkerById(id);
+        if (!oldWorker) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'العامل غير موجود' });
+        }
+
+        if (Object.prototype.hasOwnProperty.call(data, 'photoUrl')) {
+          const requestedPhotoUrl = data.photoUrl ?? null;
+          const currentPhotoUrl = oldWorker.photoUrl ?? null;
+          const photoChanged = requestedPhotoUrl !== currentPhotoUrl;
+
+          if (photoChanged && currentPhotoUrl && !requestedPhotoUrl) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'لا يمكن حذف صورة العامل؛ يمكن استبدالها فقط',
+            });
+          }
+
+          if (photoChanged) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'استبدال صورة العامل يتم من خلال خيار استبدال الصورة فقط',
+            });
+          }
+
+          // Do not pass photo_url through the generic worker update path.
+          delete data.photoUrl;
+        }
+
         await db.updateWorker(id, data);
         // Audit log
         await db.logAudit({
@@ -122,10 +173,71 @@ export const workersRouter = router({
           action: 'UPDATE_WORKER',
           tableName: 'workers',
           recordId: id,
-          oldValues: oldWorker ? { code: oldWorker.code, fullName: oldWorker.fullName, status: oldWorker.status } : null,
+          oldValues: { code: oldWorker.code, fullName: oldWorker.fullName, status: oldWorker.status },
           newValues: data,
         });
         return { success: true };
+      }),
+
+    uploadPhoto: protectedProcedure
+      .input(z.object({
+        workerId: z.number().int().positive(),
+        imageBase64: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!canCurrentUserManageWorkerPhotos(ctx.user)) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'ليس لديك صلاحية لرفع أو استبدال صورة العامل',
+          });
+        }
+
+        const worker = await db.getWorkerById(input.workerId);
+        if (!worker) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'العامل غير موجود' });
+        }
+
+        let imageBuffer: Buffer;
+        try {
+          imageBuffer = decodeWorkerPhotoBase64(input.imageBase64);
+        } catch (error: any) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: error?.message || 'صورة العامل غير صالحة',
+          });
+        }
+
+        const storageKey = buildWorkerPhotoStorageKey(input.workerId);
+        let photoUrl: string;
+        try {
+          const uploaded = await storagePut(storageKey, imageBuffer, 'image/webp');
+          photoUrl = uploaded.url;
+        } catch (error) {
+          console.error('[workers.uploadPhoto] Storage upload failed:', error);
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'تعذر رفع صورة العامل. لم يتم تغيير الصورة الحالية.',
+          });
+        }
+
+        // Update only after storage upload succeeds, so a failed upload never
+        // removes or damages the worker's current photo reference.
+        await db.updateWorker(input.workerId, { photoUrl });
+
+        await db.logAudit({
+          userId: ctx.user?.id,
+          action: worker.photoUrl ? 'REPLACE_WORKER_PHOTO' : 'ADD_WORKER_PHOTO',
+          tableName: 'workers',
+          recordId: input.workerId,
+          oldValues: { photoPresent: Boolean(worker.photoUrl) },
+          newValues: {
+            photoPresent: true,
+            format: 'webp',
+            storageKey,
+          },
+        });
+
+        return { success: true, photoUrl };
       }),
     
     delete: protectedProcedure

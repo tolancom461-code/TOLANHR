@@ -342,13 +342,14 @@ export default function DailyAttendanceReports() {
                     <th className="border border-gray-700 px-2 py-2 text-right">الاضافي</th>
                     <th className="border border-gray-700 px-2 py-2 text-right">الصافي</th>
                     <th className="border border-gray-700 px-2 py-2 text-right">توقيع المستلم</th>
+                    <th className="border border-gray-700 px-2 py-2 text-right">الملاحظات</th>
                   </tr>
                 </thead>
                 <tbody>
                   {groupBlocks.map((group) => (
                     <Fragment key={group.groupId}>
                       <tr key={`h-${group.groupId}`} className="bg-blue-100 font-bold">
-                        <td colSpan={9} className="border border-gray-700 px-2 py-2">
+                        <td colSpan={10} className="border border-gray-700 px-2 py-2">
                           {group.groupName} ({group.items.length} عامل)
                         </td>
                       </tr>
@@ -364,7 +365,8 @@ export default function DailyAttendanceReports() {
                             <td className="border border-gray-700 px-2 py-2 text-red-600">{formatAmount(item.totalDeductions)}</td>
                             <td className="border border-gray-700 px-2 py-2 text-green-600">{formatAmount(item.totalBonuses)}</td>
                             <td className="border border-gray-700 px-2 py-2 font-bold">{formatAmount(item.netAmount)}</td>
-                            <td className="border border-gray-700 px-2 py-2"></td>
+                            <td className="border border-gray-700 px-2 py-2 min-w-[110px]"></td>
+                            <td className="border border-gray-700 px-2 py-2 min-w-[140px] whitespace-pre-line">{item.notes || ''}</td>
                           </tr>
                         );
                       })}
@@ -374,6 +376,7 @@ export default function DailyAttendanceReports() {
                         <td className="border border-gray-700 px-2 py-2 text-red-600">{formatAmount(group.totals.totalDeductions)}</td>
                         <td className="border border-gray-700 px-2 py-2 text-green-600">{formatAmount(group.totals.totalBonuses)}</td>
                         <td className="border border-gray-700 px-2 py-2 font-bold">{formatAmount(group.totals.netAmount)}</td>
+                        <td className="border border-gray-700 px-2 py-2"></td>
                         <td className="border border-gray-700 px-2 py-2"></td>
                       </tr>
                     </Fragment>
@@ -385,9 +388,10 @@ export default function DailyAttendanceReports() {
                     <td className="border border-gray-700 px-2 py-2">{formatAmount(grandTotals.totalBonuses)}</td>
                     <td className="border border-gray-700 px-2 py-2">{formatAmount(grandTotals.netAmount)}</td>
                     <td className="border border-gray-700 px-2 py-2"></td>
+                    <td className="border border-gray-700 px-2 py-2"></td>
                   </tr>
                   <tr>
-                    <td colSpan={9} className="bg-blue-50 text-blue-900 font-semibold text-sm px-3 py-2" style={{ borderTop: '2px solid #4a90d9' }}>
+                    <td colSpan={10} className="bg-blue-50 text-blue-900 font-semibold text-sm px-3 py-2" style={{ borderTop: '2px solid #4a90d9' }}>
                       المبلغ الإجمالي بالأحرف: {numberToArabicWords(grandTotals.netAmount)}
                     </td>
                   </tr>

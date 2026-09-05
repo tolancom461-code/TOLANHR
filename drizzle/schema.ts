@@ -176,6 +176,271 @@ export const devices = mysqlTable("devices", {
 	index("devices_code_unique").on(table.code),
 ]);
 
+
+// ============================================
+// جداول biometric-service الفعلية في TiDB — محدثة 2026-08-31
+// الجداول البيومترية القديمة حُذفت، وهذه التعريفات تعكس الجداول العشرة
+// الموجودة فعلياً الآن داخل قاعدة test والمملوكة لـ biometric-service.
+// لا توجد Foreign Keys أو روابط إلى workers / attendance / finance.
+// ملاحظة: Collation الفعلية على مستوى الجدول هي utf8mb4_bin حسب SHOW CREATE TABLE؛
+// Drizzle schema هنا يعكس الأعمدة والقيود والفهارس، وليس إعداد Collation الجدولي.
+// ============================================
+export const biometricSvcDevices = mysqlTable("biometric_svc_devices", {
+	id: bigint({ mode: 'number', unsigned: true }).autoincrement().notNull(),
+	vendor: varchar({ length: 64 }).notNull(),
+	serialNumber: varchar("serial_number", { length: 128 }).notNull(),
+	displayName: varchar("display_name", { length: 255 }),
+	manufacturer: varchar({ length: 128 }),
+	model: varchar({ length: 128 }),
+	protocol: varchar({ length: 64 }),
+	adapterType: varchar("adapter_type", { length: 64 }),
+	mode: varchar({ length: 32 }).default('test').notNull(),
+	status: varchar({ length: 32 }).default('active').notNull(),
+	timezone: varchar({ length: 100 }).default('Asia/Riyadh').notNull(),
+	acceptEventsFrom: datetime("accept_events_from", { mode: 'string', fsp: 6 }),
+	firmwareVersion: varchar("firmware_version", { length: 160 }),
+	platform: varchar({ length: 128 }),
+	oemVendor: varchar("oem_vendor", { length: 128 }),
+	firstSeenAt: datetime("first_seen_at", { mode: 'string', fsp: 6 }),
+	lastSeenAt: datetime("last_seen_at", { mode: 'string', fsp: 6 }),
+	lastEventAt: datetime("last_event_at", { mode: 'string', fsp: 6 }),
+	lastIpAddress: varchar("last_ip_address", { length: 45 }),
+	safeCapabilities: json("safe_capabilities"),
+	notes: text(),
+	createdAt: datetime("created_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+	updatedAt: datetime("updated_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+},
+(table) => [
+	uniqueIndex("uq_biometric_svc_devices_vendor_serial").on(table.vendor, table.serialNumber),
+	index("idx_biometric_svc_devices_status").on(table.status),
+	index("idx_biometric_svc_devices_last_seen").on(table.lastSeenAt),
+	index("idx_biometric_svc_devices_last_event").on(table.lastEventAt),
+]);
+
+export const biometricSvcIngestEvents = mysqlTable("biometric_svc_ingest_events", {
+	id: bigint({ mode: 'number', unsigned: true }).autoincrement().notNull(),
+	ingestKey: char("ingest_key", { length: 64 }).notNull(),
+	storageIdentityVersion: varchar("storage_identity_version", { length: 32 }).notNull(),
+	deviceId: bigint("device_id", { mode: 'number', unsigned: true }).notNull(),
+	vendor: varchar({ length: 64 }).notNull(),
+	serialNumber: varchar("serial_number", { length: 128 }).notNull(),
+	eventFamily: varchar("event_family", { length: 64 }).notNull(),
+	vendorEventType: varchar("vendor_event_type", { length: 64 }).notNull(),
+	vendorEventId: varchar("vendor_event_id", { length: 255 }),
+	dedupeKey: varchar("dedupe_key", { length: 255 }).notNull(),
+	dedupeStrategy: varchar("dedupe_strategy", { length: 100 }).notNull(),
+	dedupeVersion: varchar("dedupe_version", { length: 32 }).notNull(),
+	wireHash: char("wire_hash", { length: 64 }).notNull(),
+	captureId: char("capture_id", { length: 36 }),
+	captureIndex: int("capture_index", { unsigned: true }),
+	adapterVersion: varchar("adapter_version", { length: 128 }),
+	parserVersion: varchar("parser_version", { length: 128 }).notNull(),
+	parseValid: tinyint("parse_valid", { unsigned: true }).notNull(),
+	safeToAcknowledge: tinyint("safe_to_acknowledge", { unsigned: true }).notNull(),
+	unsafeReason: varchar("unsafe_reason", { length: 255 }),
+	sourceBytes: int("source_bytes", { unsigned: true }),
+	sourceFieldCount: smallint("source_field_count", { unsigned: true }),
+	payloadSchemaVersion: smallint("payload_schema_version", { unsigned: true }).default(1).notNull(),
+	safePayload: json("safe_payload"),
+	sourceIp: varchar("source_ip", { length: 45 }),
+	receivedAt: datetime("received_at", { mode: 'string', fsp: 6 }).notNull(),
+	createdAt: datetime("created_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+},
+(table) => [
+	uniqueIndex("uq_biometric_svc_ingest_key").on(table.ingestKey),
+	uniqueIndex("uq_biometric_svc_ingest_vendor_identity").on(table.deviceId, table.dedupeStrategy, table.dedupeVersion, table.dedupeKey),
+	index("idx_biometric_svc_ingest_device_received").on(table.deviceId, table.receivedAt),
+	index("idx_biometric_svc_ingest_wire_hash").on(table.wireHash),
+	index("idx_biometric_svc_ingest_capture").on(table.captureId),
+	index("idx_biometric_svc_ingest_ack").on(table.safeToAcknowledge, table.receivedAt),
+]);
+
+export const biometricSvcEventProcessing = mysqlTable("biometric_svc_event_processing", {
+	ingestEventId: bigint("ingest_event_id", { mode: 'number', unsigned: true }).notNull(),
+	status: varchar({ length: 32 }).default('pending').notNull(),
+	attemptCount: int("attempt_count", { unsigned: true }).default(0).notNull(),
+	nextAttemptAt: datetime("next_attempt_at", { mode: 'string', fsp: 6 }),
+	lastAttemptAt: datetime("last_attempt_at", { mode: 'string', fsp: 6 }),
+	leaseOwner: varchar("lease_owner", { length: 128 }),
+	leaseToken: char("lease_token", { length: 36 }),
+	leaseExpiresAt: datetime("lease_expires_at", { mode: 'string', fsp: 6 }),
+	lastErrorCode: varchar("last_error_code", { length: 100 }),
+	lastErrorMessage: varchar("last_error_message", { length: 1000 }),
+	processedAt: datetime("processed_at", { mode: 'string', fsp: 6 }),
+	createdAt: datetime("created_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+	updatedAt: datetime("updated_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+},
+(table) => [
+	primaryKey({ columns: [table.ingestEventId] }),
+	index("idx_biometric_svc_processing_work").on(table.status, table.nextAttemptAt, table.leaseExpiresAt),
+	index("idx_biometric_svc_processing_lease").on(table.leaseToken),
+]);
+
+export const biometricSvcPunches = mysqlTable("biometric_svc_punches", {
+	id: bigint({ mode: 'number', unsigned: true }).autoincrement().notNull(),
+	ingestEventId: bigint("ingest_event_id", { mode: 'number', unsigned: true }).notNull(),
+	eventKey: char("event_key", { length: 64 }).notNull(),
+	eventKeyStrategy: varchar("event_key_strategy", { length: 100 }).notNull(),
+	eventKeyVersion: varchar("event_key_version", { length: 32 }).notNull(),
+	vendorDedupeKey: varchar("vendor_dedupe_key", { length: 255 }).notNull(),
+	vendorDedupeStrategy: varchar("vendor_dedupe_strategy", { length: 100 }).notNull(),
+	vendorDedupeVersion: varchar("vendor_dedupe_version", { length: 32 }).notNull(),
+	deviceId: bigint("device_id", { mode: 'number', unsigned: true }).notNull(),
+	vendor: varchar({ length: 64 }).notNull(),
+	serialNumber: varchar("serial_number", { length: 128 }).notNull(),
+	deviceUserId: varchar("device_user_id", { length: 128 }).notNull(),
+	deviceEventTimeRaw: varchar("device_event_time_raw", { length: 64 }).notNull(),
+	deviceEventTimeLocal: datetime("device_event_time_local", { mode: 'string', fsp: 6 }).notNull(),
+	deviceTimezone: varchar("device_timezone", { length: 100 }),
+	deviceEventTimeUtc: datetime("device_event_time_utc", { mode: 'string', fsp: 6 }),
+	rawStatus: varchar("raw_status", { length: 32 }),
+	punchState: varchar("punch_state", { length: 64 }),
+	rawVerify: varchar("raw_verify", { length: 32 }),
+	verificationMethod: varchar("verification_method", { length: 64 }),
+	workCode: varchar("work_code", { length: 100 }),
+	canonicalSchemaVersion: smallint("canonical_schema_version", { unsigned: true }).default(1).notNull(),
+	vendorMetadata: json("vendor_metadata"),
+	wireHash: char("wire_hash", { length: 64 }).notNull(),
+	parserVersion: varchar("parser_version", { length: 128 }).notNull(),
+	receivedAt: datetime("received_at", { mode: 'string', fsp: 6 }).notNull(),
+	createdAt: datetime("created_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+},
+(table) => [
+	uniqueIndex("uq_biometric_svc_punch_ingest").on(table.ingestEventId),
+	uniqueIndex("uq_biometric_svc_punch_event").on(table.eventKey),
+	index("idx_biometric_svc_punch_device_time").on(table.deviceId, table.deviceEventTimeLocal),
+	index("idx_biometric_svc_punch_user_time").on(table.deviceId, table.deviceUserId, table.deviceEventTimeLocal),
+	index("idx_biometric_svc_punch_utc").on(table.deviceEventTimeUtc),
+	index("idx_biometric_svc_punch_received").on(table.receivedAt),
+]);
+
+export const biometricSvcDeviceUsers = mysqlTable("biometric_svc_device_users", {
+	id: bigint({ mode: 'number', unsigned: true }).autoincrement().notNull(),
+	deviceId: bigint("device_id", { mode: 'number', unsigned: true }).notNull(),
+	deviceUserId: varchar("device_user_id", { length: 128 }).notNull(),
+	displayName: varchar("display_name", { length: 255 }),
+	status: varchar({ length: 32 }).default('seen').notNull(),
+	metadataSchemaVersion: smallint("metadata_schema_version", { unsigned: true }).default(1).notNull(),
+	safeMetadata: json("safe_metadata"),
+	firstSeenAt: datetime("first_seen_at", { mode: 'string', fsp: 6 }),
+	lastSeenAt: datetime("last_seen_at", { mode: 'string', fsp: 6 }),
+	createdAt: datetime("created_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+	updatedAt: datetime("updated_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+},
+(table) => [
+	uniqueIndex("uq_biometric_svc_device_user").on(table.deviceId, table.deviceUserId),
+	index("idx_biometric_svc_device_users_status").on(table.deviceId, table.status),
+	index("idx_biometric_svc_device_users_last_seen").on(table.lastSeenAt),
+]);
+
+
+// ============================================
+// طبقة الإدارة المستقلة والنتائج النهائية لـ biometric-service
+// أضيفت فعلياً إلى TiDB بتاريخ 2026-08-31.
+// تبقى مستقلة تماماً عن workers / attendance / finance / payroll / QR.
+// لا توجد Foreign Keys إلى النظام الرئيسي.
+// ============================================
+export const biometricSvcPeople = mysqlTable("biometric_svc_people", {
+	id: bigint({ mode: 'number', unsigned: true }).autoincrement().notNull(),
+	personCode: varchar("person_code", { length: 64 }).notNull(),
+	displayName: varchar("display_name", { length: 255 }).notNull(),
+	status: varchar({ length: 32 }).default('active').notNull(),
+	notes: text(),
+	createdAt: datetime("created_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+	updatedAt: datetime("updated_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+},
+(table) => [
+	uniqueIndex("uq_biometric_svc_people_person_code").on(table.personCode),
+	index("idx_biometric_svc_people_status").on(table.status),
+]);
+
+export const biometricSvcPersonDeviceUsers = mysqlTable("biometric_svc_person_device_users", {
+	id: bigint({ mode: 'number', unsigned: true }).autoincrement().notNull(),
+	personId: bigint("person_id", { mode: 'number', unsigned: true }).notNull(),
+	deviceUserRowId: bigint("device_user_row_id", { mode: 'number', unsigned: true }).notNull(),
+	status: varchar({ length: 32 }).default('active').notNull(),
+	activeFrom: datetime("active_from", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+	activeTo: datetime("active_to", { mode: 'string', fsp: 6 }),
+	createdAt: datetime("created_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+	updatedAt: datetime("updated_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+},
+(table) => [
+	uniqueIndex("uq_biometric_svc_person_device_users_device_user").on(table.deviceUserRowId),
+	index("idx_biometric_svc_person_device_users_person").on(table.personId),
+	index("idx_biometric_svc_person_device_users_status").on(table.status),
+	index("idx_biometric_svc_person_device_users_active").on(table.personId, table.status, table.activeTo),
+]);
+
+export const biometricSvcFinalEvents = mysqlTable("biometric_svc_final_events", {
+	id: bigint({ mode: 'number', unsigned: true }).autoincrement().notNull(),
+	finalEventUuid: char("final_event_uuid", { length: 36 }).notNull(),
+	personId: bigint("person_id", { mode: 'number', unsigned: true }).notNull(),
+	personCode: varchar("person_code", { length: 64 }).notNull(),
+	sourcePunchId: bigint("source_punch_id", { mode: 'number', unsigned: true }).notNull(),
+	deviceId: bigint("device_id", { mode: 'number', unsigned: true }).notNull(),
+	deviceReference: varchar("device_reference", { length: 255 }).notNull(),
+	eventType: varchar("event_type", { length: 64 }).notNull(),
+	eventTimeLocal: datetime("event_time_local", { mode: 'string', fsp: 6 }).notNull(),
+	eventTimezone: varchar("event_timezone", { length: 100 }).notNull(),
+	eventTimeUtc: datetime("event_time_utc", { mode: 'string', fsp: 6 }).notNull(),
+	verificationMethod: varchar("verification_method", { length: 64 }),
+	finalizationVersion: varchar("finalization_version", { length: 32 }).notNull(),
+	status: varchar({ length: 32 }).default('final').notNull(),
+	safeMetadata: json("safe_metadata"),
+	finalizedAt: datetime("finalized_at", { mode: 'string', fsp: 6 }).notNull(),
+	createdAt: datetime("created_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+},
+(table) => [
+	uniqueIndex("uq_biometric_svc_final_events_uuid").on(table.finalEventUuid),
+	uniqueIndex("uq_biometric_svc_final_events_source_version").on(table.sourcePunchId, table.finalizationVersion),
+	index("idx_biometric_svc_final_events_person_time").on(table.personId, table.eventTimeUtc),
+	index("idx_biometric_svc_final_events_person_code_time").on(table.personCode, table.eventTimeUtc),
+	index("idx_biometric_svc_final_events_device_time").on(table.deviceId, table.eventTimeUtc),
+	index("idx_biometric_svc_final_events_status_finalized").on(table.status, table.finalizedAt),
+	index("idx_biometric_svc_final_events_event_time_utc").on(table.eventTimeUtc),
+]);
+
+export const biometricSvcFinalizationIssues = mysqlTable("biometric_svc_finalization_issues", {
+	id: bigint({ mode: 'number', unsigned: true }).autoincrement().notNull(),
+	sourcePunchId: bigint("source_punch_id", { mode: 'number', unsigned: true }).notNull(),
+	issueType: varchar("issue_type", { length: 64 }).notNull(),
+	status: varchar({ length: 32 }).default('open').notNull(),
+	details: json(),
+	firstSeenAt: datetime("first_seen_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+	lastSeenAt: datetime("last_seen_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+	resolvedAt: datetime("resolved_at", { mode: 'string', fsp: 6 }),
+	resolutionNote: varchar("resolution_note", { length: 1000 }),
+	createdAt: datetime("created_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+	updatedAt: datetime("updated_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+},
+(table) => [
+	uniqueIndex("uq_biometric_svc_finalization_issues_source_type").on(table.sourcePunchId, table.issueType),
+	index("idx_biometric_svc_finalization_issues_status").on(table.status),
+	index("idx_biometric_svc_finalization_issues_type_status").on(table.issueType, table.status),
+	index("idx_biometric_svc_finalization_issues_last_seen").on(table.lastSeenAt),
+]);
+
+export const biometricSvcAuditLog = mysqlTable("biometric_svc_audit_log", {
+	id: bigint({ mode: 'number', unsigned: true }).autoincrement().notNull(),
+	actorType: varchar("actor_type", { length: 32 }).notNull(),
+	actorReference: varchar("actor_reference", { length: 128 }),
+	actionType: varchar("action_type", { length: 64 }).notNull(),
+	entityType: varchar("entity_type", { length: 64 }).notNull(),
+	entityId: bigint("entity_id", { mode: 'number', unsigned: true }),
+	beforeState: json("before_state"),
+	afterState: json("after_state"),
+	notes: varchar({ length: 1000 }),
+	occurredAt: datetime("occurred_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+	createdAt: datetime("created_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+},
+(table) => [
+	index("idx_biometric_svc_audit_log_actor").on(table.actorType, table.actorReference),
+	index("idx_biometric_svc_audit_log_action").on(table.actionType),
+	index("idx_biometric_svc_audit_log_entity").on(table.entityType, table.entityId),
+	index("idx_biometric_svc_audit_log_occurred_at").on(table.occurredAt),
+]);
+
+
 export const groupSchedules = mysqlTable("group_schedules", {
 	id: int().autoincrement().notNull(),
 	groupId: int("group_id").notNull().references(() => groups.id, { onDelete: "cascade", onUpdate: "cascade" } ),

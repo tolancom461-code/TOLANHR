@@ -38,6 +38,7 @@ export async function getDailyAttendanceReportData(
       totalDeductions: payrollBatchItems.totalDeductions,
       totalBonuses: payrollBatchItems.totalBonuses,
       netAmount: payrollBatchItems.netAmount,
+      notes: payrollBatchItems.notes,
     })
     .from(payrollBatchItems)
     .innerJoin(payrollBatches, eq(payrollBatchItems.batchId, payrollBatches.id))
@@ -57,6 +58,7 @@ export async function getDailyAttendanceReportData(
     totalDeductions: number;
     totalBonuses: number;
     netAmount: number;
+    notes: string;
   }>();
 
   items.forEach((row) => {
@@ -68,6 +70,7 @@ export async function getDailyAttendanceReportData(
     const totalDeductions = parseFloat(row.totalDeductions || '0');
     const totalBonuses = parseFloat(row.totalBonuses || '0');
     const netAmount = parseFloat(row.netAmount || '0');
+    const notes = (row.notes || '').trim();
 
     const existing = workerMap.get(row.workerId);
     if (existing) {
@@ -76,6 +79,16 @@ export async function getDailyAttendanceReportData(
       existing.totalDeductions += totalDeductions;
       existing.totalBonuses += totalBonuses;
       existing.netAmount += netAmount;
+
+      // إذا ظهر العامل في أكثر من دفعة ضمن الفترة، نجمع الملاحظات غير المكررة بدل فقدانها.
+      if (notes) {
+        const mergedNotes = new Set(
+          [...existing.notes.split('\n'), notes]
+            .map((note) => note.trim())
+            .filter(Boolean)
+        );
+        existing.notes = Array.from(mergedNotes).join('\n');
+      }
     } else {
       workerMap.set(row.workerId, {
         workerId: row.workerId,
@@ -88,6 +101,7 @@ export async function getDailyAttendanceReportData(
         totalDeductions,
         totalBonuses,
         netAmount,
+        notes,
       });
     }
   });

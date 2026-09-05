@@ -1,6 +1,7 @@
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import DashboardLayout from "@/components/DashboardLayout";
+import WorkerPhotoPreview from "@/components/WorkerPhotoPreview";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -180,17 +181,12 @@ export default function WorkerDetails() {
               <div className="flex gap-6">
                 {/* Photo */}
                 <div className="flex-shrink-0">
-                  {worker.photoUrl ? (
-                    <img
-                      src={worker.photoUrl}
-                      alt={worker.fullName}
-                      className="w-32 h-32 rounded-xl object-cover border-2 border-gray-200 shadow-sm"
-                    />
-                  ) : (
-                    <div className="w-32 h-32 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center border-2 border-gray-200">
-                      <User className="h-16 w-16 text-gray-400" />
-                    </div>
-                  )}
+                  <WorkerPhotoPreview
+                    src={worker.photoUrl}
+                    workerName={worker.fullName}
+                    className="h-32 w-32"
+                    fallbackIconClassName="h-14 w-14"
+                  />
                 </div>
 
                 {/* Info Grid */}

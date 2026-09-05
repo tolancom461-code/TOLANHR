@@ -129,13 +129,14 @@ function buildReportHtml({ rows, periodStart, periodEnd, printedBy }: BuildHtmlP
             <td style="color:green">${item.totalBonuses.toFixed(2)}</td>
             <td style="font-weight:bold">${item.netAmount.toFixed(2)}</td>
             <td class="signature-col"></td>
+            <td class="notes-col">${escapeHtml(item.notes || "")}</td>
           </tr>`;
         })
         .join("");
 
       return `
         <tr class="group-header">
-          <td colspan="9">${escapeHtml(group.groupName)} (${group.items.length} عامل)</td>
+          <td colspan="10">${escapeHtml(group.groupName)} (${group.items.length} عامل)</td>
         </tr>
         ${groupRows}
         <tr class="group-total">
@@ -144,6 +145,7 @@ function buildReportHtml({ rows, periodStart, periodEnd, printedBy }: BuildHtmlP
           <td style="color:red">${group.totals.totalDeductions.toFixed(2)}</td>
           <td style="color:green">${group.totals.totalBonuses.toFixed(2)}</td>
           <td style="font-weight:bold">${group.totals.netAmount.toFixed(2)}</td>
+          <td></td>
           <td></td>
         </tr>`;
     })
@@ -166,7 +168,8 @@ function buildReportHtml({ rows, periodStart, periodEnd, printedBy }: BuildHtmlP
   .total-row { font-weight: bold; background-color: #e8e8e8; }
   .group-header { background-color: #d4e6f1; font-weight: bold; font-size: 14px; }
   .group-total { background-color: #eaf2f8; font-weight: bold; font-size: 12px; }
-  .signature-col { width: 120px; min-height: 40px; }
+  .signature-col { width: 110px; min-height: 40px; }
+  .notes-col { width: 140px; min-height: 40px; white-space: pre-wrap; }
   .footer { text-align: center; font-size: 11px; color: #666; margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px; }
   @page { size: A4 landscape; margin: 1cm; }
 </style>
@@ -194,6 +197,7 @@ function buildReportHtml({ rows, periodStart, periodEnd, printedBy }: BuildHtmlP
         <th>الاضافي</th>
         <th>الصافي</th>
         <th>توقيع المستلم</th>
+        <th>الملاحظات</th>
       </tr>
     </thead>
     <tbody>
@@ -205,9 +209,10 @@ function buildReportHtml({ rows, periodStart, periodEnd, printedBy }: BuildHtmlP
         <td>${grandTotals.totalBonuses.toFixed(2)}</td>
         <td>${grandTotals.netAmount.toFixed(2)}</td>
         <td></td>
+        <td></td>
       </tr>
       <tr>
-        <td colspan="9" style="background:#f0f7ff;padding:10px 12px;font-size:13px;font-weight:600;color:#1a3c6e;border-top:2px solid #4a90d9;">المبلغ الإجمالي بالأحرف: ${numberToArabicWords(grandTotals.netAmount)}</td>
+        <td colspan="10" style="background:#f0f7ff;padding:10px 12px;font-size:13px;font-weight:600;color:#1a3c6e;border-top:2px solid #4a90d9;">المبلغ الإجمالي بالأحرف: ${numberToArabicWords(grandTotals.netAmount)}</td>
       </tr>
     </tbody>
   </table>`

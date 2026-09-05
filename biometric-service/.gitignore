@@ -1,0 +1,5 @@
+.env
+var/captures/*.ndjson
+var/logs/*.ndjson
+!var/captures/.gitkeep
+!var/logs/.gitkeep

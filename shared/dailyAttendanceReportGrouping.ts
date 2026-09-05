@@ -15,6 +15,7 @@ export interface DailyAttendanceWorkerRow {
   totalDeductions: number;
   totalBonuses: number;
   netAmount: number;
+  notes: string;
 }
 
 export interface DailyAttendanceGroupBlock {

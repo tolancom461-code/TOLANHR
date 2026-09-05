@@ -18,9 +18,16 @@ import { ExcelImportExportDialog } from "@/components/ExcelImportExportDialog";
 import { exportToExcel, printPage } from '@/lib/exportUtils';
 import { memo, useCallback, useMemo } from 'react';
 import WorkerRow from '@/components/WorkerRow';
+import WorkerPhotoPicker from '@/components/WorkerPhotoPicker';
+import WorkerPhotoPreview from '@/components/WorkerPhotoPreview';
+import { fileToBase64 } from '@/lib/imageCompression';
+import { useAuth } from '@/hooks/useAuth';
+import { canManageWorkerPhotos } from '@shared/workerPhotoPolicy';
 
 export default function Workers() {
-  const hasPermission = () => true; // All users have full permissions
+  const hasPermission = () => true; // Existing worker-management behavior remains unchanged.
+  const { user } = useAuth();
+  const canManagePhotos = canManageWorkerPhotos(user?.role, Boolean((user as any)?.isOwner));
   const [searchQuery, setSearchQuery] = useState("");
   const [filterGroup, setFilterGroup] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -36,6 +43,7 @@ export default function Workers() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isQRDialogOpen, setIsQRDialogOpen] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState<any>(null);
+  const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -45,7 +53,6 @@ export default function Workers() {
     phone: "",
     groupId: null as number | null,
     jobId: null as number | null,
-    photoUrl: "",
     hireDate: "",
     status: "active" as "active" | "inactive" | "archived",
   });
@@ -64,33 +71,9 @@ export default function Workers() {
   const workers = workersData?.data || [];
   const totalPages = workersData?.totalPages || 1;
 
-  const createMutation = trpc.workers.create.useMutation({
-    onSuccess: (data) => {
-      toast.success("تم إضافة العامل بنجاح");
-      setIsAddDialogOpen(false);
-      resetForm();
-      utils.workers.listWithPagination.invalidate();
-      utils.workers.list.invalidate();
-      utils.dashboard.stats.invalidate();
-    },
-    onError: (error) => {
-      toast.error(error.message || "حدث خطأ أثناء إضافة العامل");
-    },
-  });
-
-  const updateMutation = trpc.workers.update.useMutation({
-    onSuccess: () => {
-      toast.success("تم تحديث بيانات العامل بنجاح");
-      setIsEditDialogOpen(false);
-      setSelectedWorker(null);
-      resetForm();
-      utils.workers.listWithPagination.invalidate();
-      utils.workers.list.invalidate();
-    },
-    onError: (error) => {
-      toast.error(error.message || "حدث خطأ أثناء تحديث بيانات العامل");
-    },
-  });
+  const createMutation = trpc.workers.create.useMutation();
+  const updateMutation = trpc.workers.update.useMutation();
+  const uploadPhotoMutation = trpc.workers.uploadPhoto.useMutation();
 
   const deleteMutation = trpc.workers.delete.useMutation({
     onSuccess: () => {
@@ -151,10 +134,10 @@ export default function Workers() {
       phone: "",
       groupId: null,
       jobId: null,
-      photoUrl: "",
       hireDate: "",
       status: "active",
     });
+    setPendingPhotoFile(null);
   };
 
   const handleEdit = (worker: any) => {
@@ -166,10 +149,10 @@ export default function Workers() {
       phone: worker.phone || "",
       groupId: worker.groupId,
       jobId: worker.jobId,
-      photoUrl: worker.photoUrl || "",
       hireDate: worker.hireDate ? new Date(worker.hireDate).toLocaleDateString('en-CA') : "",
       status: worker.status || "active",
     });
+    setPendingPhotoFile(null);
     setIsEditDialogOpen(true);
   };
 
@@ -187,20 +170,75 @@ export default function Workers() {
     exportWorkerQRMutation.mutate({ workerId });
   };
 
-  const handleSubmit = () => {
+  const invalidateWorkerViews = async () => {
+    await Promise.all([
+      utils.workers.listWithPagination.invalidate(),
+      utils.workers.list.invalidate(),
+    ]);
+  };
+
+  const uploadPreparedPhoto = async (workerId: number, file: File) => {
+    const imageBase64 = await fileToBase64(file);
+    return await uploadPhotoMutation.mutateAsync({ workerId, imageBase64 });
+  };
+
+  const handleSubmit = async () => {
+    if (createMutation.isPending || updateMutation.isPending || uploadPhotoMutation.isPending) return;
+
     if (selectedWorker) {
-      updateMutation.mutate({
-        id: selectedWorker.id,
+      try {
+        await updateMutation.mutateAsync({
+          id: selectedWorker.id,
+          ...formData,
+          groupId: formData.groupId || undefined,
+          jobId: formData.jobId || undefined,
+        });
+
+        if (pendingPhotoFile) {
+          try {
+            await uploadPreparedPhoto(selectedWorker.id, pendingPhotoFile);
+          } catch (error: any) {
+            await invalidateWorkerViews();
+            toast.error(error?.message || 'تم حفظ بيانات العامل، لكن تعذر استبدال الصورة. الصورة الحالية لم تتغير.');
+            return;
+          }
+        }
+
+        toast.success(pendingPhotoFile ? 'تم تحديث بيانات العامل واستبدال الصورة بنجاح' : 'تم تحديث بيانات العامل بنجاح');
+        setIsEditDialogOpen(false);
+        setSelectedWorker(null);
+        resetForm();
+        await invalidateWorkerViews();
+      } catch (error: any) {
+        toast.error(error?.message || 'حدث خطأ أثناء تحديث بيانات العامل');
+      }
+      return;
+    }
+
+    try {
+      const created = await createMutation.mutateAsync({
         ...formData,
         groupId: formData.groupId || undefined,
         jobId: formData.jobId || undefined,
       });
-    } else {
-      createMutation.mutate({
-        ...formData,
-        groupId: formData.groupId || undefined,
-        jobId: formData.jobId || undefined,
-      });
+
+      if (pendingPhotoFile) {
+        try {
+          await uploadPreparedPhoto(created.id, pendingPhotoFile);
+          toast.success('تم إضافة العامل ورفع الصورة بنجاح');
+        } catch (error: any) {
+          toast.warning('تم إنشاء العامل، لكن تعذر رفع الصورة. يمكنك استبدالها لاحقًا من تعديل العامل.');
+        }
+      } else {
+        toast.success('تم إضافة العامل بنجاح');
+      }
+
+      setIsAddDialogOpen(false);
+      resetForm();
+      await invalidateWorkerViews();
+      await utils.dashboard.stats.invalidate();
+    } catch (error: any) {
+      toast.error(error?.message || 'حدث خطأ أثناء إضافة العامل');
     }
   };
 
@@ -292,14 +330,20 @@ export default function Workers() {
               utils.workers.list.invalidate();
             }} />
             {hasPermission() && (
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <Dialog
+                open={isAddDialogOpen}
+                onOpenChange={(open) => {
+                  setIsAddDialogOpen(open);
+                  if (!open) resetForm();
+                }}
+              >
                 <DialogTrigger asChild>
                   <Button onClick={() => { resetForm(); setSelectedWorker(null); }}>
                     <Plus className="ml-2 h-4 w-4" />
                     إضافة عامل
                   </Button>
                 </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]" dir="rtl">
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[650px]" dir="rtl">
               <DialogHeader>
                 <DialogTitle>إضافة عامل جديد</DialogTitle>
                 <DialogDescription>أدخل بيانات العامل الجديد</DialogDescription>
@@ -392,22 +436,23 @@ export default function Workers() {
                     </Select>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="photoUrl">رابط الصورة</Label>
-                  <Input
-                    id="photoUrl"
-                    value={formData.photoUrl}
-                    onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
-                    placeholder="https://..."
+                {canManagePhotos && (
+                  <WorkerPhotoPicker
+                    workerName={formData.fullName || 'العامل الجديد'}
+                    value={pendingPhotoFile}
+                    onChange={setPendingPhotoFile}
                   />
-                </div>
+                )}
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                   إلغاء
                 </Button>
-                <Button onClick={handleSubmit} disabled={createMutation.isPending}>
-                  {createMutation.isPending ? "جاري الحفظ..." : "حفظ"}
+                <Button
+                  onClick={handleSubmit}
+                  disabled={createMutation.isPending || uploadPhotoMutation.isPending}
+                >
+                  {createMutation.isPending || uploadPhotoMutation.isPending ? "جاري الحفظ..." : "حفظ"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -517,8 +562,17 @@ export default function Workers() {
         </Card>
 
         {/* Edit Dialog */}
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="sm:max-w-[600px]" dir="rtl">
+        <Dialog
+          open={isEditDialogOpen}
+          onOpenChange={(open) => {
+            setIsEditDialogOpen(open);
+            if (!open) {
+              setPendingPhotoFile(null);
+              setSelectedWorker(null);
+            }
+          }}
+        >
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[650px]" dir="rtl">
             <DialogHeader>
               <DialogTitle>تعديل بيانات العامل</DialogTitle>
               <DialogDescription>تعديل بيانات العامل</DialogDescription>
@@ -596,13 +650,39 @@ export default function Workers() {
                   </SelectContent>
                 </Select>
               </div>
+              {selectedWorker && (
+                canManagePhotos ? (
+                  <WorkerPhotoPicker
+                    workerName={formData.fullName || selectedWorker.fullName}
+                    currentPhotoUrl={selectedWorker.photoUrl}
+                    value={pendingPhotoFile}
+                    onChange={setPendingPhotoFile}
+                  />
+                ) : (
+                  <div className="space-y-3 rounded-lg border bg-muted/20 p-4">
+                    <Label>صورة العامل</Label>
+                    <div className="flex items-center gap-4">
+                      <WorkerPhotoPreview
+                        src={selectedWorker.photoUrl}
+                        workerName={formData.fullName || selectedWorker.fullName}
+                        className="h-24 w-24"
+                        fallbackIconClassName="h-10 w-10"
+                      />
+                      <p className="text-xs text-muted-foreground">الصورة للعرض فقط حسب صلاحية المستخدم.</p>
+                    </div>
+                  </div>
+                )
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 إلغاء
               </Button>
-              <Button onClick={handleSubmit} disabled={updateMutation.isPending}>
-                {updateMutation.isPending ? "جاري الحفظ..." : "حفظ التغييرات"}
+              <Button
+                onClick={handleSubmit}
+                disabled={updateMutation.isPending || uploadPhotoMutation.isPending}
+              >
+                {updateMutation.isPending || uploadPhotoMutation.isPending ? "جاري الحفظ..." : "حفظ التغييرات"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -617,12 +697,12 @@ export default function Workers() {
             {selectedWorker && (
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-20 w-20">
-                    <AvatarImage src={selectedWorker.photoUrl || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-2xl">
-                      {getInitials(selectedWorker.fullName)}
-                    </AvatarFallback>
-                  </Avatar>
+                  <WorkerPhotoPreview
+                    src={selectedWorker.photoUrl}
+                    workerName={selectedWorker.fullName}
+                    className="h-20 w-20"
+                    fallbackIconClassName="h-9 w-9"
+                  />
                   <div>
                     <h3 className="text-xl font-bold">{selectedWorker.fullName}</h3>
                     <p className="text-muted-foreground font-mono">{selectedWorker.code}</p>
