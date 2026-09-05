@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { canManageWorkerPhotos, WORKER_PHOTO_POLICY } from '@shared/workerPhotoPolicy';
 import {
+  buildWorkerPhotoAuditDetails,
   decodeWorkerPhotoBase64,
   getWebPDimensions,
   isWebPBuffer,
@@ -30,12 +31,34 @@ describe('worker photo policy', () => {
     expect(canManageWorkerPhotos('admin_affairs')).toBe(true);
     expect(canManageWorkerPhotos('data_entry')).toBe(true);
     expect(canManageWorkerPhotos('super_admin')).toBe(true);
+    expect(canManageWorkerPhotos('accountant')).toBe(true);
     expect(canManageWorkerPhotos('accountant', true)).toBe(true);
 
-    expect(canManageWorkerPhotos('accountant')).toBe(false);
     expect(canManageWorkerPhotos('auditor')).toBe(false);
     expect(canManageWorkerPhotos('executive')).toBe(false);
     expect(canManageWorkerPhotos(undefined)).toBe(false);
+  });
+
+
+  it('builds safe audit details for first upload without image payloads or URLs', () => {
+    const audit = buildWorkerPhotoAuditDetails(false, 'workers/12/profile-test.webp');
+    expect(audit.actionName).toBe('ADD_WORKER_PHOTO');
+    expect(audit.beforeValues).toEqual({ photoPresent: false });
+    expect(audit.afterValues).toEqual({ photoPresent: true, format: 'webp' });
+    expect(audit.changedFields.workerPhoto).toEqual({ old: null, new: 'webp_uploaded' });
+
+    const serialized = JSON.stringify(audit);
+    expect(serialized).not.toContain('base64');
+    expect(serialized).not.toContain('data:image');
+    expect(serialized).not.toContain('http://');
+    expect(serialized).not.toContain('https://');
+  });
+
+  it('records replacement as a distinct audit action', () => {
+    const audit = buildWorkerPhotoAuditDetails(true, 'workers/12/profile-replacement.webp');
+    expect(audit.actionName).toBe('REPLACE_WORKER_PHOTO');
+    expect(audit.beforeValues).toEqual({ photoPresent: true });
+    expect(audit.changedFields.workerPhoto).toEqual({ old: 'existing', new: 'webp_uploaded' });
   });
 
   it('accepts a WebP payload within the final size and dimension limits', () => {

@@ -1,9 +1,6 @@
-client/src/components/WorkerPhotoPicker.tsx
-client/src/components/WorkerPhotoPreview.tsx
-client/src/lib/imageCompression.ts
-client/src/pages/WorkerDetails.tsx
-client/src/pages/Workers.tsx
-server/worker-photos.ts
 server/routers/workers.ts
+server/worker-photos.ts
 server/__tests__/worker-photos.test.ts
 shared/workerPhotoPolicy.ts
+README_WORKER_PHOTO_AUDIT_V2_UPDATE.md
+SHA256SUMS.txt

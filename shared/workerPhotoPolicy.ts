@@ -20,6 +20,7 @@ export const WORKER_PHOTO_POLICY = {
 export const WORKER_PHOTO_MANAGE_ROLES = [
   'admin_affairs',
   'data_entry',
+  'accountant',
   'super_admin',
 ] as const;
 

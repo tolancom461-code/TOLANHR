@@ -7,7 +7,7 @@ import { systemRouter } from "../_core/systemRouter";
 import { publicProcedure, protectedProcedure, adminProcedure, router, requireRole, requirePermissionFlag } from "../_core/trpc";
 import * as db from "../db";
 import { sql, and, eq, gte, desc } from "drizzle-orm";
-import { attendanceEvents, type UserRole } from "../../drizzle/schema";
+import { attendanceEvents, workers, type UserRole } from "../../drizzle/schema";
 import { ROLE_PERMISSIONS, hasPageAccess, canApproveBatchAtStage, cannotSelfReview } from "../permissions";
 import { generateAttendanceExcel, generatePayrollExcel, type AttendanceReportRow, type PayrollReportRow } from "../excelExport";
 import { parseGroupsFromExcel, parseWorkersFromExcel, generateGroupsExcelTemplate, generateWorkersExcelTemplate, generateGroupsExcelExport, generateWorkersExcelExport } from "../excelImportExport";
@@ -20,7 +20,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { storagePut } from "../storage";
 import { canManageWorkerPhotos } from "@shared/workerPhotoPolicy";
-import { buildWorkerPhotoStorageKey, decodeWorkerPhotoBase64 } from "../worker-photos";
+import { buildWorkerPhotoAuditDetails, buildWorkerPhotoStorageKey, decodeWorkerPhotoBase64 } from "../worker-photos";
 import { ENV } from "../_core/env";
 
 function canCurrentUserManageWorkerPhotos(user: any): boolean {
@@ -220,22 +220,74 @@ export const workersRouter = router({
           });
         }
 
-        // Update only after storage upload succeeds, so a failed upload never
-        // removes or damages the worker's current photo reference.
-        await db.updateWorker(input.workerId, { photoUrl });
+        // The storage upload happens first. The database reference + both audit
+        // records are then committed atomically. If Audit V2 fails, the worker's
+        // current photo reference is rolled back and remains unchanged.
+        const database = await db.getDb();
+        if (!database) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة. لم يتم تغيير صورة العامل.',
+          });
+        }
 
-        await db.logAudit({
-          userId: ctx.user?.id,
-          action: worker.photoUrl ? 'REPLACE_WORKER_PHOTO' : 'ADD_WORKER_PHOTO',
-          tableName: 'workers',
-          recordId: input.workerId,
-          oldValues: { photoPresent: Boolean(worker.photoUrl) },
-          newValues: {
-            photoPresent: true,
-            format: 'webp',
-            storageKey,
-          },
-        });
+        const audit = buildWorkerPhotoAuditDetails(Boolean(worker.photoUrl), storageKey);
+        const actorName = ctx.user?.fullName || ctx.user?.username || `مستخدم رقم ${ctx.user?.id ?? ''}`;
+        const workerLabel = `${worker.fullName}${worker.code ? ` (${worker.code})` : ''}`;
+        const operationLabel = audit.actionName === 'REPLACE_WORKER_PHOTO' ? 'استبدال' : 'رفع';
+        const auditTimestamp = new Date().toISOString();
+
+        try {
+          await database.transaction(async (tx: any) => {
+            await tx.update(workers)
+              .set({ photoUrl })
+              .where(eq(workers.id, input.workerId));
+
+            // Legacy audit remains during the dual-write transition so existing
+            // audit screens keep their current behaviour. No image bytes/base64
+            // are ever written to either audit table.
+            await db.logAudit({
+              userId: ctx.user?.id,
+              action: audit.actionName,
+              tableName: 'workers',
+              recordId: input.workerId,
+              oldValues: audit.beforeValues,
+              newValues: {
+                ...audit.afterValues,
+                storageKey,
+              },
+              tx,
+            });
+
+            // Audit V2 preserves an immutable actor snapshot (name/role at the
+            // time of the action), request metadata and the precise DB timestamp.
+            await db.logAuditV2({
+              actionCategory: 'UPDATE',
+              actionName: audit.actionName,
+              description: `${actorName} قام ب${operationLabel} صورة العامل ${workerLabel}`,
+              tableName: 'workers',
+              entityType: 'worker_photo',
+              recordId: input.workerId,
+              recordKey: { workerCode: worker.code },
+              actor: db.actorFromUser(ctx.user),
+              source: 'WEB',
+              req: ctx.req,
+              requestId: ctx.requestId,
+              beforeValues: audit.beforeValues,
+              afterValues: audit.afterValues,
+              changedFields: audit.changedFields,
+              recordUpdatedAt: auditTimestamp,
+              metadata: audit.metadata,
+              tx,
+            });
+          });
+        } catch (error) {
+          console.error('[workers.uploadPhoto] Database/audit transaction failed:', error);
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'تعذر حفظ صورة العامل وتسجيل عملية التدقيق. لم يتم تغيير الصورة الحالية.',
+          });
+        }
 
         return { success: true, photoUrl };
       }),

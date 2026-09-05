@@ -115,3 +115,37 @@ export function buildWorkerPhotoStorageKey(workerId: number): string {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   return `workers/${workerId}/profile-${timestamp}-${randomUUID()}.webp`;
 }
+
+
+export type WorkerPhotoAuditDetails = {
+  actionName: 'ADD_WORKER_PHOTO' | 'REPLACE_WORKER_PHOTO';
+  beforeValues: { photoPresent: boolean };
+  afterValues: { photoPresent: true; format: 'webp' };
+  changedFields: { workerPhoto: { old: 'existing' | null; new: 'webp_uploaded' } };
+  metadata: { format: 'webp'; storageKey: string };
+};
+
+/**
+ * Build the safe, non-sensitive audit payload for a committed worker-photo
+ * change. Deliberately excludes image bytes, base64 and public/signed URLs.
+ */
+export function buildWorkerPhotoAuditDetails(
+  hadExistingPhoto: boolean,
+  storageKey: string
+): WorkerPhotoAuditDetails {
+  return {
+    actionName: hadExistingPhoto ? 'REPLACE_WORKER_PHOTO' : 'ADD_WORKER_PHOTO',
+    beforeValues: { photoPresent: hadExistingPhoto },
+    afterValues: { photoPresent: true, format: 'webp' },
+    changedFields: {
+      workerPhoto: {
+        old: hadExistingPhoto ? 'existing' : null,
+        new: 'webp_uploaded',
+      },
+    },
+    metadata: {
+      format: 'webp',
+      storageKey,
+    },
+  };
+}
