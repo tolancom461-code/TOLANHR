@@ -1,0 +1,9 @@
+92febf3803b89ec724479a4d670dd48ba0b396edc5fa3fd95a34aa434d1064d2  ./CHANGED_FILES_V0.17.1.txt
+bed2a4348dab8182fadb11c7e21cbace0be84cba834c7c5dfb389339f98bb66b  ./README.md
+d078518620a339b51dbe872ec0bd1d557a02bef35e39192beaa65b148f666639  ./README_UPDATE.txt
+37ae464189f5dfbb2dcfbc1b50f526137ca652c5395c35dc176ac7ecd678a233  ./docs/UPGRADE_V0.17.0_TO_V0.17.1.md
+4fe8999ac41e704035741af7e412643d4d5781a35a9ca9791a13f8f1eadd4da4  ./package-lock.json
+a718569693652ea086655e0823e21f0db0c630600dcb0995eba98488a6a7e531  ./package.json
+0905a2280b743029b3ee15d3328e88ee9d8114e20543127e0a783317b9e30389  ./src/infrastructure/admin/public/app.js
+1276002b47f8a8a190676fa4da780a8c79986182c46aa6ea5c7efdc741b8ad0f  ./src/infrastructure/admin/public/index.html
+508f04dc2a8d77dbc70d55f06ec9b1553667be9a62a8da4e20c1c24e9bb702cb  ./tests/admin-ui-localization.test.js

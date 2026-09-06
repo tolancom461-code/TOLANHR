@@ -13,6 +13,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { getSecurityHeaders, apiRateLimiter, loginRateLimiter, csrfManager } from "./security";
 import { parse as parseCookieHeader } from "cookie";
+import { registerBiometricWebBridgeRoutes } from "../biometric-web-bridge";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -54,6 +55,7 @@ function startMemoryLogging() {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+  let stopBiometricFinalEventsImporter: () => void = () => undefined;
 
   // ==========================================
   // SECURITY MIDDLEWARE
@@ -144,6 +146,17 @@ async function startServer() {
     next();
   });
 
+  // Public machine-to-machine biometric bridge. It uses its own bearer token
+  // and is intentionally outside the browser CSRF-protected tRPC surface.
+  app.use("/api/biometric-bridge", (req, res, next) => {
+    const clientIP = req.ip || req.socket.remoteAddress || 'unknown';
+    if (!apiRateLimiter.isAllowed(`biometric-bridge:${clientIP}`)) {
+      return res.status(429).json({ error: 'TOO_MANY_REQUESTS' });
+    }
+    next();
+  });
+  registerBiometricWebBridgeRoutes(app);
+
   // ==========================================
   // HEALTH CHECK ENDPOINT
   // ==========================================
@@ -208,24 +221,18 @@ async function startServer() {
   server.listen(port, async () => {
     console.log(`Server running on http://localhost:${port}/`);
     
-    // Auto-run migration for flexible schedule feature
-    try {
-      const { runMigration, runRoleEnumMigration, runDeductionsMigration, runPayOverridesNotesMigration } = await import('../db');
-      await runMigration();
-      console.log('[Migration] Successfully added flexible schedule columns');
-      await runRoleEnumMigration();
-      await runDeductionsMigration();
-      await runPayOverridesNotesMigration();
-    } catch (error: any) {
-      if (error.message?.includes('duplicate column name')) {
-        console.log('[Migration] Columns already exist, skipping migration');
-      } else {
-        console.error('[Migration] Failed:', error.message);
-      }
-    }
+    // Database schema changes must be run explicitly after reviewing the actual TiDB schema.
+    // Do not mutate database schema automatically during application startup.
+    console.log('[Migration] Automatic startup migrations: disabled');
     
     // Start periodic memory logging
     startMemoryLogging();
+
+    // Final Events consumer is disabled unless explicitly enabled by environment.
+    // First enable initializes its cursor at the current API tail, so historical
+    // biometric events are not backfilled into attendance automatically.
+    const importer = await import('../biometric-final-events-importer');
+    stopBiometricFinalEventsImporter = importer.startBiometricFinalEventsImporter();
   });
   
   // ==========================================
@@ -235,6 +242,7 @@ async function startServer() {
   // Handle SIGTERM (sent by Railway before stopping the service)
   process.on('SIGTERM', () => {
     console.log('[Server] SIGTERM received, shutting down gracefully...');
+    stopBiometricFinalEventsImporter();
     server.close(() => {
       console.log('[Server] HTTP server closed');
       process.exit(0);
@@ -250,6 +258,7 @@ async function startServer() {
   // Handle SIGINT (Ctrl+C in development)
   process.on('SIGINT', () => {
     console.log('[Server] SIGINT received, shutting down gracefully...');
+    stopBiometricFinalEventsImporter();
     server.close(() => {
       console.log('[Server] HTTP server closed');
       process.exit(0);

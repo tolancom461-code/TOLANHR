@@ -93,6 +93,21 @@ const translations = Object.freeze({
     'people.active': 'نشط',
     'people.inactive': 'غير نشط',
     'people.none': 'لا يوجد أشخاص مطابقون للفلاتر.',
+    'people.historicalAction': 'معالجة البصمات القديمة',
+    'historical.title': 'معالجة البصمات القديمة',
+    'historical.subtitle': 'إعادة إتاحة حركات قديمة لهذا الشخص بعد ربطه في البرنامج الرئيسي. لا يتم تغيير أو حذف الحركات الأصلية.',
+    'historical.person': 'الشخص: {name} ({code})',
+    'historical.rangeHint': 'اختر فترة لا تتجاوز 31 يومًا في كل مرة.',
+    'historical.preview': 'فحص الحركات',
+    'historical.previewCount': 'وجدنا {count} حركة نهائية قديمة في الفترة المحددة.',
+    'historical.previewNone': 'لا توجد حركات نهائية قديمة لهذا الشخص في الفترة المحددة.',
+    'historical.previewTimes': 'من {from} إلى {to}',
+    'historical.warning': 'هذه العملية ستصدر مراجع جديدة للحركات المختارة حتى يستطيع البرنامج الرئيسي قراءتها بعد الربط. الحركات الأصلية تبقى كما هي.',
+    'historical.confirmLabel': 'أؤكد أنني أريد إعادة معالجة هذه الفترة يدويًا.',
+    'historical.reprocess': 'إعادة معالجة الحركات',
+    'historical.success': 'تمت إعادة إتاحة {count} حركة قديمة للبرنامج الرئيسي.',
+    'historical.zeroSuccess': 'لا توجد حركات لإعادة المعالجة في هذه الفترة.',
+    'historical.needsPreview': 'افحص الفترة أولًا قبل إعادة المعالجة.',
     'devices.title': 'الأجهزة',
     'devices.subtitle': 'حالة أجهزة البصمة فقط، بدون إعدادات تقنية غير ضرورية.',
     'devices.status': 'الحالة',
@@ -214,6 +229,10 @@ const translations = Object.freeze({
     'error.displayNameRequired': 'اسم الشخص مطلوب.',
     'error.personNotFound': 'الشخص غير موجود.',
     'error.deviceUserNotFound': 'مستخدم الجهاز غير موجود.',
+    'error.historicalRange': 'اختر تاريخ البداية والنهاية بشكل صحيح، وبحد أقصى 31 يومًا.',
+    'error.historicalLimit': 'الفترة تحتوي حركات كثيرة. اختر فترة أصغر ثم حاول مرة أخرى.',
+    'error.historicalChanged': 'تغيرت الحركات منذ الفحص. افحص الفترة مرة أخرى ثم أعد المحاولة.',
+    'error.historicalConfirmation': 'يجب تأكيد إعادة المعالجة أولًا.',
     'error.generic': 'تعذر تنفيذ العملية.',
     'issue.unmapped': 'حركة لمستخدم غير مربوط',
     'issue.mappingConflict': 'تعارض في الربط',
@@ -334,6 +353,21 @@ const translations = Object.freeze({
     'people.active': 'Active',
     'people.inactive': 'Inactive',
     'people.none': 'No people match the selected filters.',
+    'people.historicalAction': 'Reprocess Historical Events',
+    'historical.title': 'Reprocess Historical Biometric Events',
+    'historical.subtitle': 'Reissue older events for this person after linking them in the main application. Original events are never changed or deleted.',
+    'historical.person': 'Person: {name} ({code})',
+    'historical.rangeHint': 'Choose a period of up to 31 days per operation.',
+    'historical.preview': 'Preview Events',
+    'historical.previewCount': '{count} historical final event(s) were found in the selected period.',
+    'historical.previewNone': 'No historical final events were found for this person in the selected period.',
+    'historical.previewTimes': 'From {from} to {to}',
+    'historical.warning': 'This will publish new event references for the selected history so the main application can read them after linking. Original events remain unchanged.',
+    'historical.confirmLabel': 'I confirm that I want to manually reprocess this period.',
+    'historical.reprocess': 'Reprocess Events',
+    'historical.success': '{count} historical event(s) were reissued to the main application.',
+    'historical.zeroSuccess': 'There are no events to reprocess in this period.',
+    'historical.needsPreview': 'Preview the period before reprocessing.',
     'devices.title': 'Devices',
     'devices.subtitle': 'Biometric device status only. Unnecessary technical settings stay hidden.',
     'devices.status': 'Status',
@@ -455,6 +489,10 @@ const translations = Object.freeze({
     'error.displayNameRequired': 'Person name is required.',
     'error.personNotFound': 'Person not found.',
     'error.deviceUserNotFound': 'Device user not found.',
+    'error.historicalRange': 'Choose a valid start and end date, up to 31 days.',
+    'error.historicalLimit': 'The period contains too many events. Choose a smaller period and try again.',
+    'error.historicalChanged': 'The event set changed after preview. Preview the period again and retry.',
+    'error.historicalConfirmation': 'Explicit reprocessing confirmation is required.',
     'error.generic': 'The operation could not be completed.',
     'issue.unmapped': 'Event from an unmapped user',
     'issue.mappingConflict': 'Mapping conflict',
@@ -488,6 +526,8 @@ const state = {
   activeView: 'home',
   mappingDeviceUser: null,
   currentEvent: null,
+  historicalPerson: null,
+  historicalPreview: null,
   locale: readSavedLocale(),
   connection: 'connecting',
   pages: { events: null, people: null, unmapped: null, issues: null, devices: null },
@@ -507,6 +547,7 @@ const els = {
   showAddPerson: byId('showAddPerson'), addPersonForm: byId('addPersonForm'), cancelAddPerson: byId('cancelAddPerson'),
   mapDialog: byId('mapDialog'), cancelMapDialog: byId('cancelMapDialog'), mapDialogHint: byId('mapDialogHint'), personSelect: byId('personSelect'), mapExistingForm: byId('mapExistingForm'),
   eventDialog: byId('eventDialog'), eventDetails: byId('eventDetails'), closeEventDialog: byId('closeEventDialog'), closeEventDialogTop: byId('closeEventDialogTop'), copyEventReference: byId('copyEventReference'),
+  historicalDialog: byId('historicalDialog'), historicalForm: byId('historicalForm'), historicalPersonHint: byId('historicalPersonHint'), historicalPreviewResult: byId('historicalPreviewResult'), historicalConfirm: byId('historicalConfirm'), historicalReprocessButton: byId('historicalReprocessButton'), historicalCancel: byId('historicalCancel'),
   reportsFilters: byId('reportsFilters'), reportHealth: byId('reportHealth'), reportDevicesTable: byId('reportDevicesTable'), reportMapping: byId('reportMapping'), reportIssuesSummary: byId('reportIssuesSummary'), reportIssuesTable: byId('reportIssuesTable')
 };
 
@@ -526,6 +567,12 @@ function bindEvents() {
   els.closeEventDialog.addEventListener('click', () => els.eventDialog.close());
   els.closeEventDialogTop.addEventListener('click', () => els.eventDialog.close());
   els.copyEventReference.addEventListener('click', copyEventReference);
+  els.historicalForm.addEventListener('submit', previewHistoricalEvents);
+  els.historicalReprocessButton.addEventListener('click', reprocessHistoricalEvents);
+  els.historicalCancel.addEventListener('click', () => els.historicalDialog.close());
+  els.historicalConfirm.addEventListener('change', updateHistoricalReprocessButton);
+  els.historicalForm.elements.from.addEventListener('change', resetHistoricalPreview);
+  els.historicalForm.elements.to.addEventListener('change', resetHistoricalPreview);
   els.exportEvents.addEventListener('click', exportEvents);
 
   els.eventsFilters.addEventListener('submit', (event) => { event.preventDefault(); void loadEvents(1); });
@@ -756,9 +803,20 @@ function renderIssues(issues) {
 
 function renderPeople(people) {
   els.peopleTable.replaceChildren(...people.map((person) => {
-    const row = document.createElement('tr'); row.append(td(person.person_code, 'number'), td(person.display_name), tdNode(badge(personStatusLabel(person.status), person.status === 'active' ? 'good' : 'neutral')), td(String(person.mapped_device_users), 'number')); return row;
+    const row = document.createElement('tr');
+    const historical = actionButton(t('people.historicalAction'), 'ghost');
+    historical.disabled = String(person.status || '').toLowerCase() !== 'active';
+    historical.addEventListener('click', () => openHistoricalDialog(person));
+    row.append(
+      td(person.person_code, 'number'),
+      td(person.display_name),
+      tdNode(badge(personStatusLabel(person.status), person.status === 'active' ? 'good' : 'neutral')),
+      td(String(person.mapped_device_users), 'number'),
+      tdNode(historical)
+    );
+    return row;
   }));
-  if (!people.length) els.peopleTable.append(emptyTableRow(4, t('people.none')));
+  if (!people.length) els.peopleTable.append(emptyTableRow(5, t('people.none')));
 }
 
 function renderDevices(devices) {
@@ -882,6 +940,83 @@ async function copyEventReference() {
   catch { showNotice(value); }
 }
 
+function openHistoricalDialog(person) {
+  state.historicalPerson = person;
+  els.historicalForm.reset();
+  state.historicalPreview = null;
+  els.historicalPersonHint.textContent = t('historical.person', { name: person.display_name, code: isolate(person.person_code) });
+  els.historicalPreviewResult.textContent = '';
+  els.historicalPreviewResult.classList.add('hidden');
+  els.historicalReprocessButton.disabled = true;
+  els.historicalDialog.showModal();
+}
+
+function resetHistoricalPreview() {
+  state.historicalPreview = null;
+  els.historicalConfirm.checked = false;
+  els.historicalPreviewResult.textContent = '';
+  els.historicalPreviewResult.classList.add('hidden');
+  updateHistoricalReprocessButton();
+}
+
+async function previewHistoricalEvents(event) {
+  event.preventDefault();
+  if (!state.historicalPerson) return;
+  const submit = els.historicalForm.querySelector('button[type="submit"]');
+  const from = String(els.historicalForm.elements.from.value || '').trim();
+  const to = String(els.historicalForm.elements.to.value || '').trim();
+  setBusy(submit, true);
+  try {
+    const result = await api(`/api/people/${state.historicalPerson.id}/historical-events/preview?${queryString({ from, to })}`);
+    state.historicalPreview = result;
+    els.historicalConfirm.checked = false;
+    const count = Number(result.count || 0);
+    els.historicalPreviewResult.textContent = count
+      ? `${t('historical.previewCount', { count })} ${result.earliestEventTimeLocal && result.latestEventTimeLocal ? t('historical.previewTimes', { from: isolate(localDateTime(result.earliestEventTimeLocal)), to: isolate(localDateTime(result.latestEventTimeLocal)) }) : ''}`.trim()
+      : t('historical.previewNone');
+    els.historicalPreviewResult.classList.remove('hidden');
+    updateHistoricalReprocessButton();
+  } catch (error) {
+    resetHistoricalPreview();
+    showNotice(readableError(error), true);
+  } finally {
+    setBusy(submit, false);
+  }
+}
+
+function updateHistoricalReprocessButton() {
+  const count = Number(state.historicalPreview?.count || 0);
+  els.historicalReprocessButton.disabled = !(count > 0 && els.historicalConfirm.checked);
+}
+
+async function reprocessHistoricalEvents() {
+  if (!state.historicalPerson || !state.historicalPreview) { showNotice(t('historical.needsPreview'), true); return; }
+  const button = els.historicalReprocessButton;
+  const from = String(els.historicalForm.elements.from.value || '').trim();
+  const to = String(els.historicalForm.elements.to.value || '').trim();
+  setBusy(button, true);
+  try {
+    const result = await api(`/api/people/${state.historicalPerson.id}/historical-events/reprocess`, {
+      method: 'POST', body: { from, to, confirmed: els.historicalConfirm.checked === true }
+    });
+    const reissuedCount = Number(result.reissuedCount || 0);
+    const message = reissuedCount > 0
+      ? t('historical.success', { count: reissuedCount })
+      : t('historical.zeroSuccess');
+    state.historicalPreview = null;
+    els.historicalConfirm.checked = false;
+    els.historicalPreviewResult.textContent = message;
+    els.historicalPreviewResult.classList.remove('hidden', 'error');
+    els.historicalReprocessButton.disabled = true;
+    showNotice(message);
+    await refresh();
+  } catch (error) {
+    showNotice(readableError(error), true);
+  } finally {
+    setBusy(button, false);
+  }
+}
+
 async function onboard(user, input, button) {
   const displayName = input.value.trim(); if (!displayName) { input.focus(); showNotice(t('validation.enterName'), true); return; }
   setBusy(button, true);
@@ -940,6 +1075,9 @@ function applyLocale({ rerender = true } = {}) {
     if (els.eventDialog.open && state.currentEvent) renderEventDetails(state.currentEvent);
   }
   if (els.mapDialog.open && state.mappingDeviceUser) populateMapDialog(state.mappingDeviceUser);
+  if (els.historicalDialog.open && state.historicalPerson) {
+    els.historicalPersonHint.textContent = t('historical.person', { name: state.historicalPerson.display_name, code: isolate(state.historicalPerson.person_code) });
+  }
 }
 
 async function api(url, options = {}) {
@@ -956,7 +1094,12 @@ function renderConnection() {
 
 function showNotice(message, error = false) { els.notice.textContent = message; els.notice.className = `notice${error ? ' error' : ''}`; window.clearTimeout(showNotice.timer); showNotice.timer = window.setTimeout(() => els.notice.classList.add('hidden'), error ? 7000 : 4000); }
 function readableError(error) {
-  const messages = { PERSON_CODE_CONFLICT: 'error.personCodeConflict', DEVICE_USER_MAPPING_CONFLICT: 'error.mappingConflict', PERSON_INACTIVE: 'error.personInactive', DISPLAY_NAME_REQUIRED: 'error.displayNameRequired', PERSON_NOT_FOUND: 'error.personNotFound', DEVICE_USER_NOT_FOUND: 'error.deviceUserNotFound' };
+  const messages = {
+    PERSON_CODE_CONFLICT: 'error.personCodeConflict', DEVICE_USER_MAPPING_CONFLICT: 'error.mappingConflict', PERSON_INACTIVE: 'error.personInactive',
+    DISPLAY_NAME_REQUIRED: 'error.displayNameRequired', PERSON_NOT_FOUND: 'error.personNotFound', DEVICE_USER_NOT_FOUND: 'error.deviceUserNotFound',
+    HISTORICAL_RANGE_REQUIRED: 'error.historicalRange', HISTORICAL_RANGE_INVALID: 'error.historicalRange', HISTORICAL_RANGE_TOO_LARGE: 'error.historicalRange',
+    HISTORICAL_REPLAY_LIMIT: 'error.historicalLimit', HISTORICAL_REPLAY_CHANGED: 'error.historicalChanged', HISTORICAL_CONFIRMATION_REQUIRED: 'error.historicalConfirmation'
+  };
   return messages[error?.code] ? t(messages[error.code]) : t('error.generic');
 }
 

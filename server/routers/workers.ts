@@ -22,10 +22,25 @@ import { storagePut } from "../storage";
 import { canManageWorkerPhotos } from "@shared/workerPhotoPolicy";
 import { buildWorkerPhotoAuditDetails, buildWorkerPhotoStorageKey, decodeWorkerPhotoBase64 } from "../worker-photos";
 import { ENV } from "../_core/env";
+import { BiometricIntegrationError, getBiometricPersonByCode, searchBiometricDirectory } from "../biometric-integration";
 
 function canCurrentUserManageWorkerPhotos(user: any): boolean {
   const isOwner = Boolean(ENV.ownerOpenId && user?.openId === ENV.ownerOpenId);
   return canManageWorkerPhotos(user?.role, isOwner);
+}
+
+function biometricIntegrationToTrpcError(error: unknown): TRPCError {
+  if (error instanceof BiometricIntegrationError) {
+    if (error.code === 'NOT_CONFIGURED') {
+      return new TRPCError({ code: 'PRECONDITION_FAILED', message: error.message });
+    }
+    if (error.code === 'AUTH_FAILED') {
+      return new TRPCError({ code: 'BAD_GATEWAY', message: 'تعذر المصادقة مع نظام البصمة. راجع إعدادات الربط.' });
+    }
+    return new TRPCError({ code: 'BAD_GATEWAY', message: error.message });
+  }
+
+  return new TRPCError({ code: 'BAD_GATEWAY', message: 'تعذر الاتصال بنظام البصمة' });
 }
 
   // Workers Management
@@ -62,6 +77,57 @@ export const workersRouter = router({
       .input(z.object({ code: z.string() }))
       .query(async ({ input }) => {
         return await db.getWorkerByCode(input.code);
+      }),
+
+    biometricDirectory: protectedProcedure
+      .input(z.object({
+        search: z.string().max(100).optional(),
+        afterCode: z.string().max(100).optional(),
+        limit: z.number().int().min(1).max(100).default(50),
+        currentWorkerId: z.number().int().positive().optional(),
+      }))
+      .use(requirePermissionFlag('canManageWorkers'))
+      .query(async ({ input }) => {
+        let directory;
+        try {
+          directory = await searchBiometricDirectory({
+            search: input.search,
+            afterCode: input.afterCode,
+            limit: input.limit,
+          });
+        } catch (error) {
+          throw biometricIntegrationToTrpcError(error);
+        }
+
+        const linkedWorkers = await db.getWorkersByBiometricPersonCodes(
+          directory.items.map((item) => item.personCode),
+        );
+        const linkedByCode = new Map(
+          linkedWorkers
+            .filter((worker) => Boolean(worker.biometricPersonCode))
+            .map((worker) => [worker.biometricPersonCode as string, worker]),
+        );
+
+        return {
+          apiVersion: directory.apiVersion,
+          items: directory.items.map((person) => {
+            const linkedWorker = linkedByCode.get(person.personCode);
+            const linkedToCurrentWorker = Boolean(
+              linkedWorker && input.currentWorkerId && linkedWorker.id === input.currentWorkerId,
+            );
+
+            return {
+              ...person,
+              linkState: linkedWorker
+                ? (linkedToCurrentWorker ? 'linked_current' : 'linked_other') as const
+                : 'available' as const,
+              linkedWorker: linkedWorker
+                ? { id: linkedWorker.id, code: linkedWorker.code, fullName: linkedWorker.fullName }
+                : null,
+            };
+          }),
+          page: directory.page,
+        };
       }),
     
     create: protectedProcedure
@@ -177,6 +243,147 @@ export const workersRouter = router({
           newValues: data,
         });
         return { success: true };
+      }),
+
+
+    setBiometricLink: protectedProcedure
+      .input(z.object({
+        workerId: z.number().int().positive(),
+        personCode: z.string().trim().min(1).max(100).nullable(),
+      }))
+      .use(requirePermissionFlag('canManageWorkers'))
+      .mutation(async ({ input, ctx }) => {
+        const worker = await db.getWorkerById(input.workerId);
+        if (!worker) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'العامل غير موجود' });
+        }
+
+        const oldPersonCode = worker.biometricPersonCode?.trim() || null;
+        const newPersonCode = input.personCode?.trim() || null;
+
+        if (oldPersonCode === newPersonCode) {
+          return {
+            success: true,
+            changed: false,
+            personCode: oldPersonCode,
+          };
+        }
+
+        let biometricPerson: { personCode: string; displayName: string; status: string } | null = null;
+        if (newPersonCode) {
+          try {
+            biometricPerson = await getBiometricPersonByCode(newPersonCode);
+          } catch (error) {
+            throw biometricIntegrationToTrpcError(error);
+          }
+
+          if (!biometricPerson || biometricPerson.personCode !== newPersonCode) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'رقم البصمة المحدد غير موجود في نظام البصمة',
+            });
+          }
+
+          if (biometricPerson.status !== 'active') {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'الشخص المحدد في نظام البصمة غير نشط',
+            });
+          }
+
+          const existingLink = await db.getWorkerByBiometricPersonCode(newPersonCode);
+          if (existingLink && existingLink.id !== input.workerId) {
+            throw new TRPCError({
+              code: 'CONFLICT',
+              message: `رقم البصمة ${newPersonCode} مرتبط بالفعل بالعامل ${existingLink.fullName} (${existingLink.code})`,
+            });
+          }
+        }
+
+        const database = await db.getDb();
+        if (!database) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+        }
+
+        const actionName = !oldPersonCode && newPersonCode
+          ? 'LINK_WORKER_BIOMETRIC'
+          : oldPersonCode && !newPersonCode
+            ? 'UNLINK_WORKER_BIOMETRIC'
+            : 'CHANGE_WORKER_BIOMETRIC_LINK';
+        const actorName = ctx.user?.fullName || ctx.user?.username || `مستخدم رقم ${ctx.user?.id ?? ''}`;
+        const operationLabel = actionName === 'LINK_WORKER_BIOMETRIC'
+          ? 'ربط'
+          : actionName === 'UNLINK_WORKER_BIOMETRIC'
+            ? 'إلغاء ربط'
+            : 'تغيير ربط';
+        const auditTimestamp = new Date().toISOString();
+
+        try {
+          await database.transaction(async (tx: any) => {
+            await tx.update(workers)
+              .set({ biometricPersonCode: newPersonCode, updatedAt: new Date() })
+              .where(eq(workers.id, input.workerId));
+
+            await db.logAudit({
+              userId: ctx.user?.id,
+              action: actionName,
+              tableName: 'workers',
+              recordId: input.workerId,
+              oldValues: { biometricPersonCode: oldPersonCode },
+              newValues: { biometricPersonCode: newPersonCode },
+              tx,
+            });
+
+            await db.logAuditV2({
+              actionCategory: 'UPDATE',
+              actionName,
+              description: `${actorName} قام ب${operationLabel} العامل ${worker.fullName} (${worker.code}) مع نظام البصمة`,
+              tableName: 'workers',
+              entityType: 'worker_biometric_link',
+              recordId: input.workerId,
+              recordKey: { workerCode: worker.code },
+              actor: db.actorFromUser(ctx.user),
+              source: 'WEB',
+              req: ctx.req,
+              requestId: ctx.requestId,
+              beforeValues: { biometricPersonCode: oldPersonCode },
+              afterValues: { biometricPersonCode: newPersonCode },
+              changedFields: {
+                biometricPersonCode: { old: oldPersonCode, new: newPersonCode },
+              },
+              recordUpdatedAt: auditTimestamp,
+              metadata: biometricPerson
+                ? { biometricDisplayName: biometricPerson.displayName }
+                : null,
+              tx,
+            });
+          });
+        } catch (error: any) {
+          if (error?.code === 'ER_DUP_ENTRY') {
+            throw new TRPCError({
+              code: 'CONFLICT',
+              message: 'رقم البصمة مرتبط بالفعل بعامل آخر',
+            });
+          }
+          console.error('[workers.setBiometricLink] Database/audit transaction failed:', error);
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'تعذر حفظ ربط العامل مع نظام البصمة',
+          });
+        }
+
+        return {
+          success: true,
+          changed: true,
+          personCode: newPersonCode,
+          person: biometricPerson
+            ? {
+                personCode: biometricPerson.personCode,
+                displayName: biometricPerson.displayName,
+                status: biometricPerson.status,
+              }
+            : null,
+        };
       }),
 
     uploadPhoto: protectedProcedure

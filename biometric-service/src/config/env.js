@@ -105,6 +105,40 @@ function finalEventsApiConfig(mode) {
   });
 }
 
+
+function webBridgeConfig(mode, cwd) {
+  const enabled = mode === 'database' ? boolean('BIOMETRIC_WEB_BRIDGE_ENABLED', false) : false;
+  if (!enabled) {
+    return Object.freeze({ enabled: false });
+  }
+
+  const rawTarget = String(process.env.BIOMETRIC_WEB_BRIDGE_TARGET_URL ?? '').trim();
+  if (!rawTarget) throw new Error('BIOMETRIC_WEB_BRIDGE_TARGET_URL is required when the web bridge is enabled');
+  let baseUrl;
+  try {
+    baseUrl = new URL(rawTarget);
+  } catch {
+    throw new Error('BIOMETRIC_WEB_BRIDGE_TARGET_URL must be a valid URL');
+  }
+  const localHosts = new Set(['127.0.0.1', 'localhost', '::1']);
+  if (baseUrl.protocol !== 'https:' && !(baseUrl.protocol === 'http:' && localHosts.has(baseUrl.hostname.toLowerCase()))) {
+    throw new Error('BIOMETRIC_WEB_BRIDGE_TARGET_URL must use HTTPS except for localhost testing');
+  }
+
+  const token = String(process.env.BIOMETRIC_WEB_BRIDGE_TOKEN ?? '').trim();
+  if (token.length < 32) throw new Error('BIOMETRIC_WEB_BRIDGE_TOKEN must be at least 32 characters');
+
+  const endpoint = new URL('/api/biometric-bridge/v1/final-events', baseUrl);
+  return Object.freeze({
+    enabled: true,
+    targetUrl: endpoint.toString(),
+    token,
+    intervalSeconds: integer('BIOMETRIC_WEB_BRIDGE_INTERVAL_SECONDS', 10, { min: 5, max: 3600 }),
+    requestTimeoutSeconds: integer('BIOMETRIC_WEB_BRIDGE_REQUEST_TIMEOUT_SECONDS', 10, { min: 3, max: 120 }),
+    stateFile: path.resolve(cwd, process.env.BIOMETRIC_WEB_BRIDGE_STATE_FILE || './var/web-bridge-state.json')
+  });
+}
+
 function adminConfig(mode) {
   const enabled = mode === 'database' ? boolean('BIOMETRIC_ADMIN_ENABLED', true) : false;
   const host = (process.env.BIOMETRIC_ADMIN_HOST || '127.0.0.1').trim();
@@ -128,6 +162,7 @@ export function loadConfig(cwd = process.cwd()) {
     database: databaseConfig(mode),
     admin: adminConfig(mode),
     finalEventsApi: finalEventsApiConfig(mode),
+    webBridge: webBridgeConfig(mode, cwd),
     autoFinalizeNewPunches: mode === 'database' ? boolean('BIOMETRIC_AUTO_FINALIZE_NEW_PUNCHES', true) : false,
     captureDir: path.resolve(cwd, process.env.BIOMETRIC_CAPTURE_DIR || './var/captures'),
     logDir: path.resolve(cwd, process.env.BIOMETRIC_LOG_DIR || './var/logs'),

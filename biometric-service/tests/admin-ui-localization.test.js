@@ -61,3 +61,17 @@ test('standalone operations UI includes reports, server-side filters, pagination
   assert.match(css, /details-grid/);
   assert.doesNotMatch(html, /worker_id|attendance_events|payroll|cost center|مركز تكلفة/);
 });
+
+test('people UI exposes explicit manual historical reprocessing without adding main-application attendance controls', async () => {
+  const [html, app] = await Promise.all([read('index.html'), read('app.js')]);
+  assert.match(html, /id="historicalDialog"/);
+  assert.match(html, /id="historicalConfirm"/);
+  assert.match(html, /data-i18n="people\.historicalAction"/);
+  assert.match(app, /historical-events\/preview/);
+  assert.match(app, /historical-events\/reprocess/);
+  assert.match(app, /الحركات الأصلية تبقى كما هي/);
+  assert.match(html, /id="historicalPreviewResult"[^>]*role="status"[^>]*aria-live="polite"/);
+  assert.match(app, /historicalPreviewResult\.textContent = message/);
+  assert.doesNotMatch(app, /historicalDialog\.close\(\);\s*state\.historicalPreview = null/);
+  assert.doesNotMatch(html, /worker_id|attendance_events|payroll/);
+});

@@ -3,3 +3,5 @@ var/captures/*.ndjson
 var/logs/*.ndjson
 !var/captures/.gitkeep
 !var/logs/.gitkeep
+var/web-bridge-state.json
+var/web-bridge-state.json.*.tmp

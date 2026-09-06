@@ -68,6 +68,40 @@ export async function getWorkerByCode(code: string): Promise<DbWorker | undefine
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getWorkerByBiometricPersonCode(personCode: string): Promise<DbWorker | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const normalizedCode = personCode.trim();
+  if (!normalizedCode) return undefined;
+
+  const result = await db.select().from(workers).where(eq(workers.biometricPersonCode, normalizedCode)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getWorkersByBiometricPersonCodes(personCodes: string[]): Promise<Array<{
+  id: number;
+  code: string;
+  fullName: string;
+  biometricPersonCode: string | null;
+}>> {
+  const db = await getDb();
+  if (!db || personCodes.length === 0) return [];
+
+  const normalizedCodes = Array.from(new Set(personCodes.map((code) => code.trim()).filter(Boolean)));
+  if (normalizedCodes.length === 0) return [];
+
+  return await db
+    .select({
+      id: workers.id,
+      code: workers.code,
+      fullName: workers.fullName,
+      biometricPersonCode: workers.biometricPersonCode,
+    })
+    .from(workers)
+    .where(inArray(workers.biometricPersonCode, normalizedCodes));
+}
+
 // التحقق من وجود كود العامل مسبقاً
 export async function getWorkerByCodeDirect(code: string): Promise<DbWorker | null> {
   const db = await getDb();

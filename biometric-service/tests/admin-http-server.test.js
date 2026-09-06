@@ -110,3 +110,38 @@ test('event CSV export is Excel-compatible, formula-safe, and excludes internal 
     assert.doesNotMatch(body, /person_id|source_punch_id|worker_id/);
   });
 });
+
+test('historical preview is read-only and manual historical reprocessing requires the local UI write guard', async () => {
+  let reprocessCalls = 0;
+  const adminService = {
+    async previewHistoricalEvents(input) {
+      assert.deepEqual(input, { personId: 30001, from: '2026-09-01', to: '2026-09-02' });
+      return { person: { personCode: '900002' }, count: 2 };
+    },
+    async reprocessHistoricalEvents(input) {
+      reprocessCalls += 1;
+      assert.deepEqual(input, { personId: 30001, from: '2026-09-01', to: '2026-09-02', confirmed: true });
+      return { reissuedCount: 2 };
+    }
+  };
+  await withServer(adminService, async (base) => {
+    const preview = await fetch(`${base}/api/people/30001/historical-events/preview?from=2026-09-01&to=2026-09-02`);
+    assert.equal(preview.status, 200);
+    assert.equal((await preview.json()).count, 2);
+
+    const rejected = await fetch(`${base}/api/people/30001/historical-events/reprocess`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ from: '2026-09-01', to: '2026-09-02', confirmed: true })
+    });
+    assert.equal(rejected.status, 400);
+    assert.equal(reprocessCalls, 0);
+
+    const accepted = await fetch(`${base}/api/people/30001/historical-events/reprocess`, {
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-biometric-admin': 'local-ui' },
+      body: JSON.stringify({ from: '2026-09-01', to: '2026-09-02', confirmed: true })
+    });
+    assert.equal(accepted.status, 200);
+    assert.deepEqual(await accepted.json(), { reissuedCount: 2 });
+    assert.equal(reprocessCalls, 1);
+  });
+});

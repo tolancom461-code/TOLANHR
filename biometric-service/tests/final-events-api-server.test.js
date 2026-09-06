@@ -4,8 +4,8 @@ import { createFinalEventsApiServer } from '../src/infrastructure/integration/fi
 
 const TOKEN = '0123456789abcdef0123456789abcdef';
 
-async function withServer(service, fn) {
-  const server = createFinalEventsApiServer({ service, token: TOKEN, diagnosticLog: { async write() {} } });
+async function withServer(service, fn, personDirectoryService = null) {
+  const server = createFinalEventsApiServer({ service, personDirectoryService, token: TOKEN, diagnosticLog: { async write() {} } });
   await new Promise((resolve, reject) => {
     server.once('error', reject);
     server.listen(0, '127.0.0.1', resolve);
@@ -58,4 +58,34 @@ test('HTTP layer passes cursor and UUID without exposing another integration sur
       ['get', '11111111-1111-4111-8111-111111111111']
     ]);
   });
+});
+
+
+test('person directory uses the same bearer/read-only boundary and forwards safe query parameters', async () => {
+  const calls = [];
+  const directory = {
+    async list(args) {
+      calls.push(args);
+      return {
+        apiVersion: 'v1',
+        items: [{ personCode: '900003', displayName: 'Test Person 900003', status: 'active' }],
+        page: { afterCode: '', nextAfterCode: '900003', limit: 25, hasMore: false }
+      };
+    }
+  };
+  await withServer({}, async (base) => {
+    const denied = await fetch(`${base}/api/v1/person-directory`);
+    assert.equal(denied.status, 401);
+    assert.equal(calls.length, 0);
+
+    const accepted = await fetch(`${base}/api/v1/person-directory?search=900003&status=active&after_code=900001&limit=25`, { headers: auth() });
+    assert.equal(accepted.status, 200);
+    assert.equal((await accepted.json()).items[0].personCode, '900003');
+    assert.deepEqual(calls, [{ search: '900003', status: 'active', afterCode: '900001', limit: '25' }]);
+
+    const write = await fetch(`${base}/api/v1/person-directory`, { method: 'POST', headers: auth(), body: '{}' });
+    assert.equal(write.status, 405);
+    assert.equal(write.headers.get('allow'), 'GET');
+    assert.equal(calls.length, 1);
+  }, directory);
 });

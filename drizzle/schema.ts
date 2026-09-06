@@ -47,6 +47,29 @@ export const attendanceEvents = mysqlTable("attendance_events", {
 	index("idx_attendance_worker_work_date").on(table.workerId, table.workDate),
 ]);
 
+// Reflects the manually-created TiDB table used by the main-app Final Events consumer.
+// TiDB is the source of truth; do not push/migrate this definition automatically.
+export const biometricFinalEventImports = mysqlTable("biometric_final_event_imports", {
+	id: bigint({ mode: 'number' }).autoincrement().notNull(),
+	eventUuid: char("event_uuid", { length: 36 }).notNull(),
+	personCode: varchar("person_code", { length: 100 }).notNull(),
+	workerId: int("worker_id"),
+	eventType: varchar("event_type", { length: 50 }).notNull(),
+	eventTimeUtc: datetime("event_time_utc", { mode: 'string', fsp: 6 }).notNull(),
+	status: varchar({ length: 50 }).notNull(),
+	attendanceEventId: int("attendance_event_id"),
+	message: varchar({ length: 500 }),
+	createdAt: datetime("created_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+	// Actual TiDB column has ON UPDATE CURRENT_TIMESTAMP(6). Omitted here because
+	// drizzle-orm 0.44.x does not expose datetime().onUpdateNow().
+	updatedAt: datetime("updated_at", { mode: 'string', fsp: 6 }).default(sql`CURRENT_TIMESTAMP(6)`).notNull(),
+},
+(table) => [
+	uniqueIndex("uq_biometric_final_event_uuid").on(table.eventUuid),
+	index("idx_biometric_import_worker").on(table.workerId),
+	index("idx_biometric_import_status").on(table.status),
+]);
+
 export const auditLog = mysqlTable("audit_log", {
 	id: int().autoincrement().notNull(),
 	userId: int("user_id").references(() => users.id, { onDelete: "set null", onUpdate: "cascade" } ),
@@ -901,6 +924,9 @@ export const workers = mysqlTable("workers", {
 	jobId: int("job_id"),
 	dailyRate: decimal("daily_rate", { precision: 10, scale: 2 }),
 	photoUrl: text("photo_url"),
+	// Reflects the column/index already created manually in the actual TiDB database.
+	// TiDB remains the source of truth; do not use this file to push schema changes.
+	biometricPersonCode: varchar("biometric_person_code", { length: 100 }),
 	qrToken: varchar("qr_token", { length: 100 }),
 	manualCode: varchar("manual_code", { length: 20 }),
 	status: mysqlEnum(['active','inactive','archived']).default('active'),
@@ -912,6 +938,7 @@ export const workers = mysqlTable("workers", {
 },
 (table) => [
 	index("workers_code_unique").on(table.code),
+	uniqueIndex("uq_workers_biometric_person_code").on(table.biometricPersonCode),
 ]);
 
 export const notifications = mysqlTable("notifications", {

@@ -1,0 +1,10 @@
+src/infrastructure/admin/public/app.js
+src/infrastructure/admin/public/index.html
+tests/admin-ui-localization.test.js
+package.json
+package-lock.json
+README.md
+docs/UPGRADE_V0.17.0_TO_V0.17.1.md
+CHANGED_FILES_V0.17.1.txt
+README_UPDATE.txt
+SHA256SUMS_V0.17.1.txt

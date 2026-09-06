@@ -6,7 +6,10 @@ import { AutomaticFinalizingPunchStore } from './application/automatic-finalizin
 import { FinalizationService } from './application/finalization-service.js';
 import { StandaloneManagementService } from './application/standalone-management-service.js';
 import { StandaloneAdminService } from './application/standalone-admin-service.js';
+import { HistoricalFinalEventsReplayService } from './application/historical-final-events-replay-service.js';
 import { FinalEventsReadService } from './application/final-events-read-service.js';
+import { WebBridgePushService } from './application/web-bridge-push-service.js';
+import { PersonDirectoryReadService } from './application/person-directory-read-service.js';
 import { replayDurableIngest } from './application/replay-durable-ingest.js';
 import { startDurableIngestRetryLoop } from './application/start-durable-ingest-retry-loop.js';
 import { startAutomaticFinalizationRetryLoop } from './application/start-automatic-finalization-retry-loop.js';
@@ -25,7 +28,9 @@ import { TiDbPeopleStore } from './infrastructure/storage/tidb-people-store.js';
 import { TiDbPersonDeviceUserStore } from './infrastructure/storage/tidb-person-device-user-store.js';
 import { TiDbAuditStore } from './infrastructure/storage/tidb-audit-store.js';
 import { TiDbAdminReadStore } from './infrastructure/storage/tidb-admin-read-store.js';
+import { TiDbHistoricalReplayStore } from './infrastructure/storage/tidb-historical-replay-store.js';
 import { TiDbFinalEventsReadStore } from './infrastructure/storage/tidb-final-events-read-store.js';
+import { TiDbPersonDirectoryReadStore } from './infrastructure/storage/tidb-person-directory-read-store.js';
 import { createBiometricDatabasePool } from './infrastructure/database/mysql-pool.js';
 import { assertBiometricDatabaseReady } from './infrastructure/database/schema-check.js';
 import { VendorAdapterRegistry } from './infrastructure/vendors/vendor-adapter-registry.js';
@@ -39,7 +44,7 @@ const diagnosticLog = new FileDiagnosticLog(config.logDir, {
   retainFiles: config.logRetainFiles,
   timezone: config.logTimezone
 });
-await diagnosticLog.startSession({ serviceVersion: '0.14.0' });
+await diagnosticLog.startSession({ serviceVersion: '0.18.0' });
 
 let databasePool = null;
 let deviceStore = null;
@@ -51,6 +56,7 @@ let finalizationService = null;
 let finalizationStore = null;
 let adminServer = null;
 let finalEventsApiServer = null;
+let webBridgePushService = null;
 
 if (config.storageMode === 'database') {
   databasePool = createBiometricDatabasePool(config.database);
@@ -74,19 +80,39 @@ if (config.storageMode === 'database') {
     const mappingStore = new TiDbPersonDeviceUserStore(databasePool);
     const auditStore = new TiDbAuditStore(databasePool);
     const adminReadStore = new TiDbAdminReadStore(databasePool);
+    const historicalReplayStore = new TiDbHistoricalReplayStore(databasePool);
+    const historicalReplayService = new HistoricalFinalEventsReplayService({ replayStore: historicalReplayStore });
     const managementService = new StandaloneManagementService({ peopleStore, mappingStore, auditStore });
-    const adminService = new StandaloneAdminService({ managementService, adminReadStore, finalizationService });
+    const adminService = new StandaloneAdminService({ managementService, adminReadStore, finalizationService, historicalReplayService });
     adminServer = createAdminServer({ adminService, diagnosticLog });
   }
 
-  if (config.finalEventsApi.enabled) {
+  if (config.finalEventsApi.enabled || config.webBridge.enabled) {
     const finalEventsReadStore = new TiDbFinalEventsReadStore(databasePool);
     const finalEventsReadService = new FinalEventsReadService({ readStore: finalEventsReadStore });
-    finalEventsApiServer = createFinalEventsApiServer({
-      service: finalEventsReadService,
-      token: config.finalEventsApi.token,
-      diagnosticLog
-    });
+
+    if (config.finalEventsApi.enabled) {
+      const personDirectoryReadStore = new TiDbPersonDirectoryReadStore(databasePool);
+      const personDirectoryReadService = new PersonDirectoryReadService({ readStore: personDirectoryReadStore });
+      finalEventsApiServer = createFinalEventsApiServer({
+        service: finalEventsReadService,
+        personDirectoryService: personDirectoryReadService,
+        token: config.finalEventsApi.token,
+        diagnosticLog
+      });
+    }
+
+    if (config.webBridge.enabled) {
+      webBridgePushService = new WebBridgePushService({
+        finalEventsReadService,
+        targetUrl: config.webBridge.targetUrl,
+        token: config.webBridge.token,
+        stateFile: config.webBridge.stateFile,
+        intervalSeconds: config.webBridge.intervalSeconds,
+        requestTimeoutSeconds: config.webBridge.requestTimeoutSeconds,
+        diagnosticLog
+      });
+    }
   }
 } else {
   ingestStore = new FileIngestStore(config.captureDir);
@@ -136,6 +162,8 @@ const finalizationRetryLoop = automaticFinalizationActive
     })
   : null;
 
+const stopWebBridge = webBridgePushService?.start?.() ?? null;
+
 const zktecoAdapter = new ZktecoAdmsAdapter({
   config: {
     adms: config.zkteco.adms,
@@ -177,6 +205,7 @@ finalEventsApiServer?.on('error', (error) => {
 finalEventsApiServer?.listen(config.finalEventsApi.port, config.finalEventsApi.host, () => {
   console.log(`[biometric-service] Final Events API: http://${config.finalEventsApi.host}:${config.finalEventsApi.port}/api/v1`);
   console.log('[biometric-service] Final Events API exposure: loopback only; bearer authentication required');
+  console.log('[biometric-service] Person Directory API: GET /api/v1/person-directory (same read-only listener/auth)');
 });
 
 server.listen(config.port, config.host, () => {
@@ -188,6 +217,13 @@ server.listen(config.port, config.host, () => {
   console.log('[biometric-service] ATTLOG durability: sanitized durable ingest before ACK');
   console.log(`[biometric-service] storage mode: ${config.storageMode}`);
   if (!config.finalEventsApi.enabled) console.log('[biometric-service] Final Events API: disabled');
+  if (config.webBridge.enabled) {
+    console.log(`[biometric-service] web bridge: enabled (push every ${config.webBridge.intervalSeconds}s)`);
+    console.log(`[biometric-service] web bridge target: ${new URL(config.webBridge.targetUrl).origin}`);
+    console.log('[biometric-service] web bridge first enable: historical Final Events are skipped by cursor initialization');
+  } else {
+    console.log('[biometric-service] web bridge: disabled');
+  }
   console.log(`[biometric-service] diagnostic log rotation: ${config.logMaxBytes} bytes x ${config.logRetainFiles} retained files`);
   console.log(`[biometric-service] diagnostic session: ${diagnosticLog.sessionId} (${config.logTimezone})`);
   if (databaseReady) {
@@ -196,6 +232,7 @@ server.listen(config.port, config.host, () => {
     console.log(`[biometric-service] automatic finalization: ${automaticFinalizationActive ? 'enabled for new canonical punches only' : 'disabled'}`);
     if (automaticFinalizationActive) console.log(`[biometric-service] automatic finalization retry: every ${config.database.retrySweepSeconds}s (retry delay ${config.database.retryDelaySeconds}s; durable pending intents only)`);
     console.log('[biometric-service] automatic historical finalization backfill: disabled');
+    console.log('[biometric-service] manual historical Final Events reprocessing: available from local admin UI');
   }
   console.log(`[biometric-service] startup ingest replay: ${replay.failedCount === 0 ? 'ok' : 'partial'} (${replay.eligibleCount} eligible)`);
 });
@@ -206,6 +243,7 @@ async function shutdown(signal) {
   shuttingDown = true;
   retryLoop?.stop();
   finalizationRetryLoop?.stop();
+  stopWebBridge?.();
   console.log(`[biometric-service] ${signal} received, shutting down`);
   try {
     await Promise.all([closeHttpServer(server), closeHttpServer(adminServer), closeHttpServer(finalEventsApiServer)]);

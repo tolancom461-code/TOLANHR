@@ -1,8 +1,9 @@
 export class StandaloneAdminService {
-  constructor({ managementService, adminReadStore, finalizationService }) {
+  constructor({ managementService, adminReadStore, finalizationService, historicalReplayService = null }) {
     this.managementService = managementService;
     this.adminReadStore = adminReadStore;
     this.finalizationService = finalizationService;
+    this.historicalReplayService = historicalReplayService;
   }
 
   async overview() {
@@ -50,6 +51,18 @@ export class StandaloneAdminService {
     return this.adminReadStore.getOperationalReports(filters);
   }
 
+
+
+  async previewHistoricalEvents({ personId, from, to }) {
+    if (!this.historicalReplayService) throw codedError('HISTORICAL_REPLAY_UNAVAILABLE', 'Historical replay is unavailable');
+    return this.historicalReplayService.preview({ personId, from, to });
+  }
+
+  async reprocessHistoricalEvents({ personId, from, to, confirmed }, actor = localAdminActor()) {
+    if (!this.historicalReplayService) throw codedError('HISTORICAL_REPLAY_UNAVAILABLE', 'Historical replay is unavailable');
+    return this.historicalReplayService.reprocess({ personId, from, to, confirmed, actor });
+  }
+
   async createPerson(input, actor = localAdminActor()) {
     return this.managementService.createPerson({ ...input, actor });
   }
@@ -83,6 +96,8 @@ export class StandaloneAdminService {
     return results;
   }
 }
+
+function codedError(code, message) { const error = new Error(message); error.code = code; return error; }
 
 function localAdminActor() {
   return { actorType: 'admin', actorReference: 'local-ui' };

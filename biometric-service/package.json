@@ -1,6 +1,6 @@
 {
   "name": "tolan-biometric-service",
-  "version": "0.15.1",
+  "version": "0.18.0",
   "private": true,
   "type": "module",
   "description": "Isolated multi-device, multi-vendor biometric service with local standalone administration UI, identity management, and deterministic automatic finalization.",

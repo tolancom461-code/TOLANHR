@@ -24,7 +24,8 @@ import {
   AlertCircle,
   TrendingUp,
   TrendingDown,
-  Minus
+  Minus,
+  Fingerprint
 } from "lucide-react";
 
 export default function WorkerDetails() {
@@ -235,7 +236,21 @@ export default function WorkerDetails() {
                       {worker.hireDate ? new Date(worker.hireDate).toLocaleDateString('ar-SA') : "-"}
                     </p>
                   </div>
-                  <div className="space-y-1 col-span-2">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Fingerprint className="h-3 w-3" />
+                      الربط مع البصمة
+                    </p>
+                    {worker.biometricPersonCode ? (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary">مربوط</Badge>
+                        <span className="font-mono text-sm" dir="ltr">{worker.biometricPersonCode}</span>
+                      </div>
+                    ) : (
+                      <p className="font-semibold text-muted-foreground">غير مربوط</p>
+                    )}
+                  </div>
+                  <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">الحالة</p>
                     {getStatusBadge(worker.status || 'active')}
                   </div>

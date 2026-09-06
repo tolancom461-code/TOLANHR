@@ -148,3 +148,12 @@ thead th { position: sticky; top: 0; z-index: 1; background: white; }
   .details-grid dt { border-bottom: 0; padding-bottom: 3px; }
   .details-grid dd { padding-top: 3px; }
 }
+
+/* v0.17 manual historical biometric reprocessing. Existing palette/theme intentionally preserved. */
+#historicalDialog { width: min(680px, calc(100% - 28px)); }
+.historical-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; margin-top: 14px; }
+.historical-preview { margin: 14px 0 0; }
+.historical-warning { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: #fff7e8; border: 1px solid #efd9ad; color: #684b16; font-size: .88rem; line-height: 1.6; }
+.historical-confirm { display: flex; grid-template-columns: none; gap: 10px; align-items: flex-start; margin-top: 14px; color: #344149; }
+.historical-confirm input { width: auto; margin-top: 3px; flex: 0 0 auto; }
+@media (max-width: 620px) { .historical-form { grid-template-columns: 1fr; } }

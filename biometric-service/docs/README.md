@@ -54,3 +54,6 @@ The standalone service now includes a loopback-only administration UI at `127.0.
 ## v0.14.0 durable automatic Finalization retry
 
 `v0.14.0` adds a durable pending intent for every newly inserted canonical punch while automatic Finalization is active, plus bounded retry of only those intents after transient Finalization failures. It uses the existing Finalization Issues table, requires no SQL/DDL, preserves the no-historical-backfill gate, keeps the current UI theme, and does not connect to the main application. See `UPGRADE_V0.13.1_TO_V0.14.0.md`.
+
+- `UPGRADE_V0.16.0_TO_V0.17.0.md` — controlled manual historical Final Event reprocessing; no automatic backfill.
+- `UPGRADE_V0.17.1_TO_V0.18.0.md` — optional outbound HTTPS Final Events bridge to the main web application; no automatic historical backfill.

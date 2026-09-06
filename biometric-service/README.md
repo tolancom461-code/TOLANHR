@@ -5,7 +5,7 @@ Independent **multi-device, multi-vendor** biometric service.
 It remains fully isolated from the existing workforce application: it does not import the main `server/`, `client/`, `shared/`, or Drizzle ORM code, and it never writes to `workers`, `attendance_events`, finance/payroll, shifts, or QR tables.
 
 
-## v0.15.0 standalone administration + operational reporting + read-only Final Events API
+## v0.18.0 standalone administration + controlled historical replay + outbound web bridge
 
 The service now includes a deliberately simple **local standalone administration UI** on a separate loopback-only listener. Arabic is the default language and English is available from a persistent language switch. Changing language changes both text and page direction (`RTL`/`LTR`), while technical codes and timestamps remain isolated left-to-right for readability.
 
@@ -13,11 +13,11 @@ The UI focuses on operational tasks instead of internal IDs: dashboard, users ne
 
 The administration listener defaults to `127.0.0.1:9096` and this release refuses non-loopback admin hosts. Device ADMS remains independently reachable on port `9095`. This local restriction is a safety boundary, not remote-user authentication; remote administration is intentionally deferred to a later approved design.
 
-Automatic Finalization v1 now persists a durable pending intent atomically with each newly inserted canonical punch. If downstream Finalization fails transiently, a bounded retry sweep re-attempts only that durable pending intent. Deterministic unresolved cases become safe review issues, and historical automatic backfill remains disabled. There is still **no main-application integration**. The reference device remains in `mode=test`.
+Automatic Finalization v1 now persists a durable pending intent atomically with each newly inserted canonical punch. If downstream Finalization fails transiently, a bounded retry sweep re-attempts only that durable pending intent. Deterministic unresolved cases become safe review issues, and historical automatic backfill remains disabled. The service remains standalone; the workforce application integrates only through the approved loopback read-only APIs. The reference device remains in `mode=test`.
 
 ## Current version
 
-`0.15.1`
+`0.18.0`
 
 The production/default database contract now uses these ten service-owned tables inside the existing `test` database:
 
@@ -33,6 +33,8 @@ The production/default database contract now uses these ten service-owned tables
 - `biometric_svc_audit_log`
 
 The service **never creates, alters, or drops database objects automatically**. Startup performs read-only validation of the selected database, required columns, `utf8mb4_bin` collation, and critical unique indexes. Any schema change must be executed manually by the operator first.
+
+`v0.18.0` adds an optional outbound-only web bridge for Final Events. When explicitly enabled, the local service pushes only the existing safe Final Event contract to the main web application over HTTPS. It keeps a durable local delivery cursor, retries without advancing the cursor when the target is unavailable, and initializes at the current tail on first enable so historical data is not backfilled automatically. The local admin UI and read-only API remain loopback-only.
 
 ## Core flow
 
@@ -208,7 +210,7 @@ The standalone biometric-service stage was formally closed on 2026-08-31 after r
 
 `v0.13.0` adds a versioned integration contract **inside biometric-service only**. It is disabled by default, loopback-only in this release, and requires an independent Bearer token when enabled. It reads only rows already finalized by the standalone Finalization engine and exposes no internal person IDs, source punch IDs, device/vendor details, raw payloads, or biometric material. No main application code is changed or connected.
 
-Endpoints: `GET /api/v1/health`, `GET /api/v1/final-events?after_id=...&limit=...`, and `GET /api/v1/final-events/{finalEventUuid}`. All Final Events mutation methods are rejected. Cursor replay is designed to be safe with consumer deduplication by `eventId`. See `docs/FINAL_EVENTS_API_V1.md`.
+Endpoints: `GET /api/v1/health`, `GET /api/v1/final-events?after_id=...&limit=...`, `GET /api/v1/final-events/{finalEventUuid}`, and from v0.16.0 `GET /api/v1/person-directory?search=...&status=active&after_code=...&limit=...`. All protected integration mutation methods are rejected. Cursor replay is designed to be safe with consumer deduplication by `eventId`. See `docs/FINAL_EVENTS_API_V1.md`.
 
 
 ## v0.13.1 consumer simulator hotfix
@@ -221,6 +223,22 @@ Endpoints: `GET /api/v1/health`, `GET /api/v1/final-events?after_id=...&limit=..
 `v0.14.0` closes the transient-failure gap after canonical punch durability. New canonical punches created while automatic Finalization is active carry a durable `automatic_finalization_pending` intent in the existing Finalization Issues table. A bounded retry sweep retries only those intents; existing historical canonical punches are not scanned or backfilled. No database schema change, UI theme change, or main-application integration is introduced. See `docs/UPGRADE_V0.13.1_TO_V0.14.0.md`.
 
 
+
+
+
+## v0.17.1 historical reprocessing success feedback
+
+`v0.17.1` is a UI-only patch for the manual historical Final Event reprocessing dialog. After a successful reprocess, the dialog now stays open and shows the success result inside the same dialog (for example, that one historical event was reissued), while the existing global notice remains as a secondary confirmation. This release does not change historical replay logic, Final Event contents, database schema, `.env`, device mode, automatic-backfill policy, or main-application integration behavior.
+
+## v0.17.0 controlled historical reprocessing
+
+`v0.17.0` adds explicit **manual** historical Final Event reprocessing from the standalone People screen. This is for the case where a biometric person is linked to a worker in the workforce application after older biometric events already existed. Nothing is backfilled automatically when a worker is linked. The administrator selects the biometric person and a bounded date range, previews the count, confirms the action, and only then reissues those historical Final Events with new immutable event references. The original Final Events are never edited or deleted.
+
+The reissued rows keep the original person code, event type, device event time, timezone, verification method, source punch and device reference. They use a replay-specific finalization version beginning with `hr-`, and safe metadata records the replay batch/original Final Event reference. Because the rows are new Final Events with newer database IDs, an already-running cursor consumer can receive them normally. Consumer-side attendance deduplication remains the consumer's responsibility. Each operation is limited to 31 calendar days and 1,000 original events, requires an active biometric person, and writes one safe audit record. No database schema change, SQL migration, `.env` change, main-application file change, or automatic historical scan is introduced. See `docs/UPGRADE_V0.16.0_TO_V0.17.0.md`.
+
+## v0.16.0 safe Person Directory integration surface
+
+`v0.16.0` extends the existing loopback-only, Bearer-protected read-only integration listener with `GET /api/v1/person-directory`. The endpoint supports the approved worker-linking UI and exposes exactly `personCode`, `displayName`, and `status`, with search and person-code cursor pagination. It does not expose internal biometric IDs, device-user identities, device details, notes, raw payloads, biometric material, or `worker_id`. The endpoint is read-only and no database schema change or SQL mutation is required. No main-application files are changed in this release. See `docs/PERSON_DIRECTORY_API_V1.md` and `docs/UPGRADE_V0.15.1_TO_V0.16.0.md`.
 
 ## v0.15.1 reporting semantics correction
 

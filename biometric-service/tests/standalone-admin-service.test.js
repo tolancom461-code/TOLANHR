@@ -77,3 +77,16 @@ test('read-only admin reporting methods delegate only to the biometric admin rea
   await service.operationalReports({ from: '2026-09-01' });
   assert.deepEqual(calls.map((entry) => entry[0]), ['events', 'export', 'event', 'people', 'unmapped', 'issues', 'devices', 'reports']);
 });
+
+test('historical preview and reprocessing delegate only to the explicit manual replay service', async () => {
+  const calls = [];
+  const historicalReplayService = {
+    async preview(input) { calls.push(['preview', input]); return { count: 1 }; },
+    async reprocess(input) { calls.push(['reprocess', input]); return { reissuedCount: 1 }; }
+  };
+  const service = new StandaloneAdminService({ managementService: {}, adminReadStore: {}, finalizationService: {}, historicalReplayService });
+  assert.deepEqual(await service.previewHistoricalEvents({ personId: 30001, from: '2026-09-01', to: '2026-09-01' }), { count: 1 });
+  assert.deepEqual(await service.reprocessHistoricalEvents({ personId: 30001, from: '2026-09-01', to: '2026-09-01', confirmed: true }), { reissuedCount: 1 });
+  assert.equal(calls[1][1].actor.actorType, 'admin');
+  assert.equal(calls[1][1].actor.actorReference, 'local-ui');
+});

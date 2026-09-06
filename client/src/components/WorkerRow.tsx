@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { Eye, QrCode, Download, Pencil } from 'lucide-react';
 
 interface WorkerRowProps {
@@ -46,6 +47,16 @@ const WorkerRow = memo(({
     <TableCell>{worker.nationalId || "-"}</TableCell>
     <TableCell>{getGroupName(worker.groupId)}</TableCell>
     <TableCell>{getStatusBadge(worker.status || "active")}</TableCell>
+    <TableCell>
+      {worker.biometricPersonCode ? (
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">مربوط</Badge>
+          <span className="font-mono text-xs" dir="ltr">{worker.biometricPersonCode}</span>
+        </div>
+      ) : (
+        <span className="text-sm text-muted-foreground">غير مربوط</span>
+      )}
+    </TableCell>
     <TableCell>
       <div className="flex items-center gap-1">
         <Button

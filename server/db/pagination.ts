@@ -61,7 +61,8 @@ export async function getWorkersWithPagination(
       or(
         like(workers.fullName, searchTerm),
         like(workers.code, searchTerm),
-        like(workers.nationalId, searchTerm)
+        like(workers.nationalId, searchTerm),
+        like(workers.biometricPersonCode, searchTerm)
       )
     );
   }

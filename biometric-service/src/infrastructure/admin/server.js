@@ -29,6 +29,16 @@ export function createAdminServer({ adminService, diagnosticLog }) {
         if (!event) return json(res, 404, { error: 'EVENT_NOT_FOUND', message: 'Final event not found' });
         return json(res, 200, { event });
       }
+
+      const historicalPreviewMatch = url.pathname.match(/^\/api\/people\/(\d+)\/historical-events\/preview$/);
+      if (req.method === 'GET' && historicalPreviewMatch) {
+        return json(res, 200, await adminService.previewHistoricalEvents({
+          personId: Number(historicalPreviewMatch[1]),
+          from: url.searchParams.get('from'),
+          to: url.searchParams.get('to')
+        }));
+      }
+
       if (req.method === 'GET' && url.pathname === '/api/people') {
         return json(res, 200, await adminService.listPeople(readFilters(url)));
       }
@@ -43,6 +53,20 @@ export function createAdminServer({ adminService, diagnosticLog }) {
       }
       if (req.method === 'GET' && url.pathname === '/api/reports/operational') {
         return json(res, 200, await adminService.operationalReports(readFilters(url)));
+      }
+
+
+      const historicalReprocessMatch = url.pathname.match(/^\/api\/people\/(\d+)\/historical-events\/reprocess$/);
+      if (req.method === 'POST' && historicalReprocessMatch) {
+        enforceLocalUiWrite(req);
+        const body = await readJson(req);
+        const result = await adminService.reprocessHistoricalEvents({
+          personId: Number(historicalReprocessMatch[1]),
+          from: body.from,
+          to: body.to,
+          confirmed: body.confirmed === true
+        });
+        return json(res, 200, result);
       }
 
       if (req.method === 'POST' && url.pathname === '/api/people') {
@@ -216,8 +240,9 @@ function setSecurityHeaders(res) {
 
 function httpStatus(error) {
   if (error?.code === 'PERSON_NOT_FOUND' || error?.code === 'DEVICE_USER_NOT_FOUND') return 404;
-  if (['PERSON_CODE_CONFLICT', 'DEVICE_USER_MAPPING_CONFLICT', 'PERSON_INACTIVE'].includes(error?.code)) return 409;
-  if (['DISPLAY_NAME_REQUIRED', 'JSON_REQUIRED', 'LOCAL_UI_HEADER_REQUIRED', 'INVALID_JSON'].includes(error?.code)) return 400;
+  if (['PERSON_CODE_CONFLICT', 'DEVICE_USER_MAPPING_CONFLICT', 'PERSON_INACTIVE', 'HISTORICAL_REPLAY_LIMIT', 'HISTORICAL_REPLAY_CHANGED'].includes(error?.code)) return 409;
+  if (['DISPLAY_NAME_REQUIRED', 'JSON_REQUIRED', 'LOCAL_UI_HEADER_REQUIRED', 'INVALID_JSON',
+    'HISTORICAL_CONFIRMATION_REQUIRED', 'HISTORICAL_RANGE_REQUIRED', 'HISTORICAL_RANGE_INVALID', 'HISTORICAL_RANGE_TOO_LARGE'].includes(error?.code)) return 400;
   if (error?.code === 'ADMIN_BODY_TOO_LARGE') return 413;
   if (error instanceof TypeError) return 400;
   return 500;
@@ -227,7 +252,9 @@ function safeMessage(error) {
   const known = new Set([
     'PERSON_NOT_FOUND', 'DEVICE_USER_NOT_FOUND', 'PERSON_CODE_CONFLICT',
     'DEVICE_USER_MAPPING_CONFLICT', 'PERSON_INACTIVE', 'DISPLAY_NAME_REQUIRED',
-    'JSON_REQUIRED', 'LOCAL_UI_HEADER_REQUIRED', 'INVALID_JSON', 'ADMIN_BODY_TOO_LARGE'
+    'JSON_REQUIRED', 'LOCAL_UI_HEADER_REQUIRED', 'INVALID_JSON', 'ADMIN_BODY_TOO_LARGE',
+    'HISTORICAL_CONFIRMATION_REQUIRED', 'HISTORICAL_RANGE_REQUIRED', 'HISTORICAL_RANGE_INVALID',
+    'HISTORICAL_RANGE_TOO_LARGE', 'HISTORICAL_REPLAY_LIMIT', 'HISTORICAL_REPLAY_CHANGED'
   ]);
   if (known.has(error?.code) || error instanceof TypeError) return error.message;
   return 'حدث خطأ غير متوقع';

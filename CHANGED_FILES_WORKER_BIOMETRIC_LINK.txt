@@ -1,0 +1,11 @@
+client/src/components/WorkerBiometricLinkPicker.tsx
+client/src/components/WorkerRow.tsx
+client/src/pages/Workers.tsx
+client/src/pages/WorkerDetails.tsx
+drizzle/schema.ts
+server/biometric-integration.ts
+server/db/pagination.ts
+server/db/workers.ts
+server/routers/workers.ts
+server/__tests__/biometric-integration.test.ts
+README_WORKER_BIOMETRIC_LINK_UPDATE_2026-09-05.md

@@ -75,7 +75,8 @@ import {
   ListChecks,
   UtensilsCrossed,
   BarChart3,
-  Receipt
+  Receipt,
+  Fingerprint
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { PWAInstallButton } from "./PWAInstallButton";
@@ -194,6 +195,7 @@ function getMenuSections(t: any) {
     label: t.nav.attendanceManagement,
     items: [
       { icon: QrCode, label: t.navItems.attendanceScanner, path: "/attendance" },
+      { icon: Fingerprint, label: t.navItems.biometricUnit, path: "/biometric-service", externalHref: "http://127.0.0.1:9096", color: "text-cyan-600" },
       { icon: ClipboardList, label: t.navItems.attendanceLog, path: "/attendance/log" },
       { icon: FileText, label: t.navItems.attendanceReports, path: "/attendance/reports" },
       { icon: Clock, label: t.navItems.workDays, path: "/work-days" },
@@ -328,6 +330,7 @@ type MenuItem = {
   path: string;
   color?: string;
   badge?: number | null;
+  externalHref?: string;
 };
 
 type MenuSection = {
@@ -464,10 +467,15 @@ function DashboardLayoutContent({
                           <SidebarMenuItem key={item.path}>
                             <SidebarMenuButton
                               asChild
-                              isActive={location === item.path}
-                              onClick={() => setLocation(item.path)}
+                              isActive={!item.externalHref && location === item.path}
+                              onClick={item.externalHref ? undefined : () => setLocation(item.path)}
                             >
-                              <a href={item.path} className="flex items-center gap-2 justify-between w-full">
+                              <a
+                                href={item.externalHref || item.path}
+                                target={item.externalHref ? "_blank" : undefined}
+                                rel={item.externalHref ? "noopener noreferrer" : undefined}
+                                className="flex items-center gap-2 justify-between w-full"
+                              >
                                 <div className="flex items-center gap-2">
                                   <item.icon className={`h-4 w-4 ${(item as any).color || ''}`} />
                                   <span>{item.label}</span>

@@ -20,6 +20,7 @@ import { memo, useCallback, useMemo } from 'react';
 import WorkerRow from '@/components/WorkerRow';
 import WorkerPhotoPicker from '@/components/WorkerPhotoPicker';
 import WorkerPhotoPreview from '@/components/WorkerPhotoPreview';
+import WorkerBiometricLinkPicker, { type WorkerBiometricSelection } from '@/components/WorkerBiometricLinkPicker';
 import { fileToBase64 } from '@/lib/imageCompression';
 import { useAuth } from '@/hooks/useAuth';
 import { canManageWorkerPhotos } from '@shared/workerPhotoPolicy';
@@ -44,6 +45,8 @@ export default function Workers() {
   const [isQRDialogOpen, setIsQRDialogOpen] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState<any>(null);
   const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
+  const [biometricSelection, setBiometricSelection] = useState<WorkerBiometricSelection>(null);
+  const [initialBiometricPersonCode, setInitialBiometricPersonCode] = useState<string | null>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -74,6 +77,7 @@ export default function Workers() {
   const createMutation = trpc.workers.create.useMutation();
   const updateMutation = trpc.workers.update.useMutation();
   const uploadPhotoMutation = trpc.workers.uploadPhoto.useMutation();
+  const setBiometricLinkMutation = trpc.workers.setBiometricLink.useMutation();
 
   const deleteMutation = trpc.workers.delete.useMutation({
     onSuccess: () => {
@@ -138,6 +142,8 @@ export default function Workers() {
       status: "active",
     });
     setPendingPhotoFile(null);
+    setBiometricSelection(null);
+    setInitialBiometricPersonCode(null);
   };
 
   const handleEdit = (worker: any) => {
@@ -153,6 +159,13 @@ export default function Workers() {
       status: worker.status || "active",
     });
     setPendingPhotoFile(null);
+    const currentBiometricCode = worker.biometricPersonCode?.trim() || null;
+    setInitialBiometricPersonCode(currentBiometricCode);
+    setBiometricSelection(
+      currentBiometricCode
+        ? { personCode: currentBiometricCode, displayName: '' }
+        : null,
+    );
     setIsEditDialogOpen(true);
   };
 
@@ -182,8 +195,20 @@ export default function Workers() {
     return await uploadPhotoMutation.mutateAsync({ workerId, imageBase64 });
   };
 
+
+  const applyBiometricLinkIfChanged = async (workerId: number, originalCode: string | null) => {
+    const nextCode = biometricSelection?.personCode ?? null;
+    if (nextCode === originalCode) return false;
+
+    await setBiometricLinkMutation.mutateAsync({
+      workerId,
+      personCode: nextCode,
+    });
+    return true;
+  };
+
   const handleSubmit = async () => {
-    if (createMutation.isPending || updateMutation.isPending || uploadPhotoMutation.isPending) return;
+    if (createMutation.isPending || updateMutation.isPending || uploadPhotoMutation.isPending || setBiometricLinkMutation.isPending) return;
 
     if (selectedWorker) {
       try {
@@ -193,6 +218,14 @@ export default function Workers() {
           groupId: formData.groupId || undefined,
           jobId: formData.jobId || undefined,
         });
+
+        try {
+          await applyBiometricLinkIfChanged(selectedWorker.id, initialBiometricPersonCode);
+        } catch (error: any) {
+          await invalidateWorkerViews();
+          toast.error(error?.message || 'تم حفظ بيانات العامل، لكن تعذر تحديث الربط مع نظام البصمة.');
+          return;
+        }
 
         if (pendingPhotoFile) {
           try {
@@ -204,7 +237,14 @@ export default function Workers() {
           }
         }
 
-        toast.success(pendingPhotoFile ? 'تم تحديث بيانات العامل واستبدال الصورة بنجاح' : 'تم تحديث بيانات العامل بنجاح');
+        const biometricChanged = (biometricSelection?.personCode ?? null) !== initialBiometricPersonCode;
+        toast.success(
+          pendingPhotoFile
+            ? 'تم تحديث بيانات العامل واستبدال الصورة بنجاح'
+            : biometricChanged
+              ? 'تم تحديث بيانات العامل وربط البصمة بنجاح'
+              : 'تم تحديث بيانات العامل بنجاح',
+        );
         setIsEditDialogOpen(false);
         setSelectedWorker(null);
         resetForm();
@@ -222,15 +262,34 @@ export default function Workers() {
         jobId: formData.jobId || undefined,
       });
 
+      let biometricLinkFailed = false;
+      if (biometricSelection?.personCode) {
+        try {
+          await setBiometricLinkMutation.mutateAsync({
+            workerId: created.id,
+            personCode: biometricSelection.personCode,
+          });
+        } catch (error: any) {
+          biometricLinkFailed = true;
+          toast.warning(error?.message || 'تم إنشاء العامل، لكن تعذر ربطه مع نظام البصمة. يمكنك إعادة المحاولة من تعديل العامل.');
+        }
+      }
+
       if (pendingPhotoFile) {
         try {
           await uploadPreparedPhoto(created.id, pendingPhotoFile);
-          toast.success('تم إضافة العامل ورفع الصورة بنجاح');
+          if (!biometricLinkFailed) {
+            toast.success(biometricSelection?.personCode
+              ? 'تم إضافة العامل وربطه بالبصمة ورفع الصورة بنجاح'
+              : 'تم إضافة العامل ورفع الصورة بنجاح');
+          }
         } catch (error: any) {
           toast.warning('تم إنشاء العامل، لكن تعذر رفع الصورة. يمكنك استبدالها لاحقًا من تعديل العامل.');
         }
-      } else {
-        toast.success('تم إضافة العامل بنجاح');
+      } else if (!biometricLinkFailed) {
+        toast.success(biometricSelection?.personCode
+          ? 'تم إضافة العامل وربطه بالبصمة بنجاح'
+          : 'تم إضافة العامل بنجاح');
       }
 
       setIsAddDialogOpen(false);
@@ -443,6 +502,12 @@ export default function Workers() {
                     onChange={setPendingPhotoFile}
                   />
                 )}
+                <WorkerBiometricLinkPicker
+                  workerName={formData.fullName || 'العامل الجديد'}
+                  value={biometricSelection}
+                  currentPersonCode={null}
+                  onChange={setBiometricSelection}
+                />
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
@@ -450,9 +515,9 @@ export default function Workers() {
                 </Button>
                 <Button
                   onClick={handleSubmit}
-                  disabled={createMutation.isPending || uploadPhotoMutation.isPending}
+                  disabled={createMutation.isPending || uploadPhotoMutation.isPending || setBiometricLinkMutation.isPending}
                 >
-                  {createMutation.isPending || uploadPhotoMutation.isPending ? "جاري الحفظ..." : "حفظ"}
+                  {createMutation.isPending || uploadPhotoMutation.isPending || setBiometricLinkMutation.isPending ? "جاري الحفظ..." : "حفظ"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -468,7 +533,7 @@ export default function Workers() {
               <div className="relative flex-1">
                 <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="البحث عن عامل بالاسم أو الكود أو الهوية..."
+                  placeholder="البحث بالاسم أو الكود أو الهوية أو رقم البصمة..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pr-10"
@@ -530,6 +595,7 @@ export default function Workers() {
                     <TableHead className="text-right">رقم الهوية</TableHead>
                     <TableHead className="text-right">المجموعة</TableHead>
                     <TableHead className="text-right">الحالة</TableHead>
+                    <TableHead className="text-right">البصمة</TableHead>
                     <TableHead className="text-right">الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -569,6 +635,8 @@ export default function Workers() {
             if (!open) {
               setPendingPhotoFile(null);
               setSelectedWorker(null);
+              setBiometricSelection(null);
+              setInitialBiometricPersonCode(null);
             }
           }}
         >
@@ -651,6 +719,15 @@ export default function Workers() {
                 </Select>
               </div>
               {selectedWorker && (
+                <WorkerBiometricLinkPicker
+                  workerId={selectedWorker.id}
+                  workerName={formData.fullName || selectedWorker.fullName}
+                  value={biometricSelection}
+                  currentPersonCode={initialBiometricPersonCode}
+                  onChange={setBiometricSelection}
+                />
+              )}
+              {selectedWorker && (
                 canManagePhotos ? (
                   <WorkerPhotoPicker
                     workerName={formData.fullName || selectedWorker.fullName}
@@ -680,9 +757,9 @@ export default function Workers() {
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={updateMutation.isPending || uploadPhotoMutation.isPending}
+                disabled={updateMutation.isPending || uploadPhotoMutation.isPending || setBiometricLinkMutation.isPending}
               >
-                {updateMutation.isPending || uploadPhotoMutation.isPending ? "جاري الحفظ..." : "حفظ التغييرات"}
+                {updateMutation.isPending || uploadPhotoMutation.isPending || setBiometricLinkMutation.isPending ? "جاري الحفظ..." : "حفظ التغييرات"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -736,6 +813,14 @@ export default function Workers() {
                       {selectedWorker.lastAttendanceAt 
                         ? new Date(selectedWorker.lastAttendanceAt).toLocaleDateString('ar-SA')
                         : "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">الربط مع البصمة</p>
+                    <p className="font-medium">
+                      {selectedWorker.biometricPersonCode ? (
+                        <span className="font-mono" dir="ltr">{selectedWorker.biometricPersonCode}</span>
+                      ) : 'غير مربوط'}
                     </p>
                   </div>
                 </div>

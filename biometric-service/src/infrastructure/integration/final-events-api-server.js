@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import http from 'node:http';
 
-export function createFinalEventsApiServer({ service, token, diagnosticLog }) {
+export function createFinalEventsApiServer({ service, personDirectoryService = null, token, diagnosticLog }) {
   const expectedToken = String(token ?? '');
   if (expectedToken.length < 32) throw new Error('Final Events API token must be at least 32 characters');
 
@@ -14,7 +14,7 @@ export function createFinalEventsApiServer({ service, token, diagnosticLog }) {
         return json(res, 200, { ok: true, service: 'biometric-final-events-api', apiVersion: 'v1' });
       }
 
-      if (url.pathname === '/api/v1/final-events' || url.pathname.startsWith('/api/v1/final-events/')) {
+      if (isProtectedReadPath(url.pathname)) {
         if (req.method !== 'GET') return json(res, 405, { error: 'READ_ONLY_API', message: 'This API is read-only' }, { allow: 'GET' });
         enforceBearer(req, expectedToken);
       }
@@ -25,9 +25,19 @@ export function createFinalEventsApiServer({ service, token, diagnosticLog }) {
         return json(res, 200, await service.list({ afterId, limit }));
       }
 
-      const match = url.pathname.match(/^\/api\/v1\/final-events\/([^/]+)$/);
-      if (req.method === 'GET' && match) {
-        return json(res, 200, await service.getByUuid(decodeURIComponent(match[1])));
+      const eventMatch = url.pathname.match(/^\/api\/v1\/final-events\/([^/]+)$/);
+      if (req.method === 'GET' && eventMatch) {
+        return json(res, 200, await service.getByUuid(decodeURIComponent(eventMatch[1])));
+      }
+
+      if (req.method === 'GET' && url.pathname === '/api/v1/person-directory') {
+        if (!personDirectoryService) return json(res, 503, { error: 'PERSON_DIRECTORY_UNAVAILABLE', message: 'Person directory unavailable' });
+        return json(res, 200, await personDirectoryService.list({
+          search: url.searchParams.get('search') ?? '',
+          status: url.searchParams.get('status') ?? 'active',
+          afterCode: url.searchParams.get('after_code') ?? '',
+          limit: url.searchParams.get('limit') ?? '100'
+        }));
       }
 
       return json(res, 404, { error: 'NOT_FOUND', message: 'Not found' });
@@ -48,6 +58,12 @@ export function createFinalEventsApiServer({ service, token, diagnosticLog }) {
       return json(res, status, { error: error?.code ?? 'FINAL_EVENTS_API_ERROR', message: safeMessage(error) }, headers);
     }
   });
+}
+
+function isProtectedReadPath(pathname) {
+  return pathname === '/api/v1/final-events'
+    || pathname.startsWith('/api/v1/final-events/')
+    || pathname === '/api/v1/person-directory';
 }
 
 function enforceBearer(req, expectedToken) {

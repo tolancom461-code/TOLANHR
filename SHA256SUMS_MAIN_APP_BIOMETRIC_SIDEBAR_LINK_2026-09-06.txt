@@ -1,0 +1,3 @@
+48d04a3fff905d62afd4fcf137b9aa597b0aea6c33fddd403f4e9a15cfefa9c6  client/src/components/DashboardLayout.tsx
+8b606baa57592c2dfb28b72ae1c07121b60f6c2576842006a7f98f4e0fdaec1c  client/src/i18n/translations.ts
+a0016d3086f052cd8d13ae4f3fd3b237fd8d8bb0bd8c3fd48e4567187ae67448  README_MAIN_APP_BIOMETRIC_SIDEBAR_LINK_2026-09-06.md
