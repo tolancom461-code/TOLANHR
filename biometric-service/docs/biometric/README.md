@@ -1,58 +1,71 @@
 # توثيق مشروع نظام البصمة — المرجع الرئيسي
 
 **المشروع:** TolanWorkforce / برنامج تحضير اليومية  
-**آخر تحديث شامل:** 2026-08-31  
-**الخدمة المستقلة:** `biometric-service` v0.9.4  
-**الحالة:** مرحلة الخدمة المستقلة مكتملة؛ الربط مع النظام الرئيسي لم يبدأ عمداً.
+**آخر تحديث شامل:** 2026-09-07  
+**الخدمة الحالية:** `biometric-service` v0.18.0  
+**حالة الجهاز:** `mode=test`  
+**مرحلة الجهاز المحلي:** ✅ مكتملة  
+**المرحلة التالية:** تجهيز سيرفر الشركة المحلي — لم تبدأ بعد.
 
 ## ابدأ من هنا
 
-1. `20_STANDALONE_BIOMETRIC_SYSTEM_EXECUTION_PLAN_2026-08-31.md` — **خطة التنفيذ المرجعية للمرحلة الجديدة: نظام إدارة بصمة مستقل كامل + Final Events + بوابة الربط المستقبلية.**
-2. `19_FINAL_CLOSURE_REPORT_2026-08-31.md` — تقرير الإغلاق النهائي والحقيقة التشغيلية الحالية.
-3. `01_CURRENT_STATUS.md` — لقطة مختصرة للحالة النهائية.
-4. `00_BIOMETRIC_MASTER_PLAN.md` — الخطة والحدود المعمارية.
-5. `08_REAL_DEVICE_VALIDATION_2026-08-29.md` — إثباتات الجهاز والبروتوكول الأولى.
-6. `09_ATTLOG_FIELD_MAPPING.md` — خرائط ATTLOG المثبتة على الجهاز المرجعي.
-7. `15_DATABASE_RUNTIME_INTEGRATION_2026-08-30.md` — دمج TiDB داخل الخدمة المستقلة.
-8. `16_V0.9.2_RUNTIME_HARDENING_2026-08-31.md` — retry/timezone/policy/log hardening.
-9. `18_V0.9.4_ACCEPT_EVENTS_FROM_UTC_FIX_2026-08-31.md` — عيب UTC الذي كشفه الاختبار الحقيقي وإصلاحه.
-10. `04_EXECUTION_CHECKLIST.md` — بوابات التنفيذ بعد تحديثها للحالة النهائية.
-11. `02_DECISION_LOG.md` و`03_ISSUES_AND_FIXES.md` — تاريخ القرارات والمشاكل.
+1. `21_WINDOWS_SERVICE_WINSW_LOCAL_PC_2026-09-07.md` — **الحالة النهائية للتشغيل المحلي: Web Bridge outage + WinSW + Auto-Start + Auto-Restart + Reboot tests.**
+2. `01_CURRENT_STATUS.md` — لقطة الحالة الحالية.
+3. `12_OPERATIONS_RUNBOOK.md` — التشغيل والإدارة اليومية عبر Windows Service.
+4. `04_EXECUTION_CHECKLIST.md` — الاختبارات والبوابات المحدثة.
+5. `02_DECISION_LOG.md` — القرارات، ومنها اعتماد WinSW بدل Task Scheduler.
+6. `03_ISSUES_AND_FIXES.md` — المشاكل المكتشفة وإصلاحاتها.
+7. `../BIOMETRIC_INTEGRATION_STATUS_2026-09-07.md` — ملخص التكامل مع Main App/Railway/TiDB.
+8. `../UPGRADE_V0.17.1_TO_V0.18.0.md` — Web Bridge v0.18.0.
+9. `19_FINAL_CLOSURE_REPORT_2026-08-31.md` — Baseline التاريخي قبل مراحل v0.10+ والربط.
+10. `20_STANDALONE_BIOMETRIC_SYSTEM_EXECUTION_PLAN_2026-08-31.md` — الخطة التاريخية التي قادت إلى Final Events/Web Bridge.
+
+## الحالة المثبتة الآن
+
+```text
+Real device / ADMS                     ✅
+Durable ingest / canonical punch       ✅
+Final Events                           ✅
+Person Directory                       ✅
+Manual historical reprocessing         ✅
+Main App worker linking                 ✅ tested previously
+Production outbound Web Bridge          ✅
+Railway outage pending + retry           ✅
+Production TiDB verification             ✅
+Windows background service (WinSW)      ✅
+Auto-restart after process crash         ✅
+Auto-start after Windows reboot          ✅
+Post-reboot biometric delivery           ✅
+Old Task Scheduler                       ✅ disabled
+Device mode                              test
+Company server deployment                ❌ not started
+```
 
 ## القواعد الملزمة
 
-- TiDB الفعلية هي مصدر الحقيقة، وليس `drizzle/schema.ts`.
-- أي تغيير DB مستقبلي ينفذه المشغل يدوياً بعد موافقة؛ لا Migration تلقائي.
-- `biometric-service` مستقلة ولا تكتب إلى workers/attendance/finance/payroll/shifts/QR.
-- لا يتم تخزين biometric templates أو صور أو Password/Card credentials.
-- device identity = `vendor + serialNumber`.
-- Vendor mappings تبقى داخل Adapter/compatibility profile ولا تعمم بدون إثبات.
-- الجهاز الحالي يبقى `mode=test` حتى موافقة مستقلة على بدء مرحلة الربط؛ لا تحويل إلى `live` الآن.
+- TiDB الفعلية هي مصدر الحقيقة، وليس Drizzle schema.
+- لا `drizzle push` ولا Migration تلقائي ولا SQL تعديلي بلا موافقة صريحة.
+- الجهاز الحالي يبقى `mode=test` حتى موافقة صريحة على تغيير ذلك.
+- لا تخزين templates أو صور بصمة/وجه أو passwords أو raw sensitive payloads.
+- لا طباعة أو توثيق Token values.
+- `.env` يبقى محليًا ولا يذهب إلى GitHub.
+- لا expose مباشر للمنافذ 9095/9096/9097 إلى الإنترنت العام.
+- production direction = outbound HTTPS Web Bridge.
 
-## الحالة المثبتة
+## التشغيل المحلي النهائي
+
+التشغيل اليومي لم يعد يعتمد على فتح PowerShell. الخدمة المثبتة:
 
 ```text
-Real ADMS connectivity          ✅
-OPTIONS / OPERLOG / ATTLOG      ✅
-Durable TiDB ingest             ✅
-Canonical punch                 ✅
-Retry + deduplication           ✅
-ACK stop-retry                  ✅
-Timezone/UTC normalization      ✅
-accept_events_from              ✅ after v0.9.4 fix
-mode/status policy              ✅
-Diagnostic session + rotation   ✅
-Automated tests                 ✅ 97/97
-Boundary tests                  ✅ 4/4
-Main-app integration            ❌ not started by design
+Service name: TolanBiometricService
+Display name: Tolan Biometric Service
+Deployment:   C:\Tolan\BiometricService
+Start:        Automatic / delayed auto start
+Recovery:     restart service after failure
 ```
 
-## ملاحظة عن الأدلة القديمة
+التفاصيل الكاملة في `21_WINDOWS_SERVICE_WINSW_LOCAL_PC_2026-09-07.md`.
 
-بعض الملفات الأقدم توثق الحالة كما كانت وقت كتابتها (`v0.6` إلى `v0.9.3`) وقد تحتوي عبارات مثل "pending" أو "no DB runtime" كانت صحيحة تاريخياً في ذلك الوقت. عند التعارض، المرجع الحالي هو:
+## الوثائق الأقدم
 
-1. `20_STANDALONE_BIOMETRIC_SYSTEM_EXECUTION_PLAN_2026-08-31.md` للمرحلة الجديدة.
-2. `19_FINAL_CLOSURE_REPORT_2026-08-31.md` لحقيقة Baseline v0.9.4.
-3. `01_CURRENT_STATUS.md` للحالة التشغيلية المختصرة.
-4. الكود/الاختبارات في v0.9.4.
-5. TiDB الفعلية للبنية والبيانات.
+الوثائق المؤرخة قبل 2026-09-07 تبقى تاريخية ولا تُحذف. إذا قالت وثيقة قديمة إن Main App Bridge "لم يبدأ" فهذا وصف صحيح لذلك التاريخ فقط وقد تم تجاوزه لاحقًا.

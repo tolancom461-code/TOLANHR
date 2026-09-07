@@ -79,3 +79,78 @@ DB الحالية تجعل `serial_number` فريدًا وحده ولا تحتو
 ## I-015 — QR الحالي للنظام يجب ألا يختلط بميزة QR في الجهاز
 
 الجهاز يعلن دعم QR، لكن الاختبار أُلغي. QR الخاص بالنظام الحالي يبقى خارج الخدمة المستقلة وممنوع لمسه.
+
+---
+
+# مشاكل وإصلاحات 2026-09-07
+
+## I-016 — Web Bridge target unavailable
+
+**الاختبار:** target مؤقت `http://127.0.0.1:1`.
+
+**المشاهدة:**
+
+```text
+web bridge error (TypeError): fetch failed
+```
+
+**الإثبات:** cursor بقي `120001`، وبعد إعادة target الصحيح أرسل الحدث مرة واحدة وTiDB أظهرت `import_count=1`.
+
+**الحالة:** مغلق / behavior صحيح.
+
+## I-017 — افتراض اسم عمود attendance من خارج TiDB
+
+استعلام تحقق أول استخدم `a.attendance_time` وفشل:
+
+```text
+Unknown column 'a.attendance_time' in 'field list'
+```
+
+**الإصلاح:** قراءة بنية `attendance_events` من TiDB الفعلية؛ الاسم الصحيح المستخدم في التحقق كان `event_time`.
+
+**القاعدة الناتجة:** TiDB الفعلية هي source of truth؛ لا نفترض من Drizzle.
+
+## I-018 — Task Scheduler لا يعيد Node بعد crash simulation
+
+رغم:
+
+```text
+RestartCount    = 999
+RestartInterval = PT1M
+```
+
+قتل `node.exe` أدى إلى task `Ready` دون restart. سجل Task Scheduler Operational أظهر return code `4294967295` ثم اعتبر action مكتملة.
+
+**الإصلاح:** عدم الاعتماد على Task Scheduler كحل supervision نهائي؛ الانتقال إلى WinSW Windows Service.
+
+## I-019 — Installer v1 فشل على `.Count`
+
+أول تنفيذ installer توقف عند:
+
+```text
+The property 'Count' cannot be found on this object.
+```
+
+السبب: PowerShell أعاد عنصر port واحد scalar بدل collection.
+
+**الإصلاح في v2:** wrap explicit `@(...)` لنتائج فحص المنافذ، وتحسين rollback وحماية deployment directory.
+
+**أمان الفشل:** WinSW لم يُثبت في ذلك التنفيذ، Task Scheduler القديم تم الحفاظ/الاستعادة عليه، ولا SQL ولا reboot.
+
+## I-020 — فحص الخدمة مباشرة بعد Windows restart أعطى `Stopped`
+
+الفحص المبكر بعد reboot رأى:
+
+```text
+Stopped TolanBiometricService
+```
+
+لكن WinSW wrapper log أثبت أن delayed auto start بدأ الخدمة تلقائيًا عند `2026-09-07 14:21:14` وشغل PID `4404`.
+
+**المعالجة التشغيلية:** بعد Windows boot، أعط delayed-auto-start وقتًا مناسبًا ثم افحص `Get-Service` والمنافذ قبل اعتبار startup فاشلًا.
+
+## I-021 — منع التشغيل المزدوج
+
+بعد نجاح WinSW تم التحقق أن Windows Service `Running` وأن Task Scheduler القديم `Disabled`.
+
+**الحالة:** مغلق؛ لا يوجد listener مزدوج على 9095/9096/9097.

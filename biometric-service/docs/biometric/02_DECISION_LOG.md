@@ -179,3 +179,65 @@ v0.5 فصل OPTIONS عن ATTLOG؛ v0.6 أثبت OPERLOG ثم ATTLOG ACK الحق
 ## D-039 — نسخة الخدمة الحالية v0.8.0
 
 آخر suite محلي: 58/58 passing. لم تُعد اختبارات الجهاز الحقيقي لأن مسار ADMS wire protocol لم يتغير.
+
+---
+
+# قرارات 2026-09-07 — Web Bridge + Windows Service
+
+## D-040 — TiDB الفعلية تبقى مصدر الحقيقة أثناء التكامل
+
+لا يتم افتراض أسماء أعمدة أو بنية DB من Drizzle. عند اختلاف اسم عمود `attendance_events` تم الرجوع إلى TiDB الفعلية بقراءة `SHOW COLUMNS` وتصحيح الاستعلام بناءً عليها.
+
+## D-041 — اتجاه الإنتاج هو outbound Web Bridge
+
+Railway لا يعتمد على الوصول إلى loopback المحلي. الاتجاه المعتمد:
+
+```text
+biometric-service local -> outbound HTTPS -> https://www.tolanhr.com
+```
+
+## D-042 — Web Bridge cursor لا يتقدم عند failure
+
+اختبار target غير متاح أثبت أن cursor بقي `120001` أثناء `fetch failed`، ثم تقدم إلى `150001` فقط بعد acknowledgement ناجح.
+
+## D-043 — لا نعتمد Task Scheduler كـservice supervisor نهائي
+
+Task Scheduler نجح في background/startup وتشغيل البصمات، لكنه لم يعد Process تلقائيًا بعد kill رغم إعداد restart policy. تم رفض workaround دوري مستمر لأنه لا يمثل service supervision المطلوبة.
+
+## D-044 — WinSW هو wrapper Windows المعتمد محليًا
+
+يتم تشغيل Node كـWindows Service حقيقية عبر WinSW:
+
+```text
+SCM -> WinSW -> node.exe -> biometric-service
+```
+
+## D-045 — مسار deployment ثابت للخدمة
+
+Runtime المعتمد للخدمة:
+
+```text
+C:\Tolan\BiometricService
+```
+
+ولا يعتمد Windows Service النهائي على Desktop كمسار تشغيل.
+
+## D-046 — Recovery يعيد الخدمة فقط ولا يعيد Windows
+
+failure action المعتمد هو service restart. لا يوجد reboot/shutdown action في إعداد الخدمة أو installer.
+
+## D-047 — Task Scheduler القديم يعطّل فقط بعد نجاح WinSW
+
+لتجنب downtime أو duplicate listeners، installer يعطل المهمة القديمة فقط بعد:
+
+- تثبيت الخدمة.
+- بدء الخدمة.
+- نجاح health check للمنافذ 9095/9096/9097.
+
+## D-048 — Windows Service تبدأ تلقائيًا مع delayed auto start
+
+تم اعتماد Automatic + delayed auto start. لذلك الفحص المبكر جدًا بعد login قد يرى `Stopped` مؤقتًا قبل أن يبدأ SCM الخدمة.
+
+## D-049 — الجهاز يبقى `mode=test` بعد إغلاق مرحلة الجهاز المحلي
+
+نجاح الإنتاج/Windows Service لا يعني go-live mode. تغيير mode يحتاج موافقة صريحة مستقلة.

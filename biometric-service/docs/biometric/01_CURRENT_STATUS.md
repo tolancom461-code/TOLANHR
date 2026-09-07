@@ -1,91 +1,41 @@
-# الحالة الحالية — 2026-08-31
+# الحالة الحالية — 2026-09-07
 
-## 1. ملخص تنفيذي
+## 1. الملخص التنفيذي
 
-تم إغلاق مرحلة `biometric-service` المستقلة على **v0.9.4** بعد اختبارات آلية واختبارات جهاز حقيقي وTiDB فعلية.
-
-```text
-Service isolation             ✅
-Multi-device architecture     ✅ automated
-Multi-vendor architecture     ✅ architectural; one real vendor tested
-Real ZKTeco connection        ✅
-OPTIONS / OPERLOG / ATTLOG    ✅
-Retry / replay / dedupe       ✅
-ATTLOG ACK                    ✅ real device
-Verification mappings         ✅ 5 methods on tested profile
-Punch-state mappings          ✅ 6 states on tested profile
-TiDB runtime persistence      ✅ real device
-Canonical punch               ✅ real device
-Timezone -> UTC               ✅ real device
-accept_events_from policy     ✅ real device on v0.9.4
-mode policy                   ✅ real runtime evidence
-status policy                 ✅ runtime rejection evidence + automated ATTLOG coverage
-Diagnostic session/rotation   ✅
-Current-app integration       ❌ intentionally not started
-```
-
-التقرير النهائي المرجعي: `19_FINAL_CLOSURE_REPORT_2026-08-31.md`.
-
-## 2. الإصدار والاختبارات
+`biometric-service` الحالية هي **v0.18.0**، ومسار الإنتاج المثبت حاليًا هو:
 
 ```text
-Package version      0.9.4
-Automated suite      97/97 pass
-Boundary tests       4/4 pass
-Storage mode         database (default)
-Database             test
-Service port         9095
-Vendor adapter       zkteco
+ZKTeco device
+    ↓ local network
+biometric-service on Windows
+    ↓ outbound HTTPS Web Bridge
+https://www.tolanhr.com / Railway
+    ↓
+production main app
+    ↓
+production TiDB
 ```
 
-تمت إعادة `npm test` أثناء توثيق الإغلاق ونجحت 97/97.
+الجهاز المرجعي ما زال `mode=test`.
 
-## 3. الحالة النهائية للجهاز
+مرحلة الجهاز المحلي اكتملت باختبارات فعلية شملت outage، background service، process crash recovery، Windows restart، وبصمة فعلية بعد restart.
+
+## 2. الجهاز المرجعي
 
 ```text
 Vendor             zkteco
 Model              SpeedFace-V5L
 Serial             AJE1261900133
-Firmware           ZAM230-NF50VA-1.1.9-OCM-4000-Ver1.0.1
 Device IP          192.168.10.199
-Subnet             255.255.255.0
-Gateway            192.168.10.1
-DHCP               OFF
-Service PC IP      192.168.10.187
+ADMS port          9095
+SDK port           4370
 Timezone           Asia/Riyadh / UTC+03:00
-DST                OFF
-NTP                OFF by operator choice
 Mode               test
-Status             active
-accept_events_from NULL
 ```
 
-**لا يتم تغيير `mode` إلى `live` إلا عند بدء مرحلة الربط مع النظام الرئيسي بموافقة منفصلة.**
+لا يتم تغيير `mode` إلى `live` إلا بموافقة صريحة مستقلة.
 
-## 4. قاعدة البيانات
-
-الجداول الخمسة المملوكة للخدمة:
-
-```text
-biometric_svc_devices
-biometric_svc_ingest_events
-biometric_svc_event_processing
-biometric_svc_punches
-biometric_svc_device_users
-```
-
-الجداول البيومترية القديمة الفارغة تم حذفها يدوياً بعد فحوص الاعتماديات. Runtime لا ينفذ DDL، ولا توجد كتابة إلى جداول التطبيق الرئيسي.
-
-آخر count تم قياسه أثناء الاختبارات:
-
-```text
-ingest_events = 8
-punches       = 7
-```
-
-الفرق مقصود بسبب اختبار `accept_events_from`: حدث واحد تم حفظه durable ولم يتحول إلى Punch.
-
-## 5. الخريطة المثبتة على الجهاز المرجعي
+## 3. خرائط الجهاز المثبتة
 
 ```text
 rawStatus 0 -> check_in
@@ -102,71 +52,183 @@ rawVerify 15 -> face
 rawVerify 25 -> palm
 ```
 
-هذه القيم خاصة بالـCompatibility Profile للجهاز/firmware المختبر ولا تعمم على جهاز ZKTeco آخر بدون اختبار.
+هذه mapping للجهاز/firmware المختبر ولا تعمم تلقائيًا على جهاز آخر.
 
-## 6. أهم نتائج الاختبار الحقيقي
+## 4. قاعدة بيانات `biometric-service`
 
-- ACK بعد durable TiDB ingest أوقف retry الحقيقي للجهاز.
-- duplicates لم تنتج ingest/punch جديداً.
-- `check_in`, `break_out`, `overtime_in` ظهرت Canonical بشكل صحيح مع fingerprint.
-- `device_event_time_local=09:44:05 Asia/Riyadh` تحول إلى `device_event_time_utc=06:44:05` بشكل صحيح.
-- عيب v0.9.3 في مقارنة `accept_events_from` مع وقت الرياض اكتشف فعلياً وأصلح في v0.9.4.
-- بعد الإصلاح: count تغير من `6/6` إلى `7/6` عند cutoff المستقبلي، أي durable ingest بدون Punch كما هو مطلوب.
-- `mode=maintenance` أدى إلى `device_policy_rejected` في السجل الحقيقي.
-- أثناء `status=disabled` ظهرت رفضات policy حقيقية، لكن ATTLOG الخاص بحركة الاختبار تأخر حتى إعادة `active`؛ لذلك لا يتم المبالغة في هذا الدليل.
+Schema المستخدمة: `test`.
 
-## 7. الخصوصية
-
-لا templates ولا biometric images ولا password/card credentials ولا unsafe raw payloads في التخزين الدائم.
-
-## 8. نقطة التوقف
+الجداول البيومترية العشرة المثبتة:
 
 ```text
-Standalone biometric-service = CLOSED / COMPLETE
-Main application bridge       = NOT STARTED
-Device mode                   = test
+biometric_svc_devices
+biometric_svc_ingest_events
+biometric_svc_event_processing
+biometric_svc_punches
+biometric_svc_device_users
+biometric_svc_people
+biometric_svc_person_device_users
+biometric_svc_final_events
+biometric_svc_finalization_issues
+biometric_svc_audit_log
 ```
 
-الخطوة التالية — إن اعتمدت مستقبلاً — هي تصميم Bridge مستقل. لا تغيير إلى `live` ولا ربط بالعمال/الحضور/المالية/QR قبل موافقة جديدة.
+TiDB الفعلية هي مصدر الحقيقة. لا يتم اعتماد Drizzle schema كمرجع DB نهائي.
 
-## المرحلة التالية المعتمدة — بعد الإغلاق
+## 5. الخدمات المحلية الحالية
 
-تم اعتماد قرار بناء **نظام بصمة مستقل كامل** فوق Baseline `v0.9.4` قبل أي ربط مع البرنامج الرئيسي. المرجع التنفيذي الملزم هو:
+```text
+Admin UI:          http://127.0.0.1:9096
+Final Events API:  http://127.0.0.1:9097/api/v1
+Person Directory:  GET /api/v1/person-directory
+ADMS listener:     0.0.0.0:9095
+```
 
-`20_STANDALONE_BIOMETRIC_SYSTEM_EXECUTION_PLAN_2026-08-31.md`
+9096 و9097 loopback-only. لا يتم expose مباشر للمنافذ المحلية إلى الإنترنت العام.
 
-القرار: البرنامج الرئيسي لا يقرأ الجداول الداخلية ولا يكتب فيها؛ لاحقًا يقرأ **Final Events فقط** عبر عقد قراءة ثابت. الجهاز يبقى `mode=test` حتى إغلاق النظام المستقل الجديد، اختبار Bridge منفصل، وموافقة صريحة على `live`.
+## 6. Finalization / historical behavior
 
+- automatic finalization: enabled for new canonical punches only.
+- retry sweep: every 10 seconds; retry delay 30 seconds.
+- automatic historical finalization backfill: disabled.
+- manual historical Final Events reprocessing: available from local Admin UI.
+- historical reprocessing remains explicit/human-controlled.
 
----
+## 7. Main App integration
 
-## تحديث تنفيذ Phase 1/2 — v0.10.0 foundations — 2026-08-31
+### attendance truth
 
-تم بعد إغلاق Baseline v0.9.4 إنشاء واعتماد خمسة جداول مستقلة إضافية يدويًا في TiDB:
+`attendance_events` هو سجل الحضور الأساسي.
 
-- `biometric_svc_people`
-- `biometric_svc_person_device_users`
-- `biometric_svc_final_events`
-- `biometric_svc_finalization_issues`
-- `biometric_svc_audit_log`
+```text
+attendance_events
+    ↓
+processAttendanceToFinance(...)
+    ↓
+worker_daily_finance
+```
 
-وبذلك أصبح عقد schema الخاص بخدمة البصمة يتوقع **10 جداول `biometric_svc_*`**.
+### source method
 
-قرار الهوية المعتمد:
+```text
+QR camera / manual worker code -> method=qr
+biometric                     -> method=biometric
+```
 
-- `person_code` هو الرقم الموحد للشخص داخل نظام البصمة، مثل `175`.
-- عند ظهور Device User جديد يقترح النظام مبدئيًا `person_code = device_user_id` لتبسيط الاستخدام، لكن لا ينشئ الربط الصامت إذا كانت الحالة ملتبسة.
-- البرنامج الرئيسي لا يدخل في هذه المرحلة، ولا يوجد `worker_id` داخل جداول نظام البصمة.
+### duplicate policy
 
-تم في v0.10.0 إضافة Backend foundations داخل `biometric-service` فقط لـ:
+First valid event wins داخل نافذة 3 دقائق لنفس العامل + نفس event type.
 
-- إنشاء/قراءة People.
-- اكتشاف Device Users غير المربوطين.
-- اقتراح `person_code` من `device_user_id`.
-- ربط Device User بشخص واحد مع conflict protection.
-- السماح للشخص الواحد بالارتباط بعدة Device Users على أجهزة مختلفة.
-- Audit آمن لعمليات إنشاء الشخص والربط.
+### biometric import tracking
 
-لا توجد Admin HTTP API مكشوفة في هذه الدفعة؛ فتح API للشاشات يأتي بعد تثبيت هذه الطبقة واختبارها.
+Main App يستخدم `biometric_final_event_imports` لتتبع:
 
-الجهاز المرجعي يبقى `mode=test` ولا يوجد Main-App Bridge.
+```text
+processed
+duplicate
+unmapped
+unsupported_event
+```
+
+ويضمن idempotency بواسطة Final Event UUID.
+
+## 8. Web Bridge v0.18.0
+
+Production endpoint:
+
+```text
+https://www.tolanhr.com
+```
+
+الاتجاه الحالي:
+
+```text
+local biometric-service
+    ↓ outbound HTTPS
+Railway main app
+```
+
+الـpull importer القديم ليس اتجاه الإنتاج الحالي.
+
+### outage test — PASSED
+
+تم تحويل target مؤقتًا إلى `http://127.0.0.1:1`، تنفيذ بصمة واحدة، وإثبات:
+
+- `fetch failed` أثناء الانقطاع.
+- Web Bridge cursor بقي `120001` ولم يتقدم.
+- بعد إعادة target الصحيح، ظهر:
+  `web bridge pushed 1; cursor=150001; results={"processed":1}`.
+- TiDB الإنتاجية أثبتت `status=processed`, `method=biometric`, `import_count=1`.
+
+تفاصيل الاختبار: `21_WINDOWS_SERVICE_WINSW_LOCAL_PC_2026-09-07.md`.
+
+## 9. Windows background service — PASSED
+
+الحل النهائي المحلي هو Windows Service حقيقية بواسطة WinSW، وليس Task Scheduler.
+
+```text
+Service name: TolanBiometricService
+Display name: Tolan Biometric Service
+Deployment:   C:\Tolan\BiometricService
+Account:      LocalSystem
+Start mode:   Automatic + delayed auto start
+```
+
+### اختبارات مثبتة
+
+```text
+Background execution without daily PowerShell        PASS
+Process crash -> automatic service restart            PASS
+Windows restart -> automatic service startup          PASS
+Post-reboot break_in delivery                         PASS (unsupported_event as designed)
+Post-reboot check_in delivery                         PASS (processed / biometric)
+Old Task Scheduler                                    Disabled
+```
+
+عملية crash test رجعت من PID `18468` إلى PID `9824` تلقائيًا.
+
+بعد Windows restart بدأ WinSW تلقائيًا وشغّل PID `4404`; بعد startup كان 9095/9096/9097 listening.
+
+آخر post-reboot check-in الموثق:
+
+```text
+status              = processed
+attendance_event_id = 28860001
+method              = biometric
+event_time_utc      = 2026-09-07 11:27:23
+event_time          = 2026-09-07 14:27:23
+work_date           = 2026-09-07
+```
+
+## 10. الأمن والخصوصية
+
+- لا Token values داخل التوثيق.
+- `.env` لا يذهب إلى GitHub.
+- لا biometric templates/images/passwords/raw sensitive payloads في Main App.
+- outbound HTTPS هو اتجاه الإنتاج.
+- لا expose مباشر لـZKTeco أو 9095/9096/9097 إلى الإنترنت العام.
+- الجهاز يبقى `mode=test`.
+
+## 11. DB / migration safety
+
+- لا `drizzle push`.
+- لا startup automatic migrations.
+- لا schema mutation دون موافقة صريحة.
+- read-only SQL مسموح للتحقق.
+- خلال outage/Windows-service phase بتاريخ 2026-09-07 كانت عمليات TiDB المستخدمة للتحقق قراءة فقط.
+
+## 12. نقطة الانتقال الحالية
+
+```text
+Local PC phase       = COMPLETE
+Company server phase = NOT STARTED
+Device mode          = test
+```
+
+**انتهت مرحلة الجهاز المحلي، الآن ننتقل إلى جهاز سيرفر الشركة ونجهزه لتشغيل برنامج البصمة تلقائيًا.**
+
+لا تبدأ خطوات سيرفر الشركة إلا عند بدء تلك المرحلة صراحة.
+
+## 13. ملاحظة تاريخية
+
+تقارير v0.9.4 و2026-08-31 تبقى Baseline تاريخيًا مهمًا، لكن عبارات مثل "Main application integration not started" فيها تصف الحالة وقتها فقط وقد تم تجاوزها لاحقًا حتى v0.18.0.

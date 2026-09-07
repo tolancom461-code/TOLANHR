@@ -1,59 +1,66 @@
 # Biometric Documentation — TolanWorkforce
 
-**Last verified:** 2026-08-31  
-**Current standalone service:** `biometric-service` v0.14.0 (v0.9.4 remains the closed ingest/canonical baseline)  
+**Last verified:** 2026-09-07  
+**Current biometric-service:** `v0.18.0`  
 **Real terminal:** ZKTeco SpeedFace-V5L / ZAM230  
-**Database:** TiDB Serverless (`test`)  
-**Safety state:** standalone phase complete; main attendance/finance/QR integration not started.
+**Database source of truth:** actual TiDB  
+**Device safety state:** `mode=test`  
+**Local-PC phase:** ✅ complete  
+**Next phase:** company local server preparation — not started yet.
 
-## Authoritative current documents
+## ابدأ من هنا — الحالة الحالية
 
-1. `biometric/19_FINAL_CLOSURE_REPORT_2026-08-31.md`
-2. `biometric/01_CURRENT_STATUS.md`
-3. `biometric/README.md`
-4. `ARCHITECTURE.md`
-5. `biometric/09_ATTLOG_FIELD_MAPPING.md`
-6. `biometric/15_DATABASE_RUNTIME_INTEGRATION_2026-08-30.md`
-7. `biometric/18_V0.9.4_ACCEPT_EVENTS_FROM_UTC_FIX_2026-08-31.md`
-8. `biometric/04_EXECUTION_CHECKLIST.md`
+1. `biometric/21_WINDOWS_SERVICE_WINSW_LOCAL_PC_2026-09-07.md` — **التشغيل التلقائي النهائي على Windows + WinSW + اختبارات outage/crash/reboot.**
+2. `BIOMETRIC_INTEGRATION_STATUS_2026-09-07.md` — ملخص تكامل Main App / Railway / TiDB الحالي.
+3. `biometric/01_CURRENT_STATUS.md` — الحالة التشغيلية المحدثة.
+4. `UPGRADE_V0.17.1_TO_V0.18.0.md` — تعريف Web Bridge في v0.18.0.
+5. `FINAL_EVENTS_API_V1.md` و`PERSON_DIRECTORY_API_V1.md` — عقود API المحلية.
+6. `biometric/12_OPERATIONS_RUNBOOK.md` — دليل التشغيل اليومي الحالي.
+7. `biometric/04_EXECUTION_CHECKLIST.md` — بوابات التنفيذ والاختبارات.
+8. `biometric/02_DECISION_LOG.md` و`biometric/03_ISSUES_AND_FIXES.md` — القرارات والمشاكل.
 
-## Historical/protocol documents
+## الحقيقة الحالية المثبتة
 
-Upgrade notes and earlier phase documents are retained as historical evidence. Statements such as "DB pending" in an older dated document describe the state at that time and are superseded by the final closure report.
+```text
+Local ZKTeco
+→ local Windows Service (WinSW)
+→ biometric-service v0.18.0
+→ outbound HTTPS
+→ https://www.tolanhr.com / Railway
+→ attendance_events / import tracking in production TiDB
+```
 
-## Absolute rules
+تم إثبات:
 
-- Actual TiDB is the database source of truth.
-- No automatic migration/DDL.
-- No main-app imports or writes from the standalone service.
-- No biometric templates/images, passwords, or card credential material in durable storage.
-- The current real device remains operationally in `mode=test` until a separately approved main-application integration phase begins.
+- Web Bridge push إلى الإنتاج.
+- الاحتفاظ بالحدث pending عند تعطل الهدف وعدم تقدم cursor.
+- retry تلقائي بعد استعادة الهدف.
+- استيراد الحدث مرة واحدة فقط (`import_count=1` في اختبار الانقطاع).
+- تشغيل `biometric-service` في الخلفية كـWindows Service حقيقية.
+- automatic service recovery بعد قتل `node.exe` عمدًا.
+- automatic startup بعد Windows restart.
+- بصمة فعلية بعد restart وصلت إلى TiDB الإنتاجية.
+- Task Scheduler القديم معطّل بعد نجاح Windows Service.
 
-- خطة المرحلة التالية: `biometric/20_STANDALONE_BIOMETRIC_SYSTEM_EXECUTION_PLAN_2026-08-31.md` — بناء نظام البصمة المستقل الكامل وFinal Events قبل أي Main-App Bridge.
+## القواعد الملزمة
 
-## v0.10.0 standalone management foundations
+- Actual TiDB is the database source of truth. Do not treat Drizzle schema as authoritative.
+- No `drizzle push`, automatic migrations, or schema mutations without explicit approval.
+- Read-only SQL is allowed for verification.
+- Device remains `mode=test` until explicit approval changes it.
+- Do not store/expose biometric templates, biometric images, passwords, or raw sensitive payloads.
+- `.env` and bridge tokens must not be committed or printed in documentation.
+- Do not expose the ZKTeco terminal or local ports 9095/9096/9097 directly to the public internet.
+- Production direction is outbound HTTPS from local `biometric-service` to the Main App.
 
-See `UPGRADE_V0.9.4_TO_V0.10.0.md` and `biometric/20_STANDALONE_BIOMETRIC_SYSTEM_EXECUTION_PLAN_2026-08-31.md`.
+## وثائق تاريخية
 
+ملفات v0.4 إلى v0.17.1 وتقارير 2026-08-29/30/31 تبقى كأدلة تاريخية للحالة وقت كتابتها. عبارات مثل "main integration not started" داخل تلك الملفات لا تمثل الحالة الحالية بعد 2026-09-07.
 
-## v0.12.0 local bilingual administration
+المرجع عند التعارض:
 
-The standalone service now includes a loopback-only administration UI at `127.0.0.1:9096` by default. Arabic is default with RTL layout; English switches the same screens to LTR. The UI exposes simple operational concepts only and does not integrate with the main workforce application. See `UPGRADE_V0.11.1_TO_V0.12.0.md`.
-
-
-## v0.12.1 TiDB administration-read hotfix
-
-`v0.12.1` keeps the v0.12.0 UI unchanged and fixes TiDB/mysql2 pagination compatibility in the standalone administration read layer. No database migration or main-application integration is introduced.
-
-
-## v0.12.2 mapping re-finalization hotfix
-
-`v0.12.2` fixes the post-mapping retry call in the standalone administration service so it invokes `FinalizationService.finalizePunchById(...)`. This is an application-only hotfix: no schema change, no UI-theme change, no automatic historical backfill, and no main-app integration.
-
-
-## v0.14.0 durable automatic Finalization retry
-
-`v0.14.0` adds a durable pending intent for every newly inserted canonical punch while automatic Finalization is active, plus bounded retry of only those intents after transient Finalization failures. It uses the existing Finalization Issues table, requires no SQL/DDL, preserves the no-historical-backfill gate, keeps the current UI theme, and does not connect to the main application. See `UPGRADE_V0.13.1_TO_V0.14.0.md`.
-
-- `UPGRADE_V0.16.0_TO_V0.17.0.md` — controlled manual historical Final Event reprocessing; no automatic backfill.
-- `UPGRADE_V0.17.1_TO_V0.18.0.md` — optional outbound HTTPS Final Events bridge to the main web application; no automatic historical backfill.
+1. actual TiDB for database facts.
+2. `biometric/21_WINDOWS_SERVICE_WINSW_LOCAL_PC_2026-09-07.md` for local Windows operation.
+3. `BIOMETRIC_INTEGRATION_STATUS_2026-09-07.md` for current Main App integration status.
+4. `biometric/01_CURRENT_STATUS.md` for concise current state.
+5. dated historical documents for historical evidence only.

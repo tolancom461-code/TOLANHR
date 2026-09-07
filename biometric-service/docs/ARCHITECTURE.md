@@ -1,26 +1,69 @@
 # Biometric Service Architecture
 
-## Status
+## Status — 2026-09-07
 
-`biometric-service/` is a fully isolated application inside the repository. Current service version is **0.12.2**. The real ZKTeco SpeedFace-V5L has connected successfully and produced real ADMS traffic and real ATTLOG events.
+`biometric-service/` remains an isolated application inside the repository, but it is now intentionally integrated with the Main App through a narrow **Final Events / Web Bridge boundary**.
 
-The system is still **not integrated** with the existing workforce application. It now uses TiDB only through its own ten `biometric_svc_*` tables.
+Current service version: **v0.18.0**.
 
-## Non-negotiable boundary
+The real ZKTeco SpeedFace-V5L is proven with ADMS traffic, durable ingest, canonical punches, Final Events, outbound Web Bridge delivery, and Windows background-service operation.
 
-During the standalone biometric phase:
+The device remains `mode=test`.
 
-- no imports from `../server`, `../client`, `../shared`, or the old biometric prototype;
-- no attendance API calls;
-- no writes to `workers`, `attendance_events`, finance, shifts, QR, or any current business table;
-- no root-application startup dependency;
-- no automatic migration;
-- database access is isolated to the ten `biometric_svc_*` tables and never runs DDL;
-- failure of `biometric-service` must have zero effect on the existing application.
+## Current end-to-end path
+
+```text
+ZKTeco terminal
+   ↓ local ADMS / 9095
+biometric-service
+   ↓ durable sanitized ingest
+canonical punch
+   ↓ finalization
+Final Event
+   ↓ outbound HTTPS Web Bridge
+https://www.tolanhr.com / Railway
+   ↓
+Main App biometric ingest boundary
+   ↓
+biometric_final_event_imports
+   ↓
+attendance_events (for supported check_in/check_out)
+   ↓
+worker_daily_finance via existing attendance finance path
+```
+
+## Ownership boundaries
+
+### biometric-service owns
+
+```text
+biometric_svc_ingest_events
+biometric_svc_event_processing
+biometric_svc_punches
+biometric_svc_devices
+biometric_svc_device_users
+biometric_svc_people
+biometric_svc_person_device_users
+biometric_svc_final_events
+biometric_svc_finalization_issues
+biometric_svc_audit_log
+```
+
+### Main App owns
+
+Workers, attendance, finance, application settings, audit, and biometric import tracking belong to the Main App/TiDB side.
+
+`biometric-service` does **not** write directly into Main App DB tables. Integration happens through the versioned event boundary / Web Bridge.
+
+## Database truth rule
+
+Actual TiDB is the source of truth for database structure and data. Drizzle schema is not authoritative when verifying production DB facts.
+
+No automatic DDL/migration is allowed as part of runtime startup.
 
 ## Multi-device / multi-vendor core
 
-The common core is vendor-neutral. Hardware-specific behavior lives in adapters.
+The common core remains vendor-neutral. Hardware-specific behavior lives in adapters.
 
 ```text
 Terminal(s)
@@ -35,7 +78,9 @@ ACK eligibility boundary
    ↓
 Canonical punch processing
    ↓
-Standalone punch store / diagnostics
+Finalization
+   ↓
+Final Event
 ```
 
 Current adapter:
@@ -48,108 +93,161 @@ Future vendors receive separate adapters; vendor-specific numeric meanings must 
 
 ## Canonical device identity
 
-Architectural identity:
-
 ```text
 vendor + serialNumber
 ```
 
-Example:
+Reference device:
 
 ```text
 zkteco:AJE1261900133
 ```
 
-This is enforced by `biometric_svc_devices` with a unique `(vendor, serial_number)` key. The legacy serial-only biometric table was removed manually after it was verified empty and unreferenced at the database level.
-
-## Proven ZKTeco protocol path
+## ZKTeco protocol path
 
 The SpeedFace-V5L uses:
 
-- ADMS / PUSH protocol;
-- HTTP endpoint on the isolated service port `9095`;
-- `GET /iclock/cdata?...options=all...` negotiation;
-- `POST /iclock/cdata?table=OPTIONS` capability profile;
-- `GET /iclock/getrequest` polling;
-- `POST /iclock/cdata?table=OPERLOG` for operation logs;
-- `POST /iclock/cdata?table=ATTLOG` for attendance transactions.
+- ADMS / PUSH protocol.
+- local HTTP endpoint on 9095.
+- OPTIONS negotiation/capability profile.
+- polling through `/iclock/getrequest`.
+- OPERLOG handling with privacy filtering.
+- ATTLOG attendance transactions.
 
-Port `4370` remains the device's traditional TCP/SDK communication port. It is not the ADMS service port used by this test.
+Port 4370 remains the traditional SDK port and is not the ADMS listener used by this service path.
 
-## ATTLOG model
+## ATTLOG semantic model
 
-Every valid real ATTLOG line observed so far has ten tab-separated fields. v0.7 no longer persists the raw ATTLOG line in new durable-ingest/canonical records; it keeps a wire hash, safe parsed fields, byte/field counts, and conservatively classified numeric extra fields.
+Proven status mapping for the tested compatibility profile:
 
-The two proven semantic dimensions are:
+```text
+0 check_in
+1 check_out
+2 break_out
+3 break_in
+4 overtime_in
+5 overtime_out
+```
 
-- `rawStatus`: punch state selected on the terminal;
-- `rawVerify`: verification method used by the terminal.
+Proven verification mapping:
 
-These mappings are device/firmware compatibility knowledge owned by the ZKTeco adapter, not universal core assumptions. See `biometric/09_ATTLOG_FIELD_MAPPING.md`.
+```text
+1  fingerprint
+3  password
+4  card
+15 face
+25 palm
+```
+
+These are adapter/device-profile facts, not universal assumptions for every ZKTeco terminal.
 
 ## Privacy boundary
 
-The observer may retain attendance transaction evidence. It must not retain biometric templates or credential material.
+The service may retain sanitized attendance transaction evidence but must not persist/expose:
 
-For OPERLOG:
+- biometric templates.
+- biometric images.
+- passwords.
+- card credential material.
+- unsafe raw biometric payloads.
 
-- safe user metadata may be retained;
-- passwords and card numbers are redacted;
-- FP/FACE/PALM/VEIN/BIODATA/BIOPHOTO/USERPIC payload values are discarded;
-- unknown unsafe record shapes are not persisted raw.
+The Web Bridge sends only the sanitized Final Event contract required by the Main App.
 
-## Persistence boundary
-
-Production/default persistence is now TiDB-backed:
+## Local administration boundary
 
 ```text
-biometric_svc_ingest_events      # durable sanitized inbox / ACK boundary
-biometric_svc_event_processing   # processing and retry state
-biometric_svc_punches            # canonical punches
-biometric_svc_devices            # device registry/metadata
-biometric_svc_device_users       # safe device-user metadata
-biometric_svc_people             # standalone biometric people
-biometric_svc_person_device_users# identity mapping
-biometric_svc_final_events       # immutable integration-ready events
-biometric_svc_finalization_issues# unresolved finalization review
-biometric_svc_audit_log          # safe administrative audit
+ADMS listener:     0.0.0.0:9095
+Admin UI:          127.0.0.1:9096
+Final Events API:  127.0.0.1:9097/api/v1
+Person Directory:  same 9097 loopback/auth boundary
 ```
 
-The runtime never runs DDL. Before listening, it performs read-only checks for the selected database, required columns, table collation, and critical idempotency indexes. Database failure does not fall back silently to files. Historical file captures remain preserved for lab evidence only.
+9096/9097 are loopback-only in the current local setup. None of 9095/9096/9097 is exposed directly to the public internet.
 
-## Integration gate
+## Final Events boundary
 
-No Bridge to attendance is allowed until:
+Final Events are the stable integration-ready contract. They exclude internal/raw/biometric-sensitive details.
 
-1. the standalone service is completed and tested;
-2. database reconciliation is explicitly approved;
-3. the legacy biometric cleanup gate is completed;
-4. the existing application is regression-tested;
-5. a new explicit approval is given for integration.
+Historical Final Event backfill is **not automatic**. Manual historical reprocessing remains explicit and bounded from the local Admin UI.
 
+## Main App Web Bridge boundary — v0.18.0
 
-## Local administration boundary (v0.12.0)
+Railway cannot reach the local loopback API, so the production direction is outbound push:
 
-The device-facing server remains on `BIOMETRIC_PORT` (default `9095`). Administration uses a separate listener on `BIOMETRIC_ADMIN_PORT` (default `9096`) and is restricted to loopback in v0.12.0. The administration UI/API reads and writes only service-owned biometric tables through the standalone application services.
+```text
+local biometric-service -> outbound HTTPS -> Main App / Railway
+```
 
-The UI defaults to Arabic/RTL and can switch to English/LTR without restarting the service. CSS uses logical alignment for interface structure; person/device codes, serial numbers, and timestamps are isolated LTR so language switching cannot make technical identifiers ambiguous.
+Current target:
 
-No administration route reads or writes the main application. No bridge is created by v0.12.0.
+```text
+https://www.tolanhr.com
+```
 
+A dedicated server-side bridge token is used; its value must never be logged or documented.
 
-## v0.12.1 TiDB read compatibility
+The bridge keeps a durable cursor in:
 
-The local administration read stores validate pagination as bounded integers and emit those LIMIT/OFFSET values as SQL literals instead of prepared-statement parameters. All user/search values remain parameterized. This avoids TiDB/mysql2 prepared LIMIT argument incompatibility while preserving injection safety. No schema or architecture boundary changes were made.
+```text
+var/web-bridge-state.json
+```
 
+The cursor advances only after successful acknowledgement of the complete batch.
 
-## v0.12.2 post-mapping re-finalization
+This behavior was proven by a controlled target outage on 2026-09-07.
 
-After a local administrator maps an unresolved device user, the administration application retries only that device user's open `unmapped_device_user` punch IDs through the same `FinalizationService.finalizePunchById(...)` boundary used elsewhere. Successful finalization creates or reuses the idempotent Final Event and resolves open issues for that source punch. The database schema and isolation boundary are unchanged.
+## Main App attendance semantics
 
-## v0.13.0 Final Events integration boundary
+`attendance_events` is the attendance source of truth.
 
-The standalone service now contains an opt-in, versioned read-only Final Events API on a dedicated listener. This is an internal standalone milestone, not a main-application bridge.
+Supported biometric attendance conversion currently covers `check_in` and `check_out`.
 
-The API reads only `biometric_svc_final_events` rows whose status is `final`. Its public v1 event schema contains only the Final Event UUID, biometric person code, canonical event type/time/timezone, canonical verification method, and finalization version. It deliberately excludes internal person IDs, source punch IDs, device/vendor identifiers, raw metadata, and all biometric/credential material.
+Other canonical event types such as `break_in` can still arrive and be tracked but currently do not become attendance check-in/check-out; for example, the verified post-reboot `break_in` produced `unsupported_event`.
 
-The listener defaults to `127.0.0.1:9097`, is disabled by default, refuses non-loopback hosts in this release, and requires an independent Bearer credential for event reads. No write endpoint exists. Remote exposure, TLS termination, network allowlisting, and bridge deployment remain separate future approval gates.
+Duplicate behavior is first-valid-event-wins inside the configured 3-minute duplicate window for the same worker + same event type.
+
+## Windows runtime architecture
+
+The final local Windows runtime is:
+
+```text
+Windows Service Control Manager
+   ↓
+WinSW 2.12.0
+   ↓
+node.exe
+   ↓
+biometric-service
+```
+
+Deployment path:
+
+```text
+C:\Tolan\BiometricService
+```
+
+Service:
+
+```text
+TolanBiometricService
+```
+
+Properties:
+
+- Automatic / delayed auto start.
+- background operation.
+- service-only recovery after process failure.
+- no configured Windows reboot action.
+- old Task Scheduler task disabled after successful transition.
+
+Detailed proof: `biometric/21_WINDOWS_SERVICE_WINSW_LOCAL_PC_2026-09-07.md`.
+
+## Current gate
+
+```text
+Local PC phase       COMPLETE
+Company server phase NOT STARTED
+Device mode          test
+```
+
+The next architectural deployment step is reproducing the proven Windows Service pattern on the company local server, after verifying its Node/runtime/network/firewall prerequisites and connectivity to the ZKTeco device.

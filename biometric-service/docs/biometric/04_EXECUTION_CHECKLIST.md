@@ -124,3 +124,92 @@ Do not connect to workers/attendance/finance/payroll/shifts/QR yet.
 ```
 
 المرحلة التالية، إذا اعتمدت، هي تصميم Main Application Bridge بموافقة جديدة واختبارات regression مستقلة.
+
+---
+
+# تحديث التنفيذ — 2026-09-07
+
+## المرحلة 11 — Main App / Web Bridge production path
+
+- [x] Main App public target = `https://www.tolanhr.com`.
+- [x] outbound HTTPS bridge from local `biometric-service`.
+- [x] production bridge health/auth tested previously.
+- [x] real biometric Final Event pushed to Railway.
+- [x] production TiDB `attendance_events` verified.
+- [x] device remains `mode=test`.
+
+## المرحلة 12 — Web Bridge outage / reliability
+
+- [x] service stopped before changing target.
+- [x] temporary unavailable target = `http://127.0.0.1:1`.
+- [x] one biometric event generated.
+- [x] `fetch failed` observed.
+- [x] Web Bridge cursor remained `120001` while target unavailable.
+- [x] correct target restored to `https://www.tolanhr.com`.
+- [x] pending event retried automatically.
+- [x] push success: cursor advanced to `150001`.
+- [x] production TiDB verified `status=processed`.
+- [x] production TiDB verified `method=biometric`.
+- [x] production TiDB verified `import_count=1`.
+- [x] original timestamp preserved.
+
+## المرحلة 13 — Local Windows background operation
+
+### Task Scheduler trial
+
+- [x] background task created and tested.
+- [x] started biometric-service without daily PowerShell.
+- [x] real biometric event reached production TiDB.
+- [x] crash recovery test performed.
+- [x] Task Scheduler auto-restart behavior rejected as insufficient.
+
+### WinSW Windows Service
+
+- [x] WinSW 2.12.0 x64 selected/pinned.
+- [x] installer review mode passed.
+- [x] installer v1 safe failure documented.
+- [x] installer v2 passed.
+- [x] deployment created at `C:\Tolan\BiometricService`.
+- [x] `.env` preserved and protected; token not printed.
+- [x] Web Bridge cursor state copied/preserved.
+- [x] service installed: `TolanBiometricService`.
+- [x] service account = LocalSystem.
+- [x] start mode = Automatic / delayed auto start.
+- [x] 9095/9096/9097 listening.
+- [x] failure action does not reboot Windows.
+
+## المرحلة 14 — Recovery / reboot proof
+
+- [x] killed Node PID `18468` intentionally.
+- [x] service recovered automatically as PID `9824`.
+- [x] no manual biometric-service start used for recovery.
+- [x] Windows reboot performed manually for test.
+- [x] service started automatically after boot as PID `4404`.
+- [x] post-reboot ports 9095/9096/9097 listening.
+- [x] post-reboot `break_in` arrived as `unsupported_event` (expected).
+- [x] post-reboot `check_in` arrived as `processed` / `method=biometric`.
+- [x] post-reboot attendance_event_id `28860001` verified.
+- [x] old Task Scheduler task = Disabled.
+
+## المرحلة 15 — Local PC closure gate
+
+- [x] Web Bridge outage test passed.
+- [x] pending event durability/retry passed.
+- [x] exactly-once import verification passed.
+- [x] background service passed.
+- [x] automatic crash recovery passed.
+- [x] automatic startup after Windows reboot passed.
+- [x] real post-reboot biometric delivery passed.
+- [x] `mode=test` preserved.
+- [x] no migration / drizzle push used in this phase.
+- [x] local PC phase complete.
+
+## Gate التالية
+
+```text
+LOCAL PC PHASE = COMPLETE
+NEXT = COMPANY LOCAL SERVER PREPARATION
+DEVICE MODE = test
+```
+
+لا يتم الانتقال إلى تغيير `mode` أو go-live قبل موافقة صريحة.
