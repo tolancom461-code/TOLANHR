@@ -285,7 +285,7 @@ export async function checkUnresolvedFlags(workerId?: number, groupId?: number, 
  * NOTE: All users have full permissions now.
  */
 
-export async function updateUserRole(userId: number, role: 'guard' | 'supervisor_tolan' | 'supervisor_malqa' | 'admin_affairs' | 'accountant' | 'auditor' | 'finance_manager' | 'executive' | 'super_admin' | 'restaurant_operations' | 'data_entry', tx?: any) {
+export async function updateUserRole(userId: number, role: 'guard' | 'supervisor_tolan' | 'supervisor_malqa' | 'admin_affairs' | 'accountant' | 'operations_cost_accountant' | 'auditor' | 'finance_manager' | 'executive' | 'super_admin' | 'restaurant_operations' | 'data_entry', tx?: any) {
   const database = tx ?? (await getDb());
   if (!database) throw new Error('Database not available');
   await database

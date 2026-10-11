@@ -141,7 +141,7 @@ export const usersRouter = router({
     updateRole: protectedProcedure
       .input(z.object({
         userId: z.number(),
-        role: z.enum(['guard', 'supervisor_tolan', 'supervisor_malqa', 'admin_affairs', 'accountant', 'auditor', 'finance_manager', 'executive', 'super_admin', 'restaurant_operations', 'data_entry']),
+        role: z.enum(['guard', 'supervisor_tolan', 'supervisor_malqa', 'admin_affairs', 'accountant', 'operations_cost_accountant', 'auditor', 'finance_manager', 'executive', 'super_admin', 'restaurant_operations', 'data_entry']),
         reason: z.string().trim().min(1, 'سبب تغيير دور المستخدم إلزامي'),
       }))
       .use(requireRole('super_admin'))

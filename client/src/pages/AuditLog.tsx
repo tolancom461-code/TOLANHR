@@ -105,6 +105,7 @@ const ROLE_LABELS: Record<string, string> = {
   super_admin: 'مدير النظام',
   admin_affairs: 'الشؤون الإدارية',
   accountant: 'المحاسب',
+  operations_cost_accountant: 'محاسب تكاليف التشغيل',
   auditor: 'المراجع المالي',
   finance_manager: 'المدير المالي',
   guard: 'حارس',
