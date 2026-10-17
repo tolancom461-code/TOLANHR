@@ -5,6 +5,7 @@ import {
   gte,
   inArray,
   isNotNull,
+  isNull,
   lte,
   or,
   sql,
@@ -17,6 +18,7 @@ import {
   groups,
   operationalDayEvents,
   operationalDays,
+  operationalTransferRequests,
   payrollBatchItems,
   payrollBatches,
   userCostCenters,
@@ -71,13 +73,14 @@ export async function assertOperationalCostCenterAccess(
   userId: number,
   role: string,
   costCenterId: number,
-  groupId?: number | null
+  groupId?: number | null,
+  database?: unknown
 ) {
   // السوبر أدمن والشؤون الإدارية يريان جميع المراكز والمجموعات.
   // موظفو التشغيل مقيدون بالمركز ثم بنطاق المجموعات المحدد داخله.
   if (!SCOPED_OPERATIONS_ROLES.has(role)) return;
 
-  const db = await getDb();
+  const db = (database ?? await getDb()) as Awaited<ReturnType<typeof getDb>>;
   if (!db) throw new Error('Database not available');
 
   const [scope] = await db
@@ -112,9 +115,9 @@ export async function assertOperationalCostCenterAccess(
   }
 }
 
-async function getAllowedOperationalGroupIds(userId: number, role: string, costCenterId: number): Promise<number[] | null> {
+async function getAllowedOperationalGroupIds(userId: number, role: string, costCenterId: number, database?: unknown): Promise<number[] | null> {
   if (!SCOPED_OPERATIONS_ROLES.has(role)) return null;
-  const db = await getDb();
+  const db = (database ?? await getDb()) as Awaited<ReturnType<typeof getDb>>;
   if (!db) throw new Error('Database not available');
 
   const [scope] = await db
@@ -140,10 +143,11 @@ async function getAllowedOperationalGroupIds(userId: number, role: string, costC
 
 async function hasOperationalCloseGroupCoverage(
   costCenterId: number,
-  allowedGroupIds: number[] | null
+  allowedGroupIds: number[] | null,
+  database?: unknown
 ): Promise<boolean> {
   if (allowedGroupIds === null) return true;
-  const db = await getDb();
+  const db = (database ?? await getDb()) as Awaited<ReturnType<typeof getDb>>;
   if (!db) throw new Error('Database not available');
 
   const requiredGroups = await db
@@ -160,8 +164,8 @@ async function hasOperationalCloseGroupCoverage(
   return requiredGroups.every((group) => allowed.has(Number(group.id)));
 }
 
-async function getCostCenter(costCenterId: number) {
-  const db = await getDb();
+async function getCostCenter(costCenterId: number, database?: unknown) {
+  const db = (database ?? await getDb()) as Awaited<ReturnType<typeof getDb>>;
   if (!db) return null;
 
   const [row] = await db
@@ -183,11 +187,11 @@ function getClosingCenterType(center: { code?: string | null; name: string }): C
   return null;
 }
 
-async function getOperationalDayRow(workDate: string, costCenterId: number) {
-  const db = await getDb();
+async function getOperationalDayRow(workDate: string, costCenterId: number, database?: unknown) {
+  const db = (database ?? await getDb()) as Awaited<ReturnType<typeof getDb>>;
   if (!db) return null;
 
-  const [row] = await db
+  const query = db
     .select()
     .from(operationalDays)
     .where(
@@ -197,15 +201,16 @@ async function getOperationalDayRow(workDate: string, costCenterId: number) {
       )
     )
     .limit(1);
+  const [row] = await (database ? query.for('update') : query);
 
   return row || null;
 }
 
-async function ensureOperationalDayRow(workDate: string, costCenterId: number) {
-  const db = await getDb();
+async function ensureOperationalDayRow(workDate: string, costCenterId: number, database?: unknown) {
+  const db = (database ?? await getDb()) as Awaited<ReturnType<typeof getDb>>;
   if (!db) throw new Error('Database not available');
 
-  const center = await getCostCenter(costCenterId);
+  const center = await getCostCenter(costCenterId, db);
   if (!center) throw new Error('مركز التكلفة المحدد غير موجود');
 
   await db
@@ -215,20 +220,21 @@ async function ensureOperationalDayRow(workDate: string, costCenterId: number) {
       set: { workDate, costCenterId },
     });
 
-  const row = await getOperationalDayRow(workDate, costCenterId);
+  const row = await getOperationalDayRow(workDate, costCenterId, db);
   if (!row) throw new Error('تعذر تهيئة اليوم التشغيلي لمركز التكلفة');
   return row;
 }
 
 export async function getOverlappingPayrollBatchesForOperationalDay(
   workDate: string,
-  costCenterId: number
+  costCenterId: number,
+  database?: unknown
 ) {
-  const db = await getDb();
+  const db = (database ?? await getDb()) as Awaited<ReturnType<typeof getDb>>;
   if (!db) return [];
 
   // 1) القفل المباشر: أي دفعة تخص نفس مركز التكلفة وتشمل التاريخ.
-  const directBatches = await db
+  const directBatchesQuery = db
     .select({
       id: payrollBatches.id,
       batchCode: payrollBatches.batchCode,
@@ -242,18 +248,32 @@ export async function getOverlappingPayrollBatchesForOperationalDay(
       and(
         lte(payrollBatches.periodStart, workDate),
         gte(payrollBatches.periodEnd, workDate),
-        eq(payrollBatches.costCenterId, costCenterId)
+        or(
+          eq(payrollBatches.costCenterId, costCenterId),
+          // Legacy/group-only batches have no center on their header.
+          and(isNull(payrollBatches.costCenterId), or(
+            inArray(payrollBatches.groupId, db.select({ id: groups.id }).from(groups).where(eq(groups.costCenterId, costCenterId))),
+            inArray(payrollBatches.id, db.select({ batchId: payrollBatchItems.batchId }).from(payrollBatchItems)
+              .innerJoin(workers, eq(workers.id, payrollBatchItems.workerId)).where(or(
+                inArray(payrollBatchItems.groupId, db.select({ id: groups.id }).from(groups).where(eq(groups.costCenterId, costCenterId))),
+                and(isNull(payrollBatchItems.groupId), inArray(workers.groupId,
+                  db.select({ id: groups.id }).from(groups).where(eq(groups.costCenterId, costCenterId)))),
+              ))),
+          )),
+        )
       )
     )
     .orderBy(desc(payrollBatches.createdAt));
+  const directBatches = await (database ? directBatchesQuery.for('update') : directBatchesQuery);
 
   // 2) القفل العابر للمراكز: إذا خرج عامل من هذا المركز بقرار نقل تشغيلي
   //    ودخل فعلياً في بند دفعة مركز الوجهة، فإعادة فتح مركز المصدر قد تجعل
   //    التشغيل يناقض الـPayroll الموجودة. لذلك تعتبر تلك الدفعة قافلة أيضاً.
-  const sourceGroupRows = await db
+  const sourceGroupRowsQuery = db
     .select({ id: groups.id })
     .from(groups)
     .where(eq(groups.costCenterId, costCenterId));
+  const sourceGroupRows = await (database ? sourceGroupRowsQuery.for('update') : sourceGroupRowsQuery);
 
   const sourceGroupIds = new Set(sourceGroupRows.map((row) => row.id));
   if (sourceGroupIds.size === 0) {
@@ -264,7 +284,7 @@ export async function getOverlappingPayrollBatchesForOperationalDay(
     }));
   }
 
-  const transferRows = await db
+  const transferRowsQuery = db
     .select({
       workerId: dailyWorkAssignments.workerId,
       sourceGroupId: dailyWorkAssignments.sourceGroupId,
@@ -278,9 +298,11 @@ export async function getOverlappingPayrollBatchesForOperationalDay(
     .where(
       and(
         eq(dailyWorkAssignments.workDate, workDate),
-        isNotNull(dailyWorkAssignments.operationalGroupId)
+        isNotNull(dailyWorkAssignments.operationalGroupId),
+        or(inArray(dailyWorkAssignments.sourceGroupId, Array.from(sourceGroupIds)), inArray(workers.groupId, Array.from(sourceGroupIds)))
       )
     );
+  const transferRows = await (database ? transferRowsQuery.for('update') : transferRowsQuery);
 
   const outgoingTransfers = transferRows.filter((row) => {
     const sourceGroupId = row.sourceGroupId ?? row.workerBaseGroupId;
@@ -339,7 +361,7 @@ export async function getOverlappingPayrollBatchesForOperationalDay(
   }
   const transferredWorkerIds = Array.from(new Set(crossCenterTransfers.map((row) => row.workerId)));
 
-  const linkedBatchRows = await db
+  const linkedBatchRowsQuery = db
     .select({
       id: payrollBatches.id,
       batchCode: payrollBatches.batchCode,
@@ -360,6 +382,7 @@ export async function getOverlappingPayrollBatchesForOperationalDay(
       )
     )
     .orderBy(desc(payrollBatches.createdAt));
+  const linkedBatchRows = await (database ? linkedBatchRowsQuery.for('update') : linkedBatchRowsQuery);
 
   const linkedByBatchId = new Map<number, any>();
 
@@ -379,7 +402,7 @@ export async function getOverlappingPayrollBatchesForOperationalDay(
     };
 
     if (existing) {
-      if (!existing.linkedWorkers.some((worker) => worker.workerId === linkedWorker.workerId)) {
+      if (!existing.linkedWorkers.some((worker: { workerId: number }) => worker.workerId === linkedWorker.workerId)) {
         existing.linkedWorkers.push(linkedWorker);
       }
       continue;
@@ -405,7 +428,7 @@ export async function getOverlappingPayrollBatchesForOperationalDay(
       linkedWorkers: [] as Array<{ workerId: number; workerCode: string; workerName: string }>,
     });
   }
-  for (const batch of linkedByBatchId.values()) {
+  for (const batch of Array.from(linkedByBatchId.values())) {
     if (!merged.has(batch.id)) merged.set(batch.id, batch);
   }
 
@@ -413,11 +436,11 @@ export async function getOverlappingPayrollBatchesForOperationalDay(
 }
 
 /**
- * نطاق الإغلاق هو مركز التكلفة الأساسي للعامل (مجموعة العامل الأساسية).
- * النقل إلى مركز آخر لا ينقل مسؤولية إغلاق اليوم؛ مركز المصدر هو الذي اعتمد قرار النقل.
+ * مركز المصدر يراجع عماله والمنقولين منه، والمستقبل يراجع الطلبات الواردة إليه.
+ * الموافقة وحدها لا تستكمل توزيع العامل ولا تسمح بإغلاق يوم أي من المركزين.
  */
-async function getPresentAndUnassignedWorkers(workDate: string, costCenterId: number, allowedGroupIds?: number[] | null) {
-  const db = await getDb();
+async function getPresentAndUnassignedWorkers(workDate: string, costCenterId: number, allowedGroupIds?: number[] | null, database?: unknown) {
+  const db = (database ?? await getDb()) as Awaited<ReturnType<typeof getDb>>;
   if (!db) return { presentCount: 0, assignedCount: 0, unassignedWorkers: [] as any[] };
   if (allowedGroupIds && allowedGroupIds.length === 0) {
     return { presentCount: 0, assignedCount: 0, unassignedWorkers: [] as any[] };
@@ -443,12 +466,44 @@ async function getPresentAndUnassignedWorkers(workDate: string, costCenterId: nu
       )
     );
 
-  if (presentWorkers.length === 0) {
+  // Approved incoming workers belong to the receiving group's distribution for this day.
+  const transfers = await db.select({
+    workerId: operationalTransferRequests.workerId,
+    workerCode: workers.code,
+    workerName: workers.fullName,
+    sourceGroupId: operationalTransferRequests.sourceGroupId,
+    toGroupId: operationalTransferRequests.toGroupId,
+    sourceCostCenterId: operationalTransferRequests.sourceCostCenterId,
+    toCostCenterId: operationalTransferRequests.toCostCenterId,
+    status: operationalTransferRequests.status,
+    financeReady: operationalTransferRequests.financeReady,
+  }).from(operationalTransferRequests)
+    .innerJoin(workers, eq(workers.id, operationalTransferRequests.workerId))
+    .where(and(
+      eq(operationalTransferRequests.workDate, workDate),
+      inArray(operationalTransferRequests.status, ['approved', 'completed']),
+      or(eq(operationalTransferRequests.sourceCostCenterId, costCenterId), eq(operationalTransferRequests.toCostCenterId, costCenterId)),
+    ));
+  const visibleWorkers = new Map(presentWorkers.map(worker => [worker.workerId, worker]));
+  const blockedIds = new Set<number>();
+  for (const transfer of transfers) {
+    const groupId = transfer.toCostCenterId === costCenterId ? transfer.toGroupId : transfer.sourceGroupId;
+    if (allowedGroupIds && !allowedGroupIds.includes(groupId)) continue;
+    if (transfer.toCostCenterId === costCenterId) {
+      visibleWorkers.set(transfer.workerId, {
+        workerId: transfer.workerId, workerCode: transfer.workerCode,
+        workerName: transfer.workerName, groupId: transfer.toGroupId,
+      });
+    }
+    if (transfer.status === 'approved' || !transfer.financeReady) blockedIds.add(transfer.workerId);
+  }
+  const allPresentWorkers = Array.from(visibleWorkers.values());
+  if (allPresentWorkers.length === 0) {
     return { presentCount: 0, assignedCount: 0, unassignedWorkers: [] as any[] };
   }
 
-  const workerIds = presentWorkers.map((worker) => worker.workerId);
-  const assignments = await db
+  const workerIds = allPresentWorkers.map((worker) => worker.workerId);
+  const assignmentsQuery = db
     .select({ workerId: dailyWorkAssignments.workerId })
     .from(dailyWorkAssignments)
     .where(
@@ -458,12 +513,13 @@ async function getPresentAndUnassignedWorkers(workDate: string, costCenterId: nu
       )
     );
 
-  const assignedIds = new Set(assignments.map((row) => row.workerId));
-  const unassignedWorkers = presentWorkers.filter((worker) => !assignedIds.has(worker.workerId));
+  const assignments = await (database ? assignmentsQuery.for('update') : assignmentsQuery);
+  const assignedIds = new Set(assignments.filter(row => !blockedIds.has(row.workerId)).map((row) => row.workerId));
+  const unassignedWorkers = allPresentWorkers.filter((worker) => !assignedIds.has(worker.workerId));
 
   return {
-    presentCount: presentWorkers.length,
-    assignedCount: presentWorkers.length - unassignedWorkers.length,
+    presentCount: allPresentWorkers.length,
+    assignedCount: allPresentWorkers.length - unassignedWorkers.length,
     unassignedWorkers,
   };
 }
@@ -472,9 +528,10 @@ async function getRevisionAssignmentChanges(
   workDate: string,
   costCenterId: number,
   revision: number,
-  allowedGroupIds?: number[] | null
+  allowedGroupIds?: number[] | null,
+  database?: unknown
 ) {
-  const db = await getDb();
+  const db = (database ?? await getDb()) as Awaited<ReturnType<typeof getDb>>;
   if (!db || revision <= 0) return [];
   if (allowedGroupIds && allowedGroupIds.length === 0) return [];
 
@@ -633,9 +690,19 @@ export async function getOpenOperationalDays(costCenterId: number, role: string,
     .orderBy(desc(attendanceEvents.workDate))
     .limit(365);
 
-  const dates = attendanceDates
-    .map((row) => row.workDate)
-    .filter((date): date is string => !!date);
+  const transferDates = await db.selectDistinct({ workDate: operationalTransferRequests.workDate })
+    .from(operationalTransferRequests).where(and(
+      or(
+        and(eq(operationalTransferRequests.sourceCostCenterId, costCenterId),
+          ...(allowedGroupIds ? [inArray(operationalTransferRequests.sourceGroupId, allowedGroupIds)] : [])),
+        and(eq(operationalTransferRequests.toCostCenterId, costCenterId),
+          ...(allowedGroupIds ? [inArray(operationalTransferRequests.toGroupId, allowedGroupIds)] : [])),
+      ),
+      gte(operationalTransferRequests.workDate, OPERATIONAL_DAY_CONTROL_START_DATE),
+      lte(operationalTransferRequests.workDate, currentWorkDate),
+    ));
+  const dates = Array.from(new Set([...attendanceDates, ...transferDates]
+    .map((row) => row.workDate).filter((date): date is string => !!date))).sort().reverse().slice(0, 365);
 
   if (dates.length === 0) return [];
 
@@ -836,7 +903,7 @@ export async function createFinalOperationalRecord(params: {
   const workDate = normalizeDate(params.workDate);
   const currentWorkDate = getCurrentWorkDate();
   assertRecordRole(params.actorRole, params.type);
-  await assertOperationalCostCenterAccess(params.actorUserId, params.actorRole, params.costCenterId);
+  await assertOperationalCostCenterAccess(params.actorUserId, params.actorRole, params.costCenterId, undefined, db);
 
   if (params.type === 'games_closed' || params.type === 'restaurants_closed') {
     const center = await getCostCenter(params.costCenterId);
@@ -1061,6 +1128,13 @@ export async function closeOperationalDay(params: {
 }) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
+  return db.transaction(tx => closeOperationalDayInTransaction(params, tx));
+}
+
+async function closeOperationalDayInTransaction(params: {
+  workDate: string; costCenterId: number; actorUserId: number; actorRole: string; acknowledgeChanges?: boolean;
+}, transaction: unknown) {
+  const db = transaction as NonNullable<Awaited<ReturnType<typeof getDb>>>;
 
   const workDate = normalizeDate(params.workDate);
   const currentWorkDate = getCurrentWorkDate();
@@ -1075,28 +1149,42 @@ export async function closeOperationalDay(params: {
     throw new Error('لا يمكن إغلاق يوم تشغيلي مستقبلي');
   }
 
-  await assertOperationalCostCenterAccess(params.actorUserId, params.actorRole, params.costCenterId);
+  await assertOperationalCostCenterAccess(params.actorUserId, params.actorRole, params.costCenterId, undefined, db);
   const allowedGroupIds = await getAllowedOperationalGroupIds(
     params.actorUserId,
     params.actorRole,
-    params.costCenterId
+    params.costCenterId,
+    db
   );
   const hasCloseGroupCoverage = await hasOperationalCloseGroupCoverage(
     params.costCenterId,
-    allowedGroupIds
+    allowedGroupIds,
+    db
   );
   if (!hasCloseGroupCoverage) {
     throw new Error('لا يمكن إغلاق اليوم التشغيلي لأن صلاحية المشرف لا تشمل جميع المجموعات المطلوبة للتوزيع في المركز');
   }
-  const center = await getCostCenter(params.costCenterId);
+  const center = await getCostCenter(params.costCenterId, db);
   if (!center) throw new Error('مركز التكلفة المحدد غير موجود');
 
-  const day = await ensureOperationalDayRow(workDate, params.costCenterId);
+  await ensureOperationalDayRow(workDate, params.costCenterId, db);
+  const [day] = await db.select().from(operationalDays)
+    .where(and(eq(operationalDays.workDate, workDate), eq(operationalDays.costCenterId, params.costCenterId)))
+    .for('update');
+  if (!day) throw new Error('تعذر قراءة اليوم التشغيلي');
   if (day.status === 'closed') {
     return { success: true, alreadyClosed: true };
   }
 
-  const attendance = await getPresentAndUnassignedWorkers(workDate, params.costCenterId);
+  // A locking read observes approvals committed while closure waited for the center-day lock.
+  const blockers = await db.select({ id: operationalTransferRequests.id }).from(operationalTransferRequests)
+    .where(and(
+      eq(operationalTransferRequests.workDate, workDate),
+      or(eq(operationalTransferRequests.sourceCostCenterId, params.costCenterId), eq(operationalTransferRequests.toCostCenterId, params.costCenterId)),
+      or(eq(operationalTransferRequests.status, 'approved'), and(eq(operationalTransferRequests.status, 'completed'), eq(operationalTransferRequests.financeReady, 0))),
+    )).for('update');
+  if (blockers.length) throw new Error('يوجد نقل معتمد بانتظار تحديد الموقع أو إكمال الاحتساب. أكمل النقل قبل إغلاق اليوم');
+  const attendance = await getPresentAndUnassignedWorkers(workDate, params.costCenterId, undefined, db);
   if (attendance.unassignedWorkers.length > 0) {
     const preview = attendance.unassignedWorkers
       .slice(0, 10)
@@ -1111,7 +1199,7 @@ export async function closeOperationalDay(params: {
   }
 
   const pendingChanges = day.revision > 0
-    ? await getRevisionAssignmentChanges(workDate, params.costCenterId, day.revision)
+    ? await getRevisionAssignmentChanges(workDate, params.costCenterId, day.revision, undefined, db)
     : [];
 
   if (pendingChanges.length > 0 && !params.acknowledgeChanges) {
@@ -1215,13 +1303,55 @@ export async function reopenOperationalDay(params: {
   return { success: true, revision: nextRevision, costCenterId: params.costCenterId };
 }
 
+/** Locks are shared by assignment writes, transfers, day closure, and payroll creation. */
+export async function lockOperationalDayRows(workDate: string, costCenterIds: number[], transaction: unknown) {
+  const db = transaction as NonNullable<Awaited<ReturnType<typeof getDb>>>;
+  for (const costCenterId of Array.from(new Set(costCenterIds)).sort((a, b) => a - b)) {
+    await ensureOperationalDayRow(workDate, costCenterId, db);
+  }
+}
+
+/** Shared day/financial locks for a transfer; authorization belongs to its request workflow. */
+export async function assertOperationalTransferChangeAllowed(params: {
+  workDate: string;
+  sourceCostCenterId: number;
+  toCostCenterId: number;
+  tx?: unknown;
+}) {
+  const workDate = normalizeDate(params.workDate);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(workDate) || workDate < OPERATIONAL_DAY_CONTROL_START_DATE || workDate > getCurrentWorkDate()) {
+    throw new Error('اختر يوماً تشغيلياً صالحاً وغير مستقبلي للنقل');
+  }
+  if (params.sourceCostCenterId === params.toCostCenterId) throw new Error('النقل يتطلب مركزَي تكلفة مختلفين');
+  const db = (params.tx ?? await getDb()) as Awaited<ReturnType<typeof getDb>>;
+  if (!db) throw new Error('Database not available');
+  for (const costCenterId of [params.sourceCostCenterId, params.toCostCenterId].sort((a, b) => a - b)) {
+    if (!await getCostCenter(costCenterId, db)) throw new Error('مركز التكلفة غير موجود');
+    let day;
+    if (params.tx) {
+      await db.insert(operationalDays).values({ workDate, costCenterId, status: 'open', revision: 0 })
+        .onDuplicateKeyUpdate({ set: { workDate, costCenterId } });
+      [day] = await db.select().from(operationalDays)
+        .where(and(eq(operationalDays.workDate, workDate), eq(operationalDays.costCenterId, costCenterId)))
+        .for('update');
+    } else {
+      day = await getOperationalDayRow(workDate, costCenterId, db);
+    }
+    if (day?.status === 'closed' || (day?.revision || 0) > 0) {
+      throw new Error('النقل متاح فقط عندما يكون يوم المركزين مفتوحاً ولم يُعد فتحه للتصحيح');
+    }
+    const batches = await getOverlappingPayrollBatchesForOperationalDay(workDate, costCenterId, db);
+    if (batches.length) throw new Error('لا يمكن النقل لوجود دفعة رواتب تشمل يوم أحد المركزين');
+  }
+}
+
 export async function assertOperationalAssignmentChangeAllowed(params: {
   workDate: string;
   costCenterId: number;
   actorUserId: number;
   actorRole: string;
   groupId?: number;
-}) {
+}, database?: unknown) {
   const workDate = normalizeDate(params.workDate);
   const currentWorkDate = getCurrentWorkDate();
 
@@ -1229,7 +1359,8 @@ export async function assertOperationalAssignmentChangeAllowed(params: {
     params.actorUserId,
     params.actorRole,
     params.costCenterId,
-    params.groupId
+    params.groupId,
+    database
   );
 
   if (workDate > currentWorkDate) {
@@ -1243,7 +1374,7 @@ export async function assertOperationalAssignmentChangeAllowed(params: {
     }
   }
 
-  const row = await getOperationalDayRow(workDate, params.costCenterId);
+  const row = await getOperationalDayRow(workDate, params.costCenterId, database);
   const status = (row?.status || 'open') as 'open' | 'closed';
   const revision = row?.revision || 0;
 
@@ -1251,7 +1382,7 @@ export async function assertOperationalAssignmentChangeAllowed(params: {
     throw new Error('اليوم التشغيلي لهذا المركز مغلق. يجب على الشؤون الإدارية إعادة فتحه قبل أي تعديل');
   }
 
-  const batches = await getOverlappingPayrollBatchesForOperationalDay(workDate, params.costCenterId);
+  const batches = await getOverlappingPayrollBatchesForOperationalDay(workDate, params.costCenterId, database);
   if (batches.length > 0) {
     const protectedBatch = batches.find((batch) => batch.status === 'approved' || batch.status === 'paid');
     if (protectedBatch) {

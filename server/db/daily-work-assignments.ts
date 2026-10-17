@@ -1,10 +1,11 @@
-import { and, eq, gte, inArray, lte } from 'drizzle-orm';
+import { and, eq, gte, inArray, lte, or } from 'drizzle-orm';
 import { getAdministrativeWorkDate } from '../attendance-logic';
 import {
   attendanceEvents,
   costCenters,
   dailyWorkAssignments,
   groups,
+  operationalTransferRequests,
   restaurants,
   workers,
 } from '../../drizzle/schema';
@@ -15,6 +16,8 @@ import { getUserOperationScope } from './user-cost-centers';
 import {
   assertOperationalAssignmentChangeAllowed,
   assertOperationalCostCenterAccess,
+  assertOperationalTransferChangeAllowed,
+  lockOperationalDayRows,
   recordOperationalAssignmentChange,
 } from './operational-days';
 
@@ -72,73 +75,16 @@ export async function getGroupAssignmentProgressForCostCenterDate(
 
   if (groupRows.length === 0) return [];
 
-  const groupIds = groupRows.map((group) => group.id);
-  const workerRows = await db
-    .select({ id: workers.id, groupId: workers.groupId })
-    .from(workers)
-    .where(inArray(workers.groupId, groupIds));
-
-  const presentByGroup = new Map<number, number>();
-  const assignedByGroup = new Map<number, number>();
-
-  if (workerRows.length > 0) {
-    const workerIds = workerRows.map((worker) => worker.id);
-    const presentEvents = await db
-      .select({ workerId: attendanceEvents.workerId })
-      .from(attendanceEvents)
-      .where(
-        and(
-          inArray(attendanceEvents.workerId, workerIds),
-          eq(attendanceEvents.workDate, workDate),
-          eq(attendanceEvents.eventType, 'check_in')
-        )
-      );
-
-    const presentWorkerIds = new Set(presentEvents.map((event) => event.workerId));
-    const presentWorkers = workerRows.filter((worker) => presentWorkerIds.has(worker.id));
-
-    for (const worker of presentWorkers) {
-      if (!worker.groupId) continue;
-      presentByGroup.set(worker.groupId, (presentByGroup.get(worker.groupId) || 0) + 1);
-    }
-
-    if (presentWorkers.length > 0) {
-      const assignments = await db
-        .select({
-          workerId: dailyWorkAssignments.workerId,
-          restaurantId: dailyWorkAssignments.restaurantId,
-        })
-        .from(dailyWorkAssignments)
-        .where(
-          and(
-            inArray(dailyWorkAssignments.workerId, presentWorkers.map((worker) => worker.id)),
-            eq(dailyWorkAssignments.workDate, workDate)
-          )
-        );
-
-      const assignedWorkerIds = new Set(
-        assignments.filter((assignment) => !!assignment.restaurantId).map((assignment) => assignment.workerId)
-      );
-
-      for (const worker of presentWorkers) {
-        if (!worker.groupId || !assignedWorkerIds.has(worker.id)) continue;
-        assignedByGroup.set(worker.groupId, (assignedByGroup.get(worker.groupId) || 0) + 1);
-      }
-    }
-  }
-
-  return groupRows.map((group) => {
-    const total = presentByGroup.get(group.id) || 0;
-    const assigned = assignedByGroup.get(group.id) || 0;
+  return Promise.all(groupRows.map(async (group) => {
+    const workers = await getWorkersWithAssignmentForGroupDate(group.id, workDate, actorUserId, actorRole);
+    const assigned = workers.filter(worker => worker.isTransferredOut || !!worker.currentRestaurantId).length;
     return {
-      groupId: group.id,
-      groupName: group.name,
-      total,
-      assigned,
-      unassigned: Math.max(total - assigned, 0),
-      completed: total > 0 && assigned >= total,
+      groupId: group.id, groupName: group.name, total: workers.length, assigned,
+      unassigned: Math.max(workers.length - assigned, 0),
+      transferred: workers.filter(worker => worker.isTransferredOut).length,
+      completed: workers.length > 0 && assigned >= workers.length,
     };
-  });
+  }));
 }
 
 /**
@@ -169,10 +115,21 @@ export async function getWorkersWithAssignmentForGroupDate(
     return [];
   }
 
+  const transferRows = await db.select({
+    id: operationalTransferRequests.id, workerId: operationalTransferRequests.workerId,
+    sourceGroupId: operationalTransferRequests.sourceGroupId, toGroupId: operationalTransferRequests.toGroupId,
+    status: operationalTransferRequests.status, financeReady: operationalTransferRequests.financeReady,
+    toCostCenterName: costCenters.name,
+  }).from(operationalTransferRequests)
+    .leftJoin(costCenters, eq(costCenters.id, operationalTransferRequests.toCostCenterId))
+    .where(and(eq(operationalTransferRequests.workDate, workDate),
+      inArray(operationalTransferRequests.status, ['approved', 'completed']),
+      or(eq(operationalTransferRequests.sourceGroupId, groupId), eq(operationalTransferRequests.toGroupId, groupId))));
+  const incomingIds = transferRows.filter(row => row.toGroupId === groupId).map(row => row.workerId);
   const groupWorkers = await db
     .select({ id: workers.id, fullName: workers.fullName, code: workers.code, groupId: workers.groupId })
     .from(workers)
-    .where(eq(workers.groupId, groupId))
+    .where(or(eq(workers.groupId, groupId), ...(incomingIds.length ? [inArray(workers.id, incomingIds)] : [])))
     .orderBy(workers.fullName);
 
   if (groupWorkers.length === 0) return [];
@@ -218,20 +175,28 @@ export async function getWorkersWithAssignmentForGroupDate(
 
   return presentGroupWorkers.map((worker) => {
     const assignment = assignmentByWorker.get(worker.id);
+    const transfer = transferRows.find(row => row.workerId === worker.id);
+    const incoming = !!transfer && transfer.toGroupId === groupId;
+    const awaitingSite = incoming && transfer.status === 'approved';
     return {
       ...worker,
-      currentRestaurantId: assignment?.restaurantId || null,
-      currentRestaurantName: assignment?.restaurantName || null,
-      siteCostCenterId: assignment?.siteCostCenterId || null,
-      siteCostCenterName: assignment?.siteCostCenterName || null,
-      sourceGroupId: assignment?.sourceGroupId || worker.groupId || groupId,
-      operationalGroupId: assignment?.operationalGroupId || null,
+      currentRestaurantId: awaitingSite ? null : assignment?.restaurantId || null,
+      currentRestaurantName: awaitingSite ? null : assignment?.restaurantName || null,
+      siteCostCenterId: awaitingSite ? null : assignment?.siteCostCenterId || null,
+      siteCostCenterName: awaitingSite ? null : assignment?.siteCostCenterName || null,
+      sourceGroupId: transfer?.sourceGroupId || assignment?.sourceGroupId || worker.groupId || groupId,
+      operationalGroupId: incoming ? transfer.toGroupId : assignment?.operationalGroupId || null,
+      isIncomingTransfer: incoming,
+      approvedTransferRequestId: incoming ? transfer.id : null,
+      isTransferredOut: !!transfer && transfer.sourceGroupId === groupId && !incoming,
+      transferToCostCenterName: transfer?.toCostCenterName || null,
+      transferStatus: transfer?.status || null,
     };
   });
 }
 
-async function getDailyAssignmentSnapshot(workerId: number, workDate: string) {
-  const db = await getDb();
+async function getDailyAssignmentSnapshot(workerId: number, workDate: string, database?: unknown) {
+  const db = (database ?? await getDb()) as Awaited<ReturnType<typeof getDb>>;
   if (!db) return null;
 
   const [assignment] = await db
@@ -299,35 +264,47 @@ async function getDailyAssignmentSnapshot(workerId: number, workDate: string) {
  * الموقع والمجموعة يجب أن يكونا متسقين مع مركز التكلفة.
  * عند النقل التشغيلي، operationalGroupId هو المجموعة المالية/التشغيلية الفعالة لذلك اليوم.
  */
-export async function upsertDailyWorkAssignment(params: {
-  workerId: number;
-  restaurantId?: number | null;
-  sourceGroupId: number;
-  operationalGroupId?: number | null;
-  workDate: string;
-  assignedBy: number;
-  actorRole: string;
-}) {
+type DailyWorkAssignmentInput = {
+  workerId: number; restaurantId?: number | null; sourceGroupId: number;
+  operationalGroupId?: number | null; workDate: string; assignedBy: number; actorRole: string;
+};
+
+export async function upsertDailyWorkAssignment(params: DailyWorkAssignmentInput) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
+  const effects: Array<() => Promise<unknown>> = [];
+  const result = await db.transaction(tx => upsertDailyWorkAssignmentInDatabase(params, tx, effects));
+  for (const effect of effects) await effect();
+  return result;
+}
+
+async function assertNoApprovedRequest(database: NonNullable<Awaited<ReturnType<typeof getDb>>>, workerId: number, workDate: string) {
+  const [request] = await database.select({ id: operationalTransferRequests.id })
+    .from(operationalTransferRequests).where(and(
+      eq(operationalTransferRequests.workerId, workerId), eq(operationalTransferRequests.workDate, workDate),
+      inArray(operationalTransferRequests.status, ['approved', 'completed']),
+    )).limit(1).for('update');
+  if (request) throw new Error('العامل مرتبط بطلب نقل معتمد؛ أكمل إجراءاته من تبويب النقل');
+}
+
+async function upsertDailyWorkAssignmentInDatabase(params: DailyWorkAssignmentInput, transaction: unknown, effects: Array<() => Promise<unknown>>) {
+  const db = transaction as NonNullable<Awaited<ReturnType<typeof getDb>>>;
+  const lockGroups = await db.select({ id: groups.id, costCenterId: groups.costCenterId })
+    .from(groups).where(inArray(groups.id, [params.sourceGroupId, ...(params.operationalGroupId ? [params.operationalGroupId] : [])])).limit(2);
+  const sourceGroup = lockGroups.find(group => group.id === params.sourceGroupId);
+  if (!sourceGroup?.costCenterId) throw new Error('يجب ربط المجموعة الأساسية بمركز تكلفة قبل توزيع العامل');
+  await lockOperationalDayRows(params.workDate, lockGroups.map(group => group.costCenterId).filter((id): id is number => !!id), db);
 
   const [worker] = await db
     .select({ id: workers.id, groupId: workers.groupId })
     .from(workers)
     .where(eq(workers.id, params.workerId))
-    .limit(1);
+    .limit(1).for('update');
   if (!worker) throw new Error('العامل غير موجود');
+  await assertNoApprovedRequest(db, params.workerId, params.workDate);
   if (worker.groupId !== params.sourceGroupId) {
     throw new Error('العامل لا ينتمي إلى المجموعة المحددة حالياً');
   }
-
-  const [sourceGroup] = await db
-    .select({ id: groups.id, costCenterId: groups.costCenterId })
-    .from(groups)
-    .where(eq(groups.id, params.sourceGroupId))
-    .limit(1);
-  if (!sourceGroup) throw new Error('المجموعة الأساسية المحددة غير موجودة');
-  if (!sourceGroup.costCenterId) throw new Error('يجب ربط المجموعة الأساسية بمركز تكلفة قبل توزيع العامل');
 
   const access = await assertOperationalAssignmentChangeAllowed({
     workDate: params.workDate,
@@ -335,9 +312,14 @@ export async function upsertDailyWorkAssignment(params: {
     actorUserId: params.assignedBy,
     actorRole: params.actorRole,
     groupId: params.sourceGroupId,
-  });
+  }, db);
+  const destination = lockGroups.find(group => group.id === params.operationalGroupId);
+  if (destination?.costCenterId && destination.costCenterId !== sourceGroup.costCenterId) {
+    await assertOperationalAssignmentChangeAllowed({ workDate: params.workDate, costCenterId: destination.costCenterId,
+      actorUserId: params.assignedBy, actorRole: params.actorRole, groupId: destination.id }, db);
+  }
   const beforeSnapshot = access.isReopened
-    ? await getDailyAssignmentSnapshot(params.workerId, params.workDate)
+    ? await getDailyAssignmentSnapshot(params.workerId, params.workDate, db)
     : null;
 
   const [present] = await db
@@ -377,10 +359,11 @@ export async function upsertDailyWorkAssignment(params: {
 
       // إذا ألغينا نقلاً فعلياً بين المجموعات، أعد احتساب المالية على المجموعة الفعالة الجديدة.
       if (hadOperationalTransfer) {
-        await processAttendanceToFinance(params.workerId, params.workDate);
+        effects.push(() => processAttendanceToFinance(params.workerId, params.workDate));
       }
 
       await logAudit({
+        tx: db,
         userId: params.assignedBy,
         action: 'DELETE_OPERATIONAL_ASSIGNMENT',
         tableName: 'daily_work_assignments',
@@ -396,14 +379,14 @@ export async function upsertDailyWorkAssignment(params: {
       });
     }
     if (access.isReopened) {
-      await recordOperationalAssignmentChange({
+      effects.push(async () => { await recordOperationalAssignmentChange({
         workDate: params.workDate,
-        costCenterId: sourceGroup.costCenterId,
+        costCenterId: sourceGroup.costCenterId!,
         workerId: params.workerId,
         actorUserId: params.assignedBy,
         beforeValues: beforeSnapshot,
         afterValues: null,
-      });
+      }); });
     }
     return { success: true, removed: true };
   }
@@ -435,7 +418,8 @@ export async function upsertDailyWorkAssignment(params: {
       params.assignedBy,
       params.actorRole,
       targetGroup.costCenterId,
-      targetGroup.id
+      targetGroup.id,
+      db
     );
     if (targetGroup.costCenterId !== site.costCenterId) {
       throw new Error('المجموعة التشغيلية وموقع العمل يجب أن يتبعا نفس مركز التكلفة');
@@ -466,6 +450,7 @@ export async function upsertDailyWorkAssignment(params: {
   }
 
   await logAudit({
+        tx: db,
     userId: params.assignedBy,
     action: existing.length > 0 ? 'UPDATE_OPERATIONAL_ASSIGNMENT' : 'CREATE_OPERATIONAL_ASSIGNMENT',
     tableName: 'daily_work_assignments',
@@ -490,32 +475,122 @@ export async function upsertDailyWorkAssignment(params: {
 
   // الموقع وحده لا يغيّر المجموعة المالية. أعد الحساب فقط إذا تغيّرت المجموعة التشغيلية الفعالة.
   if (previousOperationalGroupId !== normalizedOperationalGroupId) {
-    await processAttendanceToFinance(params.workerId, params.workDate);
+    effects.push(() => processAttendanceToFinance(params.workerId, params.workDate));
   }
 
   if (access.isReopened) {
+    effects.push(async () => {
     const afterSnapshot = await getDailyAssignmentSnapshot(params.workerId, params.workDate);
     await recordOperationalAssignmentChange({
       workDate: params.workDate,
-      costCenterId: sourceGroup.costCenterId,
+      costCenterId: sourceGroup.costCenterId!,
       workerId: params.workerId,
       actorUserId: params.assignedBy,
       beforeValues: beforeSnapshot,
       afterValues: afterSnapshot,
-    });
+    }); });
   }
 
   return { success: true, updated: existing.length > 0 };
 }
 
-export async function removeDailyWorkAssignment(
-  workerId: number,
-  workDate: string,
-  actorUserId: number,
-  actorRole: string
-) {
+/** Finalizes only the worker/day/destination approved by the source operator. */
+export async function completeApprovedOperationalTransfer(params: {
+  requestId: number; restaurantId: number; actorUserId: number; actorRole: string;
+}) {
+  if (!SCOPED_OPERATIONS_ROLES.has(params.actorRole) && !['super_admin', 'admin_affairs'].includes(params.actorRole)) {
+    throw new Error('ليس لديك صلاحية استكمال النقل');
+  }
   const db = await getDb();
   if (!db) throw new Error('Database not available');
+  const [snapshot] = await db.select().from(operationalTransferRequests)
+    .where(eq(operationalTransferRequests.id, params.requestId)).limit(1);
+  if (!snapshot) throw new Error('طلب النقل غير موجود');
+  await assertOperationalCostCenterAccess(params.actorUserId, params.actorRole, snapshot.toCostCenterId, snapshot.toGroupId);
+
+  const outcome = await db.transaction(async tx => {
+    // Same center-day lock order as request approval and day closure.
+    await assertOperationalTransferChangeAllowed({ workDate: snapshot.workDate,
+      sourceCostCenterId: snapshot.sourceCostCenterId, toCostCenterId: snapshot.toCostCenterId, tx });
+    const [request] = await tx.select().from(operationalTransferRequests)
+      .where(eq(operationalTransferRequests.id, params.requestId)).limit(1).for('update');
+    if (!request || !['approved', 'completed'].includes(request.status) || !request.reviewedBy) {
+      throw new Error('لا يمكن استكمال النقل قبل موافقة مسؤول المصدر');
+    }
+    if (request.status === 'completed') {
+      if (request.restaurantId !== params.restaurantId) throw new Error('النقل مكتمل ولا يمكن تغيير موقعه من هذا الإجراء');
+      return { request, alreadyReady: !!request.financeReady };
+    }
+    const [worker] = await tx.select({ id: workers.id, groupId: workers.groupId, status: workers.status })
+      .from(workers).where(eq(workers.id, request.workerId)).limit(1).for('update');
+    if (!worker || worker.status !== 'active' || worker.groupId !== request.sourceGroupId) {
+      throw new Error('تغيرت حالة العامل أو مجموعته الأساسية؛ لا يمكن استكمال الطلب');
+    }
+    const groupRows = await tx.select({ id: groups.id, costCenterId: groups.costCenterId, isActive: groups.isActive,
+      exempt: groups.isOperationalAssignmentExempt }).from(groups)
+      .where(inArray(groups.id, [request.sourceGroupId, request.toGroupId]));
+    const source = groupRows.find(group => group.id === request.sourceGroupId);
+    const target = groupRows.find(group => group.id === request.toGroupId);
+    if (!source?.isActive || !target?.isActive || source.exempt || target.exempt ||
+      source.costCenterId !== request.sourceCostCenterId || target.costCenterId !== request.toCostCenterId) {
+      throw new Error('تغيرت بيانات مجموعات النقل؛ راجع الطلب');
+    }
+    const [present] = await tx.select({ id: attendanceEvents.id }).from(attendanceEvents)
+      .where(and(eq(attendanceEvents.workerId, request.workerId), eq(attendanceEvents.workDate, request.workDate),
+        eq(attendanceEvents.eventType, 'check_in'))).limit(1);
+    if (!present) throw new Error('لا يمكن نقل عامل غير حاضر في اليوم التشغيلي');
+    const [site] = await tx.select({ id: restaurants.id, costCenterId: restaurants.costCenterId, isActive: restaurants.isActive })
+      .from(restaurants).where(eq(restaurants.id, params.restaurantId)).limit(1);
+    if (!site?.isActive || site.costCenterId !== request.toCostCenterId) {
+      throw new Error('اختر موقع عمل نشطًا تابعًا لمركز الاستقبال');
+    }
+    const [existing] = await tx.select().from(dailyWorkAssignments)
+      .where(and(eq(dailyWorkAssignments.workerId, request.workerId), eq(dailyWorkAssignments.workDate, request.workDate)))
+      .limit(1).for('update');
+    if (existing?.operationalGroupId && existing.operationalGroupId !== request.sourceGroupId) {
+      throw new Error('تغير النقل التشغيلي للعامل بعد إنشاء الطلب');
+    }
+    const values = { restaurantId: site.id, sourceGroupId: request.sourceGroupId,
+      operationalGroupId: request.toGroupId, assignedBy: params.actorUserId };
+    if (existing) {
+      await tx.update(dailyWorkAssignments).set(values).where(eq(dailyWorkAssignments.id, existing.id));
+    } else {
+      await tx.insert(dailyWorkAssignments).values({ workerId: request.workerId, workDate: request.workDate, ...values });
+    }
+    await tx.update(operationalTransferRequests).set({ status: 'completed', restaurantId: site.id,
+      completedBy: params.actorUserId, completedAt: new Date().toISOString().slice(0, 19).replace('T', ' '), financeReady: 0 })
+      .where(and(eq(operationalTransferRequests.id, request.id), eq(operationalTransferRequests.status, 'approved')));
+    await logAudit({ userId: params.actorUserId, action: 'COMPLETE_OPERATIONAL_TRANSFER',
+      tableName: 'daily_work_assignments', recordId: existing?.id,
+      oldValues: existing || null, newValues: { workerId: request.workerId, workDate: request.workDate,
+        requestId: request.id, ...values }, tx });
+    return { request, alreadyReady: false };
+  });
+  if (!outcome.alreadyReady) {
+    // Reuse the exact financial recalculation used by direct super-admin transfers.
+    // The durable flag keeps both centers blocked if recalculation fails after commit.
+    try {
+      await processAttendanceToFinance(outcome.request.workerId, outcome.request.workDate);
+    } catch (error) {
+      throw new Error('تم تثبيت النقل وتعذر إكمال الاحتساب. أعد المحاولة من تبويب النقل قبل إغلاق اليوم', { cause: error });
+    }
+    await db.update(operationalTransferRequests).set({ financeReady: 1 })
+      .where(and(eq(operationalTransferRequests.id, params.requestId), eq(operationalTransferRequests.status, 'completed')));
+  }
+  return { success: true, alreadyCompleted: outcome.alreadyReady };
+}
+
+export async function removeDailyWorkAssignment(workerId: number, workDate: string, actorUserId: number, actorRole: string) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  const effects: Array<() => Promise<unknown>> = [];
+  const result = await db.transaction(tx => removeDailyWorkAssignmentInDatabase(workerId, workDate, actorUserId, actorRole, tx, effects));
+  for (const effect of effects) await effect();
+  return result;
+}
+
+async function removeDailyWorkAssignmentInDatabase(workerId: number, workDate: string, actorUserId: number, actorRole: string, transaction: unknown, effects: Array<() => Promise<unknown>>) {
+  const db = transaction as NonNullable<Awaited<ReturnType<typeof getDb>>>;
 
   const [workerScope] = await db
     .select({ costCenterId: groups.costCenterId, groupId: workers.groupId })
@@ -526,16 +601,21 @@ export async function removeDailyWorkAssignment(
   if (!workerScope?.costCenterId) {
     throw new Error('لا يمكن تحديد مركز التكلفة الأساسي للعامل');
   }
+  await lockOperationalDayRows(workDate, [workerScope.costCenterId], db);
+  const [currentWorker] = await db.select({ groupId: workers.groupId }).from(workers)
+    .where(eq(workers.id, workerId)).limit(1).for('update');
+  if (!currentWorker || currentWorker.groupId !== workerScope.groupId) throw new Error('تغيرت مجموعة العامل؛ أعد تحميل الشاشة');
 
+  await assertNoApprovedRequest(db, workerId, workDate);
   const access = await assertOperationalAssignmentChangeAllowed({
     workDate,
     costCenterId: workerScope.costCenterId,
     actorUserId,
     actorRole,
     groupId: workerScope.groupId || undefined,
-  });
+  }, db);
   const beforeSnapshot = access.isReopened
-    ? await getDailyAssignmentSnapshot(workerId, workDate)
+    ? await getDailyAssignmentSnapshot(workerId, workDate, db)
     : null;
 
   const [existingAssignment] = await db
@@ -555,11 +635,12 @@ export async function removeDailyWorkAssignment(
 
   // حذف قرار نقل تشغيلي يعيد العامل إلى المجموعة الفعالة البديلة (انتداب مؤقت/أساسية).
   if (existingAssignment?.operationalGroupId) {
-    await processAttendanceToFinance(workerId, workDate);
+    effects.push(() => processAttendanceToFinance(workerId, workDate));
   }
 
   if (existingAssignment) {
     await logAudit({
+      tx: db,
       userId: actorUserId,
       action: 'DELETE_OPERATIONAL_ASSIGNMENT',
       tableName: 'daily_work_assignments',
@@ -576,14 +657,14 @@ export async function removeDailyWorkAssignment(
   }
 
   if (access.isReopened) {
-    await recordOperationalAssignmentChange({
+    effects.push(async () => { await recordOperationalAssignmentChange({
       workDate,
-      costCenterId: workerScope.costCenterId,
+      costCenterId: workerScope.costCenterId!,
       workerId,
       actorUserId,
       beforeValues: beforeSnapshot,
       afterValues: null,
-    });
+    }); });
   }
   return { success: true };
 }

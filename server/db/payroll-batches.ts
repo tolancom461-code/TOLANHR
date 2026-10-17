@@ -25,6 +25,7 @@ import {
   pushSubscriptions,
   restaurants,
   dailyWorkAssignments,
+  operationalTransferRequests,
   deductionEntries,
   operationalDayEvents
 } from "../../drizzle/schema";
@@ -41,6 +42,7 @@ import { cleanupOrphanFinanceRecords } from './daily-finance-entries';
 import { getEffectiveGroupForWorkerOnDate } from './recalculation';
 import { getActorLabel } from './_shared';
 import { aggregatePayrollDataByCostCenter } from './auto-finance';
+import { lockOperationalDayRows, OPERATIONAL_DAY_CONTROL_START_DATE } from './operational-days';
 
 // ============================================
 // Payroll Batch Functions (دفعات العمال)
@@ -54,13 +56,10 @@ import { aggregatePayrollDataByCostCenter } from './auto-finance';
  * يستخدم نمط INSERT ... ON DUPLICATE KEY UPDATE + LAST_INSERT_ID() الآمن للتزامن في MySQL/TiDB،
  * بحيث يستحيل فنياً أن تحصل دفعتان على نفس الرقم حتى لو أُنشئتا في نفس اللحظة بالضبط.
  */
-async function getNextBatchSequence(year: number): Promise<number> {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
+async function getNextBatchSequence(year: number, db: NonNullable<Awaited<ReturnType<typeof getDb>>>): Promise<number> {
   await db.execute(sql`
     INSERT INTO payroll_batch_sequences (year, counter)
-    VALUES (${year}, 1)
+    VALUES (${year}, LAST_INSERT_ID(1))
     ON DUPLICATE KEY UPDATE counter = LAST_INSERT_ID(counter + 1)
   `);
 
@@ -69,7 +68,7 @@ async function getNextBatchSequence(year: number): Promise<number> {
   return Number(rows[0].seq);
 }
 
-export async function createPayrollBatch(params: {
+type CreatePayrollBatchInput = {
   periodStart: string;
   periodEnd: string;
   groupId?: number | null;
@@ -86,9 +85,120 @@ export async function createPayrollBatch(params: {
     daysWorked?: number;
     notes?: string;
   }>;
+};
+
+/** Mandatory transfer guard, independent of the optional operational closure policy. */
+export async function assertNoIncompleteOperationalTransfersForPayroll(params: {
+  periodStart: string; periodEnd: string; costCenterId?: number | null;
+  groupId?: number | null; groupIds?: number[]; workerIds?: number[]; tx?: unknown;
 }) {
+  const db = (params.tx ?? await getDb()) as NonNullable<Awaited<ReturnType<typeof getDb>>>;
+  if (!db) throw new Error('Database not available');
+  const groupIds = Array.from(new Set([...(params.groupIds || []), ...(params.groupId ? [params.groupId] : [])]));
+  const workerIds = Array.from(new Set(params.workerIds || []));
+  const scopeConditions = [];
+  if (params.costCenterId) scopeConditions.push(or(
+    eq(operationalTransferRequests.sourceCostCenterId, params.costCenterId),
+    eq(operationalTransferRequests.toCostCenterId, params.costCenterId)));
+  if (groupIds.length) scopeConditions.push(or(
+    inArray(operationalTransferRequests.sourceGroupId, groupIds), inArray(operationalTransferRequests.toGroupId, groupIds)));
+  if (workerIds.length) scopeConditions.push(inArray(operationalTransferRequests.workerId, workerIds));
+  const query = db.select({ id: operationalTransferRequests.id, workDate: operationalTransferRequests.workDate })
+    .from(operationalTransferRequests).where(and(
+      gte(operationalTransferRequests.workDate, params.periodStart.split('T')[0]),
+      lte(operationalTransferRequests.workDate, params.periodEnd.split('T')[0]),
+      or(eq(operationalTransferRequests.status, 'approved'), and(
+        eq(operationalTransferRequests.status, 'completed'), eq(operationalTransferRequests.financeReady, 0))),
+      ...(scopeConditions.length ? [or(...scopeConditions)] : []),
+    )).limit(1);
+  // Current read after center-day locks sees an approval that committed while payroll waited.
+  const [incomplete] = await (params.tx ? query.for('update') : query);
+  if (incomplete) {
+    throw new Error(`لا يمكن إنشاء دفعة الرواتب لوجود نقل معتمد غير مكتمل في ${incomplete.workDate}. أكمل تحديد الموقع والاحتساب أولًا`);
+  }
+}
+
+async function lockPayrollTransferDays(params: CreatePayrollBatchInput, tx: NonNullable<Awaited<ReturnType<typeof getDb>>>) {
+  const centerIds = new Set<number>();
+  if (params.costCenterId) centerIds.add(params.costCenterId);
+  const groupIds = Array.from(new Set([...(params.groupIds || []), ...(params.groupId ? [params.groupId] : [])]));
+  if (groupIds.length) {
+    const groupRows = await tx.select({ costCenterId: groups.costCenterId }).from(groups).where(inArray(groups.id, groupIds));
+    for (const row of groupRows) if (row.costCenterId) centerIds.add(row.costCenterId);
+  }
+  if (params.items?.length) {
+    const workerCenters = await tx.select({ costCenterId: groups.costCenterId }).from(workers)
+      .innerJoin(groups, eq(workers.groupId, groups.id)).where(inArray(workers.id, params.items.map(item => item.workerId)));
+    for (const row of workerCenters) if (row.costCenterId) centerIds.add(row.costCenterId);
+  }
+  // The original unscoped calculation selects all workers when neither groupId nor items are supplied.
+  if (!params.costCenterId && !params.groupId && !params.items?.length) {
+    const allCenters = await tx.select({ id: costCenters.id }).from(costCenters);
+    for (const row of allCenters) centerIds.add(row.id);
+  }
+  const start = params.periodStart.split('T')[0];
+  const end = params.periodEnd.split('T')[0];
+  const startValue = new Date(`${start}T00:00:00Z`);
+  const endValue = new Date(`${end}T00:00:00Z`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || start > end ||
+    !Number.isFinite(startValue.getTime()) || !Number.isFinite(endValue.getTime()) ||
+    startValue.toISOString().slice(0, 10) !== start || endValue.toISOString().slice(0, 10) !== end) {
+    throw new Error('فترة دفعة الرواتب غير صحيحة');
+  }
+  const guardedStart = start < OPERATIONAL_DAY_CONTROL_START_DATE ? OPERATIONAL_DAY_CONTROL_START_DATE : start;
+  const currentWorkDate = getAdministrativeWorkDate(new Date());
+  const guardedEnd = end < currentWorkDate ? end : currentWorkDate;
+  const date = new Date(`${guardedStart}T00:00:00Z`);
+  const ids = Array.from(centerIds).sort((a, b) => a - b);
+  for (let workDate = guardedStart; workDate <= guardedEnd; date.setUTCDate(date.getUTCDate() + 1), workDate = date.toISOString().slice(0, 10)) {
+    await lockOperationalDayRows(workDate, ids, tx);
+  }
+}
+
+// Payroll calculation calls existing helpers on the shared pool. Reserve at most one
+// transaction for this workflow per process so those helpers always have pool capacity.
+let payrollCreationQueue: Promise<void> = Promise.resolve();
+
+export async function createPayrollBatch(params: CreatePayrollBatchInput) {
+  const predecessor = payrollCreationQueue;
+  let release!: () => void;
+  payrollCreationQueue = new Promise<void>(resolve => { release = resolve; });
+  await predecessor;
+  try {
+    return await createPayrollBatchWithTransferGuard(params);
+  } finally {
+    release();
+  }
+}
+
+async function createPayrollBatchWithTransferGuard(params: CreatePayrollBatchInput) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+  const usesAllWorkers = !params.costCenterId && !params.groupId && !params.items?.length;
+  const guardInput = { periodStart: params.periodStart, periodEnd: params.periodEnd,
+    costCenterId: params.costCenterId, groupId: params.groupId, groupIds: usesAllWorkers ? undefined : params.groupIds,
+    workerIds: params.items?.map(item => item.workerId) };
+  // Refuse before existing refresh/cleanup code changes finance while a transfer is in flight.
+  await assertNoIncompleteOperationalTransfersForPayroll(guardInput);
+  const outcome = await db.transaction(async tx => {
+    await lockPayrollTransferDays(params, tx as unknown as typeof db);
+    await assertNoIncompleteOperationalTransfersForPayroll({ ...guardInput, tx });
+    return createPayrollBatchInDatabase(params, tx as unknown as typeof db);
+  });
+  // Existing helpers use their own connection; run only after the batch/items commit.
+  if (outcome.approvedDeductions.length > 0) {
+    await markDeductionsAsPosted(outcome.approvedDeductions.map(d => d.id), outcome.batchId);
+    await addDeductionReasonNotes({ batchId: outcome.batchId, reviewerId: params.createdBy, reviewerRole: 'system',
+      deductions: outcome.approvedDeductions.map(d => ({ workerId: d.workerId, amount: d.amount, reason: d.reason })) });
+  }
+  const creatorLabel = await getActorLabel(db, params.createdBy);
+  await sendNotificationToRoles({ roles: ADMIN_OWNER_ROLES, title: "📝 تم إنشاء دفعة رواتب جديدة",
+    message: `أنشأ ${creatorLabel} دفعة رواتب جديدة برقم ${outcome.batchCode} للفترة من ${params.periodStart} إلى ${params.periodEnd} (${outcome.totalWorkers} عامل) — بانتظار الإرسال للمحاسب.`,
+    type: 'info', link: `/payroll/batches/${outcome.batchId}` });
+  return { batchId: outcome.batchId, batchCode: outcome.batchCode };
+}
+
+async function createPayrollBatchInDatabase(params: CreatePayrollBatchInput, db: NonNullable<Awaited<ReturnType<typeof getDb>>>) {
 
   // 🧹 تنظيف تلقائي للسجلات اليتيمة قبل إنشاء الدفعة
   try {
@@ -232,7 +342,7 @@ export async function createPayrollBatch(params: {
   const now = new Date();
   const year = now.getFullYear();
   const yearShort = String(year).slice(-2);
-  const sequence = await getNextBatchSequence(year);
+  const sequence = await getNextBatchSequence(year, db);
   const finalBatchCode = `PR${yearShort}${String(sequence).padStart(4, '0')}`;
 
   // If items are empty, calculate from workerDailyFinance
@@ -418,6 +528,11 @@ export async function createPayrollBatch(params: {
     createdBy: params.createdBy,
   };
 
+  // Check actual calculated workers too (including day-by-day effective groups).
+  await assertNoIncompleteOperationalTransfersForPayroll({ periodStart: params.periodStart, periodEnd: params.periodEnd,
+    costCenterId: params.costCenterId, groupId: params.groupId, groupIds: params.groupIds,
+    workerIds: batchWorkerIds, tx: db });
+
   const insertResult = await db.insert(payrollBatches).values(insertValues as any);
 
   // Get batch ID from insert result
@@ -442,32 +557,7 @@ export async function createPayrollBatch(params: {
       await db.insert(payrollBatchItems).values(itemToInsert as any);
   }
 
-  // ✅ تعليم الحسومات المُدرجة كمُرحّلة (يمنع ترحيلها مرة أخرى) + إضافة سبب كل حسم كملاحظة بالدفعة
-  if (approvedDeductions.length > 0) {
-    await markDeductionsAsPosted(approvedDeductions.map((d) => d.id), batchId);
-    await addDeductionReasonNotes({
-      batchId,
-      reviewerId: params.createdBy,
-      reviewerRole: 'system',
-      deductions: approvedDeductions.map((d) => ({
-        workerId: d.workerId,
-        amount: d.amount,
-        reason: d.reason,
-      })),
-    });
-  }
-
-  // 🔔 إشعار الأدمن والإدارة العليا فور إنشاء الدفعة كمسودة
-  const creatorLabel = await getActorLabel(db, params.createdBy);
-  await sendNotificationToRoles({
-    roles: ADMIN_OWNER_ROLES,
-    title: "📝 تم إنشاء دفعة رواتب جديدة",
-    message: `أنشأ ${creatorLabel} دفعة رواتب جديدة برقم ${finalBatchCode} للفترة من ${params.periodStart} إلى ${params.periodEnd} (${batchItems.length} عامل) — بانتظار الإرسال للمحاسب.`,
-    type: 'info',
-    link: `/payroll/batches/${batchId}`,
-  });
-
-  return { batchId, batchCode: finalBatchCode };
+  return { batchId, batchCode: finalBatchCode, totalWorkers: batchItems.length, approvedDeductions };
 }
 
 /**
