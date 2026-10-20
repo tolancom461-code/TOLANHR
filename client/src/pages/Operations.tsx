@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
+import OperationsTransfersTab from '@/components/OperationsTransfersTab';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -43,6 +45,7 @@ import {
 import { toast } from 'sonner';
 import { transliterateName } from '@/utils/transliterate';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { useSearch } from 'wouter';
 
 type WorkerFilter = 'all' | 'assigned' | 'unassigned' | 'transferred';
 
@@ -52,15 +55,40 @@ type TransferDraft = {
   siteId: string;
 };
 
+function readOperationalUrlContext(search: string) {
+  const params = new URLSearchParams(search);
+  const rawDate = params.get('workDate') || '';
+  const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? new Date(`${rawDate}T00:00:00Z`) : null;
+  const workDate = parsedDate && !Number.isNaN(parsedDate.getTime()) && parsedDate.toISOString().slice(0, 10) === rawDate ? rawDate : '';
+  const rawCenterId = params.get('costCenterId') || '';
+  const centerId = /^[1-9]\d*$/.test(rawCenterId) ? Number(rawCenterId) : 0;
+  const costCenterId = Number.isSafeInteger(centerId) && centerId > 0 && centerId <= 2147483647 ? String(centerId) : '';
+  return { workDate, costCenterId, tab: params.get('tab') === 'transfers' ? 'transfers' as const : 'assignment' as const };
+}
+
+function replaceOperationalUrlContext(workDate: string, costCenterId: string) {
+  const url = new URL(window.location.href);
+  if (workDate) url.searchParams.set('workDate', workDate);
+  else url.searchParams.delete('workDate');
+  if (costCenterId) url.searchParams.set('costCenterId', costCenterId);
+  else url.searchParams.delete('costCenterId');
+  window.history.replaceState(window.history.state, '', url);
+}
+
 export default function Operations() {
   const { t, language } = useLanguage();
   const { user } = useAuth();
+  const search = useSearch();
+  const urlContext = useMemo(() => readOperationalUrlContext(search), [search]);
+  const canUseTransfers = ['super_admin', 'admin_affairs', 'supervisor_tolan', 'supervisor_malqa', 'restaurant_operations'].includes(String(user?.role || ''));
   const displayName = (name: string) => (language === 'en' ? transliterateName(name) : name);
-  const [costCenterId, setCostCenterId] = useState('');
+  const [costCenterId, setCostCenterId] = useState(() => urlContext.costCenterId);
+  const [requestedTab, setActiveTab] = useState<'assignment' | 'transfers'>(() => urlContext.tab);
+  const activeTab = requestedTab === 'transfers' && canUseTransfers ? 'transfers' : 'assignment';
   const [groupId, setGroupId] = useState('');
   const [workerFilter, setWorkerFilter] = useState<WorkerFilter>('all');
   const [transferDrafts, setTransferDrafts] = useState<Record<number, TransferDraft>>({});
-  const [selectedWorkDate, setSelectedWorkDate] = useState('');
+  const [selectedWorkDate, setSelectedWorkDate] = useState(() => urlContext.workDate);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false);
   const [reopenReason, setReopenReason] = useState('');
@@ -76,9 +104,25 @@ export default function Operations() {
   const [quickCompletedVisible, setQuickCompletedVisible] = useState(false);
   const quickCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => {
+    setActiveTab(urlContext.tab);
+  }, [urlContext.tab]);
+
+  useEffect(() => {
+    setSelectedWorkDate(urlContext.workDate);
+    setCostCenterId(urlContext.costCenterId);
+    setGroupId('');
+    setWorkerFilter('all');
+    setTransferDrafts({});
+    setQuickDialogOpen(false);
+  }, [urlContext.workDate, urlContext.costCenterId]);
+
   const utils = trpc.useUtils();
   const { data: operationalDay } = trpc.restaurants.currentWorkDate.useQuery();
-  const workDate = selectedWorkDate || operationalDay?.workDate || '';
+  const selectedDateInRange = selectedWorkDate && operationalDay &&
+    selectedWorkDate <= operationalDay.workDate &&
+    (!operationalDay.controlStartDate || selectedWorkDate >= operationalDay.controlStartDate);
+  const workDate = operationalDay ? (selectedDateInRange ? selectedWorkDate : operationalDay.workDate) : '';
 
   useEffect(() => {
     if (!selectedWorkDate && operationalDay?.workDate) {
@@ -86,7 +130,20 @@ export default function Operations() {
     }
   }, [operationalDay?.workDate, selectedWorkDate]);
 
-  const selectedCostCenterId = costCenterId ? parseInt(costCenterId) : 0;
+  const { data: costCenters } = trpc.costCenters.list.useQuery();
+  const scopedOperationsRoles = new Set(['supervisor_tolan', 'supervisor_malqa', 'restaurant_operations']);
+  const isScopedOperationsUser = !!user?.role && scopedOperationsRoles.has(user.role);
+  const { data: userCostCenters } = trpc.users.getUserCostCenters.useQuery(
+    { userId: user?.id || 0 },
+    { enabled: isScopedOperationsUser && !!user?.id }
+  );
+  const visibleCostCenters = useMemo(() => {
+    if (!isScopedOperationsUser) return costCenters || [];
+    const allowedIds = new Set((userCostCenters || []).map((row: any) => Number(row.costCenterId)));
+    return (costCenters || []).filter((cc: any) => allowedIds.has(Number(cc.id)));
+  }, [costCenters, isScopedOperationsUser, userCostCenters]);
+  const centerContextReady = !!user && !!costCenters && (!isScopedOperationsUser || !!userCostCenters);
+  const selectedCostCenterId = centerContextReady && visibleCostCenters.some((center) => String(center.id) === costCenterId) ? Number(costCenterId) : 0;
   const { data: dayStatus } = trpc.restaurants.operationalDayStatus.useQuery(
     { workDate, costCenterId: selectedCostCenterId },
     { enabled: !!workDate && !!selectedCostCenterId }
@@ -95,17 +152,10 @@ export default function Operations() {
     { costCenterId: selectedCostCenterId },
     { enabled: !!selectedCostCenterId }
   );
-  const { data: costCenters } = trpc.costCenters.list.useQuery();
-  const scopedOperationsRoles = new Set(['supervisor_tolan', 'supervisor_malqa', 'restaurant_operations']);
-  const isScopedOperationsUser = !!user?.role && scopedOperationsRoles.has(user.role);
-  const { data: userCostCenters } = trpc.users.getUserCostCenters.useQuery(
-    { userId: user?.id || 0 },
-    { enabled: isScopedOperationsUser && !!user?.id }
-  );
   const { data: allGroups } = trpc.groups.list.useQuery();
   const { data: costCenterGroups } = trpc.groups.listByCostCenter.useQuery(
-    { costCenterId: costCenterId ? parseInt(costCenterId) : undefined },
-    { enabled: !!costCenterId }
+    { costCenterId: selectedCostCenterId || undefined },
+    { enabled: !!selectedCostCenterId }
   );
   const { data: sitesList } = trpc.restaurants.list.useQuery({ includeInactive: false });
   const { data: operationalRecords } = trpc.restaurants.operationalRecords.useQuery(
@@ -151,6 +201,29 @@ export default function Operations() {
       void refreshOperationalDay();
     },
     onError: (error) => toast.error(error.message),
+  });
+
+  const completeIncomingTransferMutation = trpc.operationalTransfers.complete.useMutation({
+    onSuccess: async () => {
+      await Promise.all([
+        utils.operationalTransfers.invalidate(),
+        utils.restaurants.operationalDayStatus.invalidate(),
+        utils.restaurants.getWorkersForAssignment.invalidate(),
+        utils.restaurants.groupAssignmentProgress.invalidate(),
+        utils.restaurants.openOperationalDays.invalidate(),
+        utils.restaurants.operationalRecords.invalidate(),
+      ]);
+    },
+    onError: async (error) => {
+      toast.error(error.message);
+      await Promise.all([
+        utils.operationalTransfers.invalidate(),
+        utils.restaurants.getWorkersForAssignment.invalidate(),
+        utils.restaurants.operationalDayStatus.invalidate(),
+        utils.restaurants.groupAssignmentProgress.invalidate(),
+        utils.restaurants.openOperationalDays.invalidate(),
+      ]);
+    },
   });
 
   const closeDayMutation = trpc.restaurants.closeOperationalDay.useMutation({
@@ -202,12 +275,6 @@ export default function Operations() {
     onError: (error) => toast.error(error.message),
   });
 
-  const visibleCostCenters = useMemo(() => {
-    if (!isScopedOperationsUser) return costCenters || [];
-    const allowedIds = new Set((userCostCenters || []).map((row: any) => Number(row.costCenterId)));
-    return (costCenters || []).filter((cc: any) => allowedIds.has(Number(cc.id)));
-  }, [costCenters, isScopedOperationsUser, userCostCenters]);
-
   const costCenterNameById = useMemo(
     () => new Map((costCenters || []).map((cc: any) => [cc.id, cc.name])),
     [costCenters]
@@ -223,9 +290,13 @@ export default function Operations() {
   const isMalqaClosingCenter = selectedCostCenterCode === 'CC06' || selectedCostCenterName.includes('الملقا');
 
   useEffect(() => {
-    if (!isScopedOperationsUser || costCenterId || visibleCostCenters.length !== 1) return;
-    setCostCenterId(String(visibleCostCenters[0].id));
-  }, [isScopedOperationsUser, costCenterId, visibleCostCenters]);
+    if (!centerContextReady || visibleCostCenters.some((center) => String(center.id) === costCenterId)) return;
+    if (isScopedOperationsUser && visibleCostCenters.length === 1) {
+      setCostCenterId(String(visibleCostCenters[0].id));
+    } else if (costCenterId) {
+      setCostCenterId('');
+    }
+  }, [centerContextReady, isScopedOperationsUser, costCenterId, visibleCostCenters]);
 
   const activeGroups = useMemo(
     () => (allGroups || []).filter((group: any) => !!group.isActive && !!group.costCenterId),
@@ -387,6 +458,7 @@ export default function Operations() {
 
   const handleWorkDateChange = (value: string) => {
     setSelectedWorkDate(value);
+    replaceOperationalUrlContext(value, costCenterId);
     setWorkerFilter('all');
     setTransferDrafts({});
     setGroupCallTime('');
@@ -450,17 +522,17 @@ export default function Operations() {
     const workers = groupWorkers || [];
     return {
       total: workers.length,
-      assigned: workers.filter((w: any) => !!w.currentRestaurantId).length,
-      unassigned: workers.filter((w: any) => !w.currentRestaurantId).length,
-      transferred: workers.filter((w: any) => !!w.operationalGroupId).length,
+      assigned: workers.filter((w: any) => !!w.currentRestaurantId || w.isTransferredOut).length,
+      unassigned: workers.filter((w: any) => !w.currentRestaurantId && !w.isTransferredOut).length,
+      transferred: workers.filter((w: any) => !!w.operationalGroupId || w.isTransferredOut).length,
     };
   }, [groupWorkers]);
 
   const filteredWorkers = useMemo(() => {
     const workers = groupWorkers || [];
-    if (workerFilter === 'assigned') return workers.filter((w: any) => !!w.currentRestaurantId);
-    if (workerFilter === 'unassigned') return workers.filter((w: any) => !w.currentRestaurantId);
-    if (workerFilter === 'transferred') return workers.filter((w: any) => !!w.operationalGroupId);
+    if (workerFilter === 'assigned') return workers.filter((w: any) => !!w.currentRestaurantId || w.isTransferredOut);
+    if (workerFilter === 'unassigned') return workers.filter((w: any) => !w.currentRestaurantId && !w.isTransferredOut);
+    if (workerFilter === 'transferred') return workers.filter((w: any) => !!w.operationalGroupId || w.isTransferredOut);
     return workers;
   }, [groupWorkers, workerFilter]);
 
@@ -492,7 +564,7 @@ export default function Operations() {
   const quickPendingWorkers = useMemo(
     () =>
       (groupWorkers || []).filter(
-        (worker: any) => !worker.currentRestaurantId && !quickProcessedWorkerIdSet.has(Number(worker.id))
+        (worker: any) => !worker.isTransferredOut && !worker.currentRestaurantId && !quickProcessedWorkerIdSet.has(Number(worker.id))
       ),
     [groupWorkers, quickProcessedWorkerIdSet]
   );
@@ -500,6 +572,7 @@ export default function Operations() {
   const quickCurrentWorker = quickPendingWorkers[0] || null;
   const quickTotalWorkers = groupWorkers?.length || 0;
   const quickAssignedWorkers = Math.max(quickTotalWorkers - quickPendingWorkers.length, 0);
+  const quickAssignmentBusy = assignMutation.isPending || completeIncomingTransferMutation.isPending;
 
   useEffect(() => {
     return () => {
@@ -552,13 +625,20 @@ export default function Operations() {
       const workerId = Number(quickCurrentWorker.id);
       const remainingAfterSave = quickPendingWorkers.length - 1;
 
-      await assignMutation.mutateAsync({
-        workerId,
-        sourceGroupId: Number(groupId),
-        restaurantId: Number(quickSelectedSiteId),
-        operationalGroupId: null,
-        workDate,
-      });
+      if (quickCurrentWorker.isIncomingTransfer && quickCurrentWorker.approvedTransferRequestId) {
+        await completeIncomingTransferMutation.mutateAsync({
+          id: quickCurrentWorker.approvedTransferRequestId,
+          restaurantId: Number(quickSelectedSiteId),
+        });
+      } else {
+        await assignMutation.mutateAsync({
+          workerId,
+          sourceGroupId: Number(groupId),
+          restaurantId: Number(quickSelectedSiteId),
+          operationalGroupId: quickCurrentWorker.operationalGroupId,
+          workDate,
+        });
+      }
 
       setQuickProcessedWorkerIds((current) => [...current, workerId]);
       setQuickSelectedSiteId('');
@@ -587,7 +667,22 @@ export default function Operations() {
           <p className="text-muted-foreground">{t.staffingPage.operationalSubtitle}</p>
         </div>
 
-        {(groupId || selectedCostCenterId) && (
+        {canUseTransfers && <Tabs value={activeTab} onValueChange={(value) => {
+          const nextTab = value === 'transfers' ? 'transfers' : 'assignment';
+          setActiveTab(nextTab);
+          handleQuickDialogOpenChange(false);
+          const url = new URL(window.location.href);
+          if (nextTab === 'transfers') url.searchParams.set('tab', 'transfers');
+          else url.searchParams.delete('tab');
+          window.history.replaceState(window.history.state, '', url);
+        }}>
+          <TabsList className="w-full sm:w-fit">
+            <TabsTrigger value="assignment"><ClipboardList className="h-4 w-4" />{t.staffingPage.assignmentTab}</TabsTrigger>
+            <TabsTrigger value="transfers"><ArrowRightLeft className="h-4 w-4" />{t.staffingPage.transfersTab}</TabsTrigger>
+          </TabsList>
+        </Tabs>}
+
+        {activeTab === 'assignment' && (groupId || selectedCostCenterId) && (
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
             {groupId && (
               <Card>
@@ -750,14 +845,24 @@ export default function Operations() {
                 <Label>{t.staffingPage.operationalDay}</Label>
                 <div className="relative">
                   <CalendarDays className="absolute start-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
-                  <Input
+                  {activeTab === 'transfers' ? (
+                    <Select value={workDate} onValueChange={handleWorkDateChange}>
+                      <SelectTrigger className="w-full ps-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Array.from(new Set([operationalDay?.workDate, workDate, ...(openOperationalDays || []).map((day) => day.workDate)]))
+                          .filter((date): date is string => !!date).sort().reverse().map((date) => (
+                            <SelectItem key={date} value={date}>{date}</SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  ) : <Input
                     type="date"
                     className="ps-9"
                     value={workDate}
                     min={operationalDay?.controlStartDate}
                     max={operationalDay?.workDate}
                     onChange={(event) => handleWorkDateChange(event.target.value)}
-                  />
+                  />}
                 </div>
                 <p className="text-xs text-muted-foreground">{t.staffingPage.operationalDateHint}</p>
               </div>
@@ -793,6 +898,7 @@ export default function Operations() {
                   value={costCenterId}
                   onValueChange={(value) => {
                     setCostCenterId(value);
+                    replaceOperationalUrlContext(workDate, value);
                     setGroupId('');
                     setWorkerFilter('all');
                     setTransferDrafts({});
@@ -817,7 +923,7 @@ export default function Operations() {
                 </Select>
               </div>
 
-              {!isScopedOperationsUser && (
+              {!isScopedOperationsUser && activeTab === 'assignment' && (
                 <div className="space-y-2">
                   <Label>{t.staffingPage.group}</Label>
                   <Select
@@ -878,7 +984,7 @@ export default function Operations() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {dayStatus.capabilities?.canReopen && (
+                    {activeTab === 'assignment' && dayStatus.capabilities?.canReopen && (
                       <Button
                         variant="outline"
                         onClick={() => setReopenDialogOpen(true)}
@@ -938,7 +1044,9 @@ export default function Operations() {
           </CardContent>
         </Card>
 
-        {isScopedOperationsUser && selectedCostCenterId > 0 && (
+        {canUseTransfers && activeTab === 'transfers' && <OperationsTransfersTab workDate={workDate} costCenterId={selectedCostCenterId} />}
+
+        {activeTab === 'assignment' && isScopedOperationsUser && selectedCostCenterId > 0 && (
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -994,7 +1102,7 @@ export default function Operations() {
           </Card>
         )}
 
-        {groupId && !isScopedOperationsUser && (
+        {activeTab === 'assignment' && groupId && !isScopedOperationsUser && (
           <>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <Card>
@@ -1104,6 +1212,10 @@ export default function Operations() {
                               <span className="text-xs text-muted-foreground">({worker.code})</span>
                             </div>
                             <div className="flex flex-wrap gap-2">
+                              {worker.isTransferredOut && (
+                                <Badge variant="outline">{t.operationalTransfersPage.transferredTo}: {displayName(worker.transferToCostCenterName || '')}</Badge>
+                              )}
+                              {worker.isIncomingTransfer && <Badge variant="outline">{t.operationalTransfersPage.incomingWorker}</Badge>}
                               {worker.operationalGroupId && (
                                 <Badge className="gap-1">
                                   <ArrowRightLeft className="h-3 w-3" />
@@ -1118,6 +1230,17 @@ export default function Operations() {
                             </div>
                           </div>
 
+                          {worker.isIncomingTransfer || worker.isTransferredOut ? (
+                            <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                              <span>{worker.currentRestaurantName ? displayName(worker.currentRestaurantName) : t.operationalTransfersPage.approved}</span>
+                              {canUseTransfers && <Button variant="outline" size="sm" onClick={() => {
+                                setActiveTab('transfers');
+                                const url = new URL(window.location.href);
+                                url.searchParams.set('tab', 'transfers');
+                                window.history.replaceState(window.history.state, '', url);
+                              }}>{t.staffingPage.transfersTab}</Button>}
+                            </div>
+                          ) : <>
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                             <div className="space-y-1.5">
                               <Label className="text-xs flex items-center gap-1">
@@ -1255,6 +1378,7 @@ export default function Operations() {
                               </div>
                             </div>
                           )}
+                          </>}
                         </div>
                       );
                     })}
@@ -1277,6 +1401,16 @@ export default function Operations() {
             </DialogHeader>
 
             <div className="min-h-0 overflow-y-auto overscroll-contain px-5 py-4">
+              {!loadingWorkers && (groupWorkers || []).some((worker) => worker.isTransferredOut) && (
+                <div className="mb-4 space-y-2">
+                  {(groupWorkers || []).filter((worker) => worker.isTransferredOut).map((worker) => (
+                    <div key={worker.id} className="rounded-md border p-3 text-sm flex flex-wrap items-center justify-between gap-2">
+                      <span>{displayName(worker.fullName)}</span>
+                      <Badge variant="outline">{t.operationalTransfersPage.transferredTo}: {displayName(worker.transferToCostCenterName || '')}</Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
               {loadingWorkers ? (
                 <div className="py-10 text-center text-muted-foreground">{t.staffingPage.loading}</div>
               ) : quickCompletedVisible ? (
@@ -1315,6 +1449,7 @@ export default function Operations() {
                       {t.staffingPage.quickWorkerStep} {quickAssignedWorkers + 1} {t.staffingPage.quickOf} {quickTotalWorkers}
                     </div>
                     <div className="text-2xl font-bold leading-tight">{displayName(quickCurrentWorker.fullName)}</div>
+                    {quickCurrentWorker.isIncomingTransfer && <Badge variant="outline">{t.operationalTransfersPage.incomingWorker}</Badge>}
                   </div>
 
                   <div className="space-y-3">
@@ -1333,7 +1468,7 @@ export default function Operations() {
                               type="button"
                               variant={selected ? 'default' : 'outline'}
                               className="min-h-12 h-auto px-3 py-3 whitespace-normal leading-snug"
-                              disabled={assignMutation.isPending || !canEditAssignments}
+                              disabled={quickAssignmentBusy || !canEditAssignments}
                               onClick={() => setQuickSelectedSiteId(String(site.id))}
                             >
                               {displayName(site.name)}
@@ -1356,9 +1491,9 @@ export default function Operations() {
                 <Button
                   className="w-full min-h-12 text-base"
                   onClick={() => void saveQuickAssignment()}
-                  disabled={!quickSelectedSiteId || assignMutation.isPending || !canEditAssignments}
+                  disabled={!quickSelectedSiteId || quickAssignmentBusy || !canEditAssignments}
                 >
-                  {assignMutation.isPending ? t.staffingPage.loading : t.staffingPage.quickSaveNext}
+                  {quickAssignmentBusy ? t.staffingPage.loading : t.staffingPage.quickSaveNext}
                 </Button>
               </DialogFooter>
             )}

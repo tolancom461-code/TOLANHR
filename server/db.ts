@@ -46,6 +46,7 @@ export * from './db/batch-worker-operations';
 export * from './db/restaurants';
 export * from './db/group-coverage';
 export * from './db/daily-work-assignments';
+export * from './db/operational-transfers';
 export * from './db/operational-days';
 export * from './db/restaurant-costs';
 export * from './db/notifications-db';
