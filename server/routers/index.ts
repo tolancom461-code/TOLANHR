@@ -53,7 +53,6 @@ import { financialRecalculationRouter } from './financial-recalculation';
 import { dailyPayrollReportRouter } from './daily-payroll-report';
 import { ceoReportsRouter } from './ceo-reports';
 import { dailyAttendanceReportsRouter } from './daily-attendance-reports';
-import { operationalTransfersRouter } from './operational-transfers';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,7 +78,6 @@ export const appRouter = router({
   // All users are now treated as Admin with full access.
   // Restaurants Management (ميزة التشغيل وتكاليف المطاعم)
   restaurants: restaurantsRouter,
-  operationalTransfers: operationalTransfersRouter,
 
   // Groups Management
   groups: groupsRouter,

@@ -540,38 +540,6 @@ export const dailyWorkAssignments = mysqlTable("daily_work_assignments", {
 	unique("uq_worker_workdate").on(table.workerId, table.workDate),
 ]);
 
-// طلب نقل ليوم تشغيلي كامل؛ لا يعدّل التوزيع أو المالية قبل استكمال الموقع.
-// ينشأ الجدول يدويًا فقط بواسطة مالك قاعدة البيانات، ولا تُشغّل له migrations تلقائية.
-export const operationalTransferRequests = mysqlTable("operational_transfer_requests", {
-	id: int().autoincrement().primaryKey(),
-	workerId: int("worker_id").notNull().references(() => workers.id, { onDelete: "restrict", onUpdate: "cascade" }),
-	workDate: date("work_date", { mode: 'string' }).notNull(),
-	sourceGroupId: int("source_group_id").notNull().references(() => groups.id, { onDelete: "restrict", onUpdate: "cascade" }),
-	sourceCostCenterId: int("source_cost_center_id").notNull().references(() => costCenters.id, { onDelete: "restrict", onUpdate: "cascade" }),
-	toGroupId: int("to_group_id").notNull().references(() => groups.id, { onDelete: "restrict", onUpdate: "cascade" }),
-	toCostCenterId: int("to_cost_center_id").notNull().references(() => costCenters.id, { onDelete: "restrict", onUpdate: "cascade" }),
-	status: mysqlEnum(['pending','approved','completed','rejected','cancelled']).default('pending').notNull(),
-	requestedBy: int("requested_by").notNull().references(() => users.id, { onDelete: "restrict", onUpdate: "cascade" }),
-	reviewedBy: int("reviewed_by").references(() => users.id, { onDelete: "set null", onUpdate: "cascade" }),
-	reviewedAt: timestamp("reviewed_at", { mode: 'string' }),
-	rejectionReason: varchar("rejection_reason", { length: 500 }),
-	completedBy: int("completed_by").references(() => users.id, { onDelete: "set null", onUpdate: "cascade" }),
-	completedAt: timestamp("completed_at", { mode: 'string' }),
-	restaurantId: int("restaurant_id").references(() => restaurants.id, { onDelete: "restrict", onUpdate: "cascade" }),
-	// عند فشل الاحتساب يبقى النقل محجوزًا ويمكن إعادة المحاولة قبل إغلاق اليوم.
-	financeReady: tinyint("finance_ready").default(0).notNull(),
-	// worker:date للطلبات النشطة والمكتملة؛ NULL للمرفوض والملغى للسماح بطلب جديد.
-	activeKey: varchar("active_key", { length: 64 }),
-	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
-}, (table) => [
-	uniqueIndex("uq_operational_transfer_active_key").on(table.activeKey),
-	index("idx_operational_transfer_source_date").on(table.sourceCostCenterId, table.workDate),
-	index("idx_operational_transfer_target_date").on(table.toCostCenterId, table.workDate),
-	index("idx_operational_transfer_worker_date").on(table.workerId, table.workDate),
-	index("idx_operational_transfer_status_date").on(table.status, table.workDate),
-]);
-
 // ============================================
 // إغلاق اليوم التشغيلي واعتماد توزيعات العمال
 // بدأ تطبيق هذه الدورة من 2026-09-16؛ الأيام الأقدم تبقى تاريخية ولا تتأثر.
