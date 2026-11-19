@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "completedAtUtc": "2026-11-11T07:06:30.851Z",
+  "fixture": "Synthetic workers and events on two process-owned local MySQL instances, reduced TolanHR schema",
+  "fingerprintPath": "Real ATTLOG intake, finalization, and authenticated Final Events API over loopback",
+  "tolanHrPath": "Real getWorkerFromQR and confirmAttendance callers, getDb, importer, and daily finance calculation",
+  "checks": [
+    "getDb connected to owned loopback MySQL and a newly generated test schema",
+    "real importer initializes a cursor through the authenticated local Fingerprint API",
+    "real QR lookup and confirmation handlers store a QR check-in on the expected Riyadh administrative date",
+    "real ADMS ingest finalizes a synthetic fingerprint checkout and exposes it through the real API",
+    "QR check-in and fingerprint checkout produce 120 minutes and a net 120.00 on the same administrative day",
+    "movement before BIOMETRIC_FINAL_EVENTS_IMPORT_FROM_UTC records before_cutoff without changing payroll or attendance",
+    "a locked worker daily row blocks attendance while preserving the existing finance row",
+    "an active payroll batch for the effective operational group blocks the movement and does not create a daily row",
+    "a finalized biometric person without a TolanHR worker mapping leaves attendance and finance unchanged",
+    "replaying the same five API UUIDs preserves exactly one biometric checkout and the original finance and import rows"
+  ],
+  "cleanup": {
+    "fingerprintProducerStopped": true,
+    "mysqlStopped": true,
+    "bootstrapRemoved": true,
+    "graceful": true,
+    "syntheticFixtureRetained": true
+  }
+}

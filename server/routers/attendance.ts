@@ -18,6 +18,7 @@ import PDFDocument from "pdfkit";
 import ExcelJS from "exceljs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { recordQrWithSourceInbox } from '../attendance-source-inbox/qr-observer';
 
   // Attendance System (Phase 4)
 export const attendanceRouter = router({
@@ -540,6 +541,7 @@ addFullSession: protectedProcedure
         workerId: z.number(),
         deviceInfo: z.string().optional(),
         eventType: z.enum(['check_in', 'check_out']).optional(),
+        sourceAttemptId: z.string().uuid().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         // ✅ استخراج IP من طلب السيرفر مباشرة بدل انتظار خدمة خارجية من المتصفح
@@ -549,15 +551,26 @@ addFullSession: protectedProcedure
           Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor?.split(',')[0].trim()
         ) || ctx.req.socket?.remoteAddress || null;
 
-        const result = await db.recordAttendanceWithAdministrativeDay(
-          input.workerId,
-          'qr',
-          undefined,
-          ctx.user?.id,
-          serverIp || undefined,
-          input.deviceInfo,
-          input.eventType
-        );
+        const result = await recordQrWithSourceInbox({
+          workerId: input.workerId, eventType: input.eventType,
+          actorId: ctx.user?.id, attemptId: input.sourceAttemptId,
+        }, {
+          async getPool() {
+            const database = await db.getDb();
+            if (!database) throw new Error('Database not available');
+            return database.$client.promise();
+          },
+          execute: observation => db.recordAttendanceWithAdministrativeDay(
+            input.workerId,
+            'qr',
+            undefined,
+            ctx.user?.id,
+            serverIp || undefined,
+            input.deviceInfo,
+            input.eventType,
+            observation
+          ),
+        });
         
         return result;
       }),

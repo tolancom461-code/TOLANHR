@@ -1,0 +1,19 @@
+{
+  "completedAtUtc": "2026-11-19T07:59:34.704Z",
+  "inMemoryOnly": true,
+  "outputs": [
+    {
+      "target": "existing-server",
+      "passed": true,
+      "inputs": 124,
+      "newModuleReachable": false
+    },
+    {
+      "target": "existing-browser-dependency-build",
+      "passed": true,
+      "inputs": 3292,
+      "newModuleReachable": false,
+      "cssRenderingVerified": false
+    }
+  ]
+}

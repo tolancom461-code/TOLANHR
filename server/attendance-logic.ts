@@ -15,6 +15,7 @@
 import { eq, and, gte, lte, desc, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
+import type { QrAttendanceObservation } from './attendance-source-inbox/qr-observer';
 
 /**
  * حساب تاريخ اليوم الإداري حسب القاعدة السارية وقت البصمة بتوقيت الرياض.
@@ -259,7 +260,8 @@ export async function recordAttendanceWithAdministrativeDay(
   verifiedBy?: number,
   ipAddress?: string,
   deviceInfo?: string,
-  forcedEventType?: 'check_in' | 'check_out'  // ✅ التعديل: اختيار الحارس
+  forcedEventType?: 'check_in' | 'check_out',  // ✅ التعديل: اختيار الحارس
+  sourceObservation?: QrAttendanceObservation
 ) {
   const db = await getDb();
   if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: "Database not available" });
@@ -272,6 +274,10 @@ export async function recordAttendanceWithAdministrativeDay(
   
   const eventTime = new Date();
   const workDate = getAdministrativeWorkDate(eventTime);
+  if (method === 'qr' && forcedEventType) {
+    await sourceObservation?.beforeValidation({ eventTime,
+      workerName: worker.fullName ?? null, personCode: worker.biometricPersonCode ?? null });
+  }
   
   // 🔥 القاعدة 1: منع أي بصمة خلال 3 دقائق من آخر بصمة
   const cooldownSecondsAgo = new Date(eventTime.getTime() - 180 * 1000);
@@ -375,6 +381,7 @@ export async function recordAttendanceWithAdministrativeDay(
   });
   
   const eventId = result[0].insertId;
+  sourceObservation?.attendanceSaved(eventId);
   
   // تحديث آخر حضور للعامل
   await db.update(workers).set({ lastAttendanceAt: eventTime }).where(eq(workers.id, workerId));

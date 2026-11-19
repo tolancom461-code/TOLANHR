@@ -1,0 +1,15 @@
+.git
+.gitignore
+.legacy-biometric-removal/
+**/node_modules
+**/.cache
+**/dist
+**/build
+**/.next
+.env
+.env.*
+*.log
+*.zip
+*.bak
+railway_vars.json
+.DS_Store

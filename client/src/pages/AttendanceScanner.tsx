@@ -26,6 +26,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import QRScanner from '@/components/QRScanner';
+import { createQrAttemptId } from '@/lib/qr-attempt-id';
 import { getDeviceInfo } from '@/lib/deviceInfo';
 
 export default function AttendanceScanner() {
@@ -154,6 +155,8 @@ export default function AttendanceScanner() {
         workerId: workerData.worker.id,
         deviceInfo,
         eventType: chosenEventType,
+        // The same mutation body survives automatic transport retries.
+        sourceAttemptId: createQrAttemptId(),
       });
       
       setLastResult({

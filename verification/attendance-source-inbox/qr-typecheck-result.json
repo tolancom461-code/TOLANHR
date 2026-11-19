@@ -1,0 +1,8 @@
+{
+  "checkedAtUtc": "2026-11-19T08:18:32.385Z",
+  "scope": "Whole project TypeScript diagnostics compared using original versions of the three wired files; unchanged unrelated errors retained",
+  "baselineErrorCount": 582,
+  "currentErrorCount": 582,
+  "newErrors": [],
+  "noNewErrors": true
+}

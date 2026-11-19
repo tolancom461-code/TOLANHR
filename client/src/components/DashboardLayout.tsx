@@ -89,7 +89,7 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 
 // تعريف الصفحات المسموحة لكل دور
-type UserRoleType = 'guard' | 'supervisor_tolan' | 'supervisor_malqa' | 'admin_affairs' | 'accountant' | 'auditor' | 'finance_manager' | 'executive' | 'super_admin' | 'restaurant_operations' | 'data_entry';
+type UserRoleType = 'guard' | 'supervisor_tolan' | 'supervisor_malqa' | 'admin_affairs' | 'accountant' | 'operations_cost_accountant' | 'auditor' | 'finance_manager' | 'executive' | 'super_admin' | 'restaurant_operations' | 'data_entry';
 
 const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
   // الحارس: فقط تسجيل الحضور (بدون سجل الحضور وبدون تقارير الحضور)
@@ -152,6 +152,8 @@ const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
   restaurant_operations: ['/operations/staffing', '/profile'],
   // مدخل بيانات: شاشة العمال فقط، لا غير
   data_entry: ['/workers', '/profile'],
+  // محاسب تكاليف التشغيل: تقرير تكاليف التشغيل فقط
+  operations_cost_accountant: ['/operations/cost-report'],
   super_admin: 'all',
 };
 
@@ -355,9 +357,14 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
+
+  const userRole = (user?.role || 'guard') as UserRoleType;
+  const isOperationsCostAccountant = userRole === 'operations_cost_accountant';
   
-  // جلب عدد البصمات المعلقة
-  const { data: pendingPunchesCount = 0 } = trpc.attendance.getPendingCount.useQuery();
+  // جلب عدد البصمات المعلقة للأدوار التي تستخدم مركز مراجعة البصمات فقط
+  const { data: pendingPunchesCount = 0 } = trpc.attendance.getPendingCount.useQuery(undefined, {
+    enabled: !isOperationsCostAccountant,
+  });
   
   // حفظ حالة الطي/الفتح لكل قسم
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
@@ -377,7 +384,6 @@ function DashboardLayoutContent({
   };
   
   // تصفية القائمة حسب دور المستخدم
-  const userRole = (user?.role || 'guard') as UserRoleType;
   const menuSections = getMenuSections(t);
   const filteredMenuSections = menuSections
     .map(section => ({
@@ -518,10 +524,12 @@ function DashboardLayoutContent({
                   <DropdownMenuItem disabled className="text-xs text-muted-foreground">
                     {user?.email}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setLocation("/profile")}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>{t.general.profile}</span>
-                  </DropdownMenuItem>
+                  {!isOperationsCostAccountant && (
+                    <DropdownMenuItem onClick={() => setLocation("/profile")}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>{t.general.profile}</span>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => logout()}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>{t.general.logout}</span>
@@ -531,8 +539,8 @@ function DashboardLayoutContent({
             </SidebarMenuItem>
             <SidebarMenuItem>
               <div className="grid grid-cols-3 gap-1 justify-items-center py-1">
-                <NotificationBell />
-                <PushNotificationToggle iconOnly />
+                {!isOperationsCostAccountant && <NotificationBell />}
+                {!isOperationsCostAccountant && <PushNotificationToggle iconOnly />}
                 <PWAInstallButton iconOnly />
                 <ThemeToggle />
                 <Tooltip>

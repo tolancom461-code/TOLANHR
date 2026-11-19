@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch, useLocation } from "wouter";
@@ -69,7 +70,7 @@ import PaymentVoucher from "./pages/PaymentVoucher";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DashboardLayout from "./components/DashboardLayout";
-import { lazy } from "react";
+import { lazy, useEffect } from "react";
 import LazyPage from "./components/LazyPage";
 
 // Lazy load heavy pages for code splitting
@@ -93,6 +94,7 @@ const FINANCIAL_REPORT_ROLES = [
 const OPERATIONS_COST_REPORT_ROLES = [
   "admin_affairs",
   "accountant",
+  "operations_cost_accountant",
 ] as const;
 
 const OPERATIONAL_RECORD_REPORT_ROLES = [
@@ -373,7 +375,22 @@ function App() {
 const NO_SIDEBAR_PATHS = ['/', '/home', '/local-login', '/workers/'];
 
 function AppWithLayout() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const isOperationsCostAccountant = user?.role === 'operations_cost_accountant';
+  const operationsCostReportPath = '/operations/cost-report';
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && isOperationsCostAccountant && location !== operationsCostReportPath) {
+      setLocation(operationsCostReportPath);
+    }
+  }, [authLoading, isAuthenticated, isOperationsCostAccountant, location, setLocation]);
+
+  // امنع وميض أي صفحة أخرى أثناء تحويل هذا الدور إلى تقرير تكاليف التشغيل.
+  if (!authLoading && isAuthenticated && isOperationsCostAccountant && location !== operationsCostReportPath) {
+    return null;
+  }
+
   const noSidebar = location === '/' || location === '/home' || location === '/local-login' || location.endsWith('/card');
   
   if (noSidebar) {

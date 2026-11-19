@@ -1,0 +1,12 @@
+{
+  "checkedAtUtc": "2026-11-19T08:21:14.033Z",
+  "baselineFiles": 756,
+  "changedExistingFiles": [
+    "client/src/pages/AttendanceScanner.tsx",
+    "server/attendance-logic.ts",
+    "server/routers/attendance.ts"
+  ],
+  "unexpectedChanges": [],
+  "missing": [],
+  "scopePassed": true
+}

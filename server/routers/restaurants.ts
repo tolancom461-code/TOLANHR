@@ -453,7 +453,7 @@ export const restaurantsRouter = router({
         siteId: z.number().optional(),
         workerId: z.number().optional(),
       }))
-      .use(requireRole('admin_affairs', 'accountant'))
+      .use(requireRole('admin_affairs', 'accountant', 'operations_cost_accountant'))
       .query(async ({ input, ctx }) => {
         if (input.startDate > input.endDate) throw new Error('تاريخ البداية يجب أن يسبق تاريخ النهاية');
         const result = await db.getRestaurantCostReport(input.startDate, input.endDate, {

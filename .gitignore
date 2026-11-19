@@ -1,4 +1,7 @@
 # Dependencies
+# Local legacy-removal backup and verification logs
+.legacy-biometric-removal/
+
 **/node_modules
 .pnpm-store/
 

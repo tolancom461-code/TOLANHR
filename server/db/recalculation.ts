@@ -31,7 +31,7 @@ import { getRoleLabel } from '../permissions';
 import { inArray, isNull, isNotNull, between } from "drizzle-orm";
 import type { Worker as DbWorker } from "../../drizzle/schema";
 import { ENV } from '../_core/env';
-import { getDb } from './connection';
+import { getDb, type DatabaseReadExecutor } from './connection';
 import { calculateDailyFinanceFromAttendance } from './daily-finance';
 
 
@@ -71,9 +71,10 @@ export async function getLastClosedPayrollDate(): Promise<string | null> {
  */
 export async function getEffectiveGroupForWorkerOnDate(
   workerId: number,
-  date: string
+  date: string,
+  database?: DatabaseReadExecutor
 ): Promise<number | null> {
-  const db = await getDb();
+  const db = database ?? await getDb();
   if (!db) throw new Error("Database not available");
 
   const dateStr = date.split('T')[0];

@@ -1,0 +1,19 @@
+{
+  "completedAtUtc": "2026-11-19T08:19:12.739Z",
+  "inMemoryOnly": true,
+  "outputs": [
+    {
+      "target": "wired-server",
+      "passed": true,
+      "inputs": 129,
+      "qrAdapterReachable": true
+    },
+    {
+      "target": "browser-dependency-build",
+      "passed": true,
+      "inputs": 3293,
+      "attemptIdHelperReachable": true,
+      "cssRenderingVerified": false
+    }
+  ]
+}

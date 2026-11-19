@@ -1,0 +1,18 @@
+{
+  "checkedAtUtc": "2026-11-19T08:07:32.5712856Z",
+  "verificationSource": "User-executed TiDB SQL results; no agent connection or production write",
+  "database": "test",
+  "table": "attendance_source_events",
+  "columns": 19,
+  "indexes": 6,
+  "indexComponents": 11,
+  "columnDefinitionsReviewed": true,
+  "indexesMatched": true,
+  "connectorActivated": false,
+  "sqlComplete": true,
+  "sourceCsvFiles": [
+    "C:\\Users\\mh\\Downloads\\results-2026-11-19-110402.csv",
+    "C:\\Users\\mh\\Downloads\\results-2026-11-19-110539.csv",
+    "C:\\Users\\mh\\Downloads\\results-2026-11-19-110631.csv"
+  ]
+}

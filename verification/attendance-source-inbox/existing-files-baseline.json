@@ -1,0 +1,3030 @@
+{
+  "root": "C:\\Users\\mh\\Desktop\\FINGER\\Fingerprint\\finger",
+  "recordedAt": "2026-11-19T07:50:57.040Z",
+  "files": [
+    {
+      "path": ".dockerignore",
+      "sha256": "0ed53a3ae28e1e3e7781948178ae61b324368cd71a750b2bf2505c9aa0264d37"
+    },
+    {
+      "path": ".env",
+      "sha256": "7dfce1820b54bbc49c0c69db0280d0e6d7e8ae52fb187608872520651efec550"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "d480f4619b8bc4d80ddef27a0e6cf34cb7f1afe650af9b9537fc9452e74722ef"
+    },
+    {
+      "path": ".gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".prettierignore",
+      "sha256": "17f593918ed38aec9deac4301d519a4349172c649d1849ce17190cedbde33228"
+    },
+    {
+      "path": ".prettierrc",
+      "sha256": "087532218269eb851c22dcc3d5234ea46bfa513b494a3d7b167b1c1f48c410c5"
+    },
+    {
+      "path": "biometric-service/.env.example",
+      "sha256": "cc1248d74c011683d7fe88a580ed54be2689a0e50869a3f4fbd9fb7752cbd1d2"
+    },
+    {
+      "path": "biometric-service/.gitignore",
+      "sha256": "e6b34fc6fa0e5cae197e863d057c1aa183e3eb8a34bd276f32a45241fe906baa"
+    },
+    {
+      "path": "biometric-service/cd",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "biometric-service/CHANGED_FILES_V0.17.0.txt",
+      "sha256": "8f4cc1eb33f3b27ac567a7e9d62d3243434018eac7558efc432ca9e27a83eb3b"
+    },
+    {
+      "path": "biometric-service/CHANGED_FILES_V0.17.1.txt",
+      "sha256": "92febf3803b89ec724479a4d670dd48ba0b396edc5fa3fd95a34aa434d1064d2"
+    },
+    {
+      "path": "biometric-service/database/ACTUAL_TABLES_REFERENCE_2026-08-30.md",
+      "sha256": "fcccd6ebb8cbd283eb457810eb7263df2b1354ec4013d330f3865f5a1ad245ce"
+    },
+    {
+      "path": "biometric-service/database/LEGACY_PROPOSED_SCHEMA_V1_NOT_APPLIED.sql",
+      "sha256": "457ccc50bec5b379b89887d735be795ae298b6d4928abc00371766acc54bf593"
+    },
+    {
+      "path": "biometric-service/database/PROPOSED_SCHEMA_V1_NOT_APPLIED.sql",
+      "sha256": "457ccc50bec5b379b89887d735be795ae298b6d4928abc00371766acc54bf593"
+    },
+    {
+      "path": "biometric-service/database/README.md",
+      "sha256": "2f24f52d63dd8090d81d670d759b9fd8cd459621712a09a92c9b76a82c24cd57"
+    },
+    {
+      "path": "biometric-service/docs/ACK_POLICY.md",
+      "sha256": "752183735d42f23463ce824ac39b314ad3422a60ceb25c16ff4897c8e42f3e7b"
+    },
+    {
+      "path": "biometric-service/docs/ARCHITECTURE.md",
+      "sha256": "3e1aef7e311d590bb9559a8885a05efdc81d48c5820dbb9d78a0aeff4b72380f"
+    },
+    {
+      "path": "biometric-service/docs/biometric/00_BIOMETRIC_MASTER_PLAN.md",
+      "sha256": "ec5b25f08838dac64c0365344f83d17b26708d77f26bf4fdcc078cf765c0a988"
+    },
+    {
+      "path": "biometric-service/docs/biometric/01_CURRENT_STATUS.md",
+      "sha256": "a683ad53a06bde81b06ca5bee1cd9940efe71d05148d4385c9cfb34e8da832cf"
+    },
+    {
+      "path": "biometric-service/docs/biometric/02_DECISION_LOG.md",
+      "sha256": "d490be9c6c52e0591c7d52992ad81f570d3d17eba3563e5e2fd178bd28e3253b"
+    },
+    {
+      "path": "biometric-service/docs/biometric/03_ISSUES_AND_FIXES.md",
+      "sha256": "fa2a4f5e4526141e2572d721a028cf0c312a30503bdc4d0979afb98c087e72d4"
+    },
+    {
+      "path": "biometric-service/docs/biometric/04_EXECUTION_CHECKLIST.md",
+      "sha256": "eb995291078ea0f066e150ac73e3ba3b0e384a593704ed82911c76fc79b8fff7"
+    },
+    {
+      "path": "biometric-service/docs/biometric/05_DATABASE_DESIGN_APPROVED.md",
+      "sha256": "9720ddcaef0ff670e23c73179dae550cf918d4e175384920d4cc790ceab6c6a4"
+    },
+    {
+      "path": "biometric-service/docs/biometric/05_DATABASE_DESIGN_DRAFT.md",
+      "sha256": "75ce18cc07439a514f2c19f85d8c432faf83bfdc95c46884b31ce2e232cc8902"
+    },
+    {
+      "path": "biometric-service/docs/biometric/06_DATABASE_EXECUTION_LOG.md",
+      "sha256": "069d28f9887a1a4b9104d6dffd6b3986b41c2d0cae989a59488bc89f9616f029"
+    },
+    {
+      "path": "biometric-service/docs/biometric/07_LEGACY_BIOMETRIC_CLEANUP_GATE.md",
+      "sha256": "474b80731cff9d458a5a6f0d907f566a49580c6fa04b1b0636348e4a9cba68b1"
+    },
+    {
+      "path": "biometric-service/docs/biometric/08_REAL_DEVICE_VALIDATION_2026-08-29.md",
+      "sha256": "a43001f903a4d13dc124565c21f7e7555d3c61c6488098d758ba493409fce9e4"
+    },
+    {
+      "path": "biometric-service/docs/biometric/09_ATTLOG_FIELD_MAPPING.md",
+      "sha256": "e8d63b790b9a9018216db3d763942681696229de20fd5110b6dc751f02729158"
+    },
+    {
+      "path": "biometric-service/docs/biometric/10_DATABASE_INSPECTION_2026-08-29.md",
+      "sha256": "baa1bc32cce5c0124eae9c0f2e476da904978fc82cfb9aa7398dfa9fb6bd30be"
+    },
+    {
+      "path": "biometric-service/docs/biometric/11_DATABASE_RECONCILIATION_PENDING.md",
+      "sha256": "1a385bef5e0c30cfe9a3a2b168fb01691ba31cabe2c3208639dc69858ec866ce"
+    },
+    {
+      "path": "biometric-service/docs/biometric/12_OPERATIONS_RUNBOOK.md",
+      "sha256": "62b7aa85cbc5db456856f46b579167af64a5d254ec6c79b6c4920342e7b18944"
+    },
+    {
+      "path": "biometric-service/docs/biometric/13_DOCUMENTATION_CHANGELOG_2026-08-29.md",
+      "sha256": "37272d4af62dcc206554b13556624a574c42ff9f56176cba4b8c38f59bba8ed7"
+    },
+    {
+      "path": "biometric-service/docs/biometric/14_DATABASE_REINSPECTION_2026-08-30.md",
+      "sha256": "3a7d2ef0573af84aa9d74fcfd564c6e8bcd13eb5c78816c47b2ea2cf40d392fe"
+    },
+    {
+      "path": "biometric-service/docs/biometric/15_DATABASE_RUNTIME_INTEGRATION_2026-08-30.md",
+      "sha256": "42c55303b424357f555769768fd99f649471642cc3305e23041a457679457445"
+    },
+    {
+      "path": "biometric-service/docs/biometric/16_V0.9.2_RUNTIME_HARDENING_2026-08-31.md",
+      "sha256": "e14ce9b9b9512997efd4d6be480582c566e9a9d5d3b13c16790f2dbb3281ec13"
+    },
+    {
+      "path": "biometric-service/docs/biometric/18_V0.9.4_ACCEPT_EVENTS_FROM_UTC_FIX_2026-08-31.md",
+      "sha256": "bac8cb2389207b4aa7694b480bd2e8bc11a22e319bf8094aa22c7cd16517151f"
+    },
+    {
+      "path": "biometric-service/docs/biometric/19_FINAL_CLOSURE_REPORT_2026-08-31.md",
+      "sha256": "84d4886354004e568420da5eec868913462c33f920879392bafca70a231c7eb1"
+    },
+    {
+      "path": "biometric-service/docs/biometric/20_STANDALONE_BIOMETRIC_SYSTEM_EXECUTION_PLAN_2026-08-31.md",
+      "sha256": "69911fb44e91195f6272a821095fc55527afd14831ea5dac2b48bbdbe2a83481"
+    },
+    {
+      "path": "biometric-service/docs/biometric/21_WINDOWS_SERVICE_WINSW_LOCAL_PC_2026-09-07.md",
+      "sha256": "7130ce82889154ef6a6c170aef5271448cd62842ab2f51600e7a1dc5c05068df"
+    },
+    {
+      "path": "biometric-service/docs/biometric/README.md",
+      "sha256": "650124fc0bcefef5f032b5d4e0608e5e78469cd51d096baae4e4a31005fe8da9"
+    },
+    {
+      "path": "biometric-service/docs/biometric/scripts/Install-TolanBiometricService-v2.ps1",
+      "sha256": "40159e9ed8ebe16d5ddc37436be73181a9f348d5a6d0cb07bd147e46e5ac3025"
+    },
+    {
+      "path": "biometric-service/docs/biometric/SUPERSEDES_OLD_BIOMETRIC_DOCS.md",
+      "sha256": "9760eb629b14176102fbfe61e06f303bd9327cd57c456a23b392d39fa9c79065"
+    },
+    {
+      "path": "biometric-service/docs/BIOMETRIC_INTEGRATION_STATUS_2026-09-07.md",
+      "sha256": "6b457008c4f3ec8cc3b83ab8f8cece7ed9c5237d76198cb91b7faa62a41fa004"
+    },
+    {
+      "path": "biometric-service/docs/DOCUMENTATION_UPDATE_2026-09-07.md",
+      "sha256": "2d1ad9c5a0346969a6c3123f77f5f9554c641d09bc35a07bf343555acac049eb"
+    },
+    {
+      "path": "biometric-service/docs/FINAL_EVENTS_API_V1.md",
+      "sha256": "a68c903e835a321ffa699f9d26c5c4fd154dc20fb8896e5249a451d3719350a2"
+    },
+    {
+      "path": "biometric-service/docs/MULTI_DEVICE_MULTI_VENDOR_POLICY.md",
+      "sha256": "d185dcaa70600b4ebbb042334d9cda9230d26cabb176982ad113cec19249cb2b"
+    },
+    {
+      "path": "biometric-service/docs/OPERLOG_POLICY.md",
+      "sha256": "366470002e3a554072ab13ae36da51c03fc09a4102104e3afe00898675f3d1b5"
+    },
+    {
+      "path": "biometric-service/docs/PERSON_DIRECTORY_API_V1.md",
+      "sha256": "fa00e8aea9a4206ea3b7b26af363b52a4d26e06a8b2399b9fa499e884d619ae5"
+    },
+    {
+      "path": "biometric-service/docs/PHASE2_ADMS_OBSERVER_STATUS.md",
+      "sha256": "1292f2bdd3903d23425db8f4ae829ac537c7753cab120e3dc47f86ad525e18d7"
+    },
+    {
+      "path": "biometric-service/docs/README.md",
+      "sha256": "f15931ca9570fd01db56a9d6dedb98d17d44304f0379cb1dc028c90148588cc2"
+    },
+    {
+      "path": "biometric-service/docs/REAL_DEVICE_OPTIONS_CAPTURE.md",
+      "sha256": "fd59c2888758cb2c26ea6ba15f264eeb65fb9a6c9b16c7b090c8dd3d892c0916"
+    },
+    {
+      "path": "biometric-service/docs/REAL_DEVICE_TEST_GATE.md",
+      "sha256": "0a308c61c496b4ddb159391d14aea3afab3faf308c2cd74dc64fcc189504c2cd"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.10.0_TO_V0.11.0.md",
+      "sha256": "a7cd7dd45649e5642eafaf5fbd49eaad9d8c7e54e611c0dfd6f27fe11d2f6fa7"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.11.0_TO_V0.11.1.md",
+      "sha256": "640c7bcd3fc95858fd36262a29e63c850b4467ed3816447467e3cf46d8e1b739"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.11.1_TO_V0.12.0.md",
+      "sha256": "fe33f2aca44753dba08f52e8feca65b2f5819478fb8dec514d32f3de94b4f9de"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.12.0_TO_V0.12.1.md",
+      "sha256": "686acba9aa8345fd7f8a11c02501696c73f9daa84e6e402f449b5e6d6c0ef4b9"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.12.1_TO_V0.12.2.md",
+      "sha256": "9cd4ed18813097c977f6bdefe5f62e9fec4581ec284cd856b2b4f82767626138"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.12.2_TO_V0.13.0.md",
+      "sha256": "fe02c09a3b7b28e7acc95272f7f4c6c27187ea009e6ac460a05a880d1ae2e15e"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.13.1_TO_V0.14.0.md",
+      "sha256": "68eebb54919192feca87e1d5fd9616d67c1822c16f46ece88caf55759ddff48e"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.14.0_TO_V0.15.0.md",
+      "sha256": "9543d2c6a3deb02786fe14fd37b2a13b5f49f7a8b771dda2bdb944a9436afe41"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.15.0_TO_V0.15.1.md",
+      "sha256": "40941727000008b2b7ad4620feb243a3d04ef042e6aa30edc76cdd4f051c8b0d"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.15.1_TO_V0.16.0.md",
+      "sha256": "f9562db687ac14b615c1de2eabd9daef41a4f11a9102676da3bbe0c1a2646a4a"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.16.0_TO_V0.17.0.md",
+      "sha256": "e2e93fbb523a631dd3246bd9bdceb427c43a5215e68b2f97b522028f02c08d5f"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.17.0_TO_V0.17.1.md",
+      "sha256": "37ae464189f5dfbb2dcfbc1b50f526137ca652c5395c35dc176ac7ecd678a233"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.17.1_TO_V0.18.0.md",
+      "sha256": "15360404e7570d99002a1bf8ac60179fe5a926572b2c2d60e4ddebbe84672185"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.4_TO_V0.5.md",
+      "sha256": "16d98be9f2b0502cf29a2e47b135d4204bcbc6b2c6b91fdf37ed25202278f1f3"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.5_TO_V0.6.md",
+      "sha256": "906e4bad3626c9ef47e729da82e3b185500921c6958028279ff18cb0c0b3be27"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.6_TO_V0.7.md",
+      "sha256": "8b3a1732383fd388165aa6015f11ea879b04da62f3e5e900ec50d931b98b96e2"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.7_TO_V0.8.md",
+      "sha256": "c43abbadec578dee6e0653120068e05fa823077421831d30aa04fc4b6d9f6bc7"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.8_TO_V0.9.md",
+      "sha256": "2e7f0e3ef11598f7b5534e27721059874065936bc5eb5e03fe9b50f9595e7eb3"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.9.0_TO_V0.9.1.md",
+      "sha256": "2b5b220abe463bc4726102ddefe041d68668c358d9e87b8ecb4167a539335a8a"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.9.1_TO_V0.9.2.md",
+      "sha256": "1a18470533bfa7db926f1a50c2c6af3fed69b4abd3e658920042d63d79fea0a2"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.9.2_TO_V0.9.3.md",
+      "sha256": "c3890ac153b9304050d935057d96a1bbfd836db84911dd08e800d31b5e2f60b4"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.9.3_TO_V0.9.4.md",
+      "sha256": "71ab39f9e73edfd42ccdd773fbbe98a29dda55324bf69b307436071653979f3e"
+    },
+    {
+      "path": "biometric-service/docs/UPGRADE_V0.9.4_TO_V0.10.0.md",
+      "sha256": "68a9e2a1a75f2f525b72e4685951565b7ac66d4d67df305cd941bd150a5f359c"
+    },
+    {
+      "path": "biometric-service/node",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "biometric-service/package-lock.json",
+      "sha256": "3b8429b4792a7c712a996099a40c070284dd6debe9743bcb5665f00fd9aa0290"
+    },
+    {
+      "path": "biometric-service/package.json",
+      "sha256": "7e38f362d861dcf070f6b6ac23ddb7bad473681323f9e6ebc949e44487b4a411"
+    },
+    {
+      "path": "biometric-service/README.md",
+      "sha256": "58a14ab0d40ff3b8bf97ab75fe2fa93e096cbdea632a079545b442a3cf2c9236"
+    },
+    {
+      "path": "biometric-service/README_UPDATE.txt",
+      "sha256": "e5e9534f9e6437bbb363c26b993efbb58fd71b1b9bd6b14c938a822ba8353c44"
+    },
+    {
+      "path": "biometric-service/SHA256SUMS_V0.17.0.txt",
+      "sha256": "5597a3b8c6ffa55852afdd9d47055ed10936171539662cd26fb53b1f4c962ae7"
+    },
+    {
+      "path": "biometric-service/SHA256SUMS_V0.17.1.txt",
+      "sha256": "7445adc901006c16c5807eb9fa9272ce140bd1a44208c17ad2f215ebde92a2b2"
+    },
+    {
+      "path": "biometric-service/src/application/automatic-finalizing-punch-store.js",
+      "sha256": "4f4b08357767f6d3b47d9033c722de4d7fa4898ed76811d4fb85292473d95e4b"
+    },
+    {
+      "path": "biometric-service/src/application/final-events-read-service.js",
+      "sha256": "efdf76eab5c078867ab5dca9f193b996b46434623cf0b512ad04eff2e094dc2b"
+    },
+    {
+      "path": "biometric-service/src/application/finalization-service.js",
+      "sha256": "c181f2deb2a6db5f6a5a449548243744d8f666a283d66387b2e2818e87a11050"
+    },
+    {
+      "path": "biometric-service/src/application/historical-final-events-replay-service.js",
+      "sha256": "17bbf1447ead56abb69d5c37fd19f0ca7855d17cb6823d054d0a9258b302b682"
+    },
+    {
+      "path": "biometric-service/src/application/person-directory-read-service.js",
+      "sha256": "aa6a4779062ed0b13e3e121d0848481483002c124be0e336619cb2163fb57293"
+    },
+    {
+      "path": "biometric-service/src/application/receive-punch-batch.js",
+      "sha256": "3a30818d93f7846aedd0001dfc4b7a1da77eb2a1c519634bb043186c2818f5e6"
+    },
+    {
+      "path": "biometric-service/src/application/replay-durable-ingest.js",
+      "sha256": "9759403b881a7e49fc41ea6d92f497409b461d9229a42e1a14d77744f46a642b"
+    },
+    {
+      "path": "biometric-service/src/application/standalone-admin-service.js",
+      "sha256": "209d403bd0b15f7185a7221e6f5c88b750ae145f480d86ccb94ae4e050f8a32a"
+    },
+    {
+      "path": "biometric-service/src/application/standalone-management-service.js",
+      "sha256": "aaa318c54b63d11ba55d0f78c71715aee99b0a856feb82a736fcda7e7d844661"
+    },
+    {
+      "path": "biometric-service/src/application/start-automatic-finalization-retry-loop.js",
+      "sha256": "9545a9aaeae15d2997e5e642f9c9ec6d36ab61df14ed5b8469991323f2287805"
+    },
+    {
+      "path": "biometric-service/src/application/start-durable-ingest-retry-loop.js",
+      "sha256": "b65b0bf7da505e69a0fbb9b114c1f417e765d3bf8968ec0dbe17c7af52a0d331"
+    },
+    {
+      "path": "biometric-service/src/application/web-bridge-push-service.js",
+      "sha256": "dd6383262bf2d72e977c2321de67da26d1a111dcc51a8a28ff7eedb8283e1b2c"
+    },
+    {
+      "path": "biometric-service/src/cli/finalize-punch.js",
+      "sha256": "ad21c6efcf3538975337955b770aae1a51fe7bc9f12b7051e0efe3591bce5557"
+    },
+    {
+      "path": "biometric-service/src/cli/simulate-final-events-consumer.js",
+      "sha256": "38bfb99905ca7f64e78acd2e7d162a993aa5d36e31e0140200fab35c0e41215a"
+    },
+    {
+      "path": "biometric-service/src/config/env.js",
+      "sha256": "e576fd416c1a7e1f3e0a665858e701293666a56291290cce1c1807546a722310"
+    },
+    {
+      "path": "biometric-service/src/domain/device-identity.js",
+      "sha256": "46b1381d4716f2dbc129b3bd25cfcc8a0bf4e347e1243a38a6b21ccb549feb34"
+    },
+    {
+      "path": "biometric-service/src/domain/device-policy.js",
+      "sha256": "ffc6809e65b7cdcc74e46957e5f448e079533c63daecc527113fed5d863274b9"
+    },
+    {
+      "path": "biometric-service/src/domain/finalization.js",
+      "sha256": "cc6cb64570d41e10ef06c19159d7b8a37d61a3d5d14e614ebdc3094b8793b446"
+    },
+    {
+      "path": "biometric-service/src/domain/historical-replay.js",
+      "sha256": "b40a942986dd58724b96dc60518a5269be1304472dcc8dca8466c35088883704"
+    },
+    {
+      "path": "biometric-service/src/domain/ingest-event.js",
+      "sha256": "5646127ab84bcc15ea8a12fdd10e34efa17ed71a0c545067384ec3fafabb7e23"
+    },
+    {
+      "path": "biometric-service/src/domain/punch.js",
+      "sha256": "c7ea0a7fbd18a6805e8d5d1e523c8afaf6c56a14441bd0818431ff6e9aef6d80"
+    },
+    {
+      "path": "biometric-service/src/domain/storage-identity.js",
+      "sha256": "c52aecc39a7b7dea36f71e99b5d754e24e69ff035fa5926c3f808c387fe3cefb"
+    },
+    {
+      "path": "biometric-service/src/domain/timezone.js",
+      "sha256": "3414af1d07cc34a80bcf434a012cba1cc5450227b6a61779d35ff11fd33c9627"
+    },
+    {
+      "path": "biometric-service/src/index.js",
+      "sha256": "c8d8cdcdf11c32752ed7295f9da964dcfcb1678678802d6ed8126933f7d190bd"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/admin/public/app.js",
+      "sha256": "0905a2280b743029b3ee15d3328e88ee9d8114e20543127e0a783317b9e30389"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/admin/public/index.html",
+      "sha256": "1276002b47f8a8a190676fa4da780a8c79986182c46aa6ea5c7efdc741b8ad0f"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/admin/public/styles.css",
+      "sha256": "17e405cf0cbe2d3eebe9a324076e85b5a09b4c11e8aa261c04a88daf097bbc2c"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/admin/server.js",
+      "sha256": "21068240580d99d493f18f3228a4fb2d2458c9c7c382b961bcfd6d50a4f421f1"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/database/mysql-pool.js",
+      "sha256": "0006be213b4ef9e02fc11466f3ea513828babbd29ec7e77c28b71dcb983e51b6"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/database/schema-check.js",
+      "sha256": "2ee6733f260098e2a121e96f0b262c55ac40bfbceb48256b833e757cb6646290"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/http/http-utils.js",
+      "sha256": "f209889384dd47b55ef648e77c71da5470e77eed93094937e72753e2ebe2a145"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/http/server.js",
+      "sha256": "0161bb388655668bc3215ecfe81745060aa3848b389280102905081ebe4de12c"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/integration/final-events-api-server.js",
+      "sha256": "88691c45bd2cf87ef523b2282b266891488079b107769d65fdbe3ba31a35c4d7"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/logging/file-diagnostic-log.js",
+      "sha256": "e633a7410de05110e0fbc31d7d6eecc7938daa5734169910e0f2fb423c8c31ee"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/biometric-table-names.js",
+      "sha256": "c03d55602f36f1ff10c31e763faf7f40a32281058bfbe52494f57f9f18cea8e0"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/env-device-registry.js",
+      "sha256": "a58c395bf298f5915b597861950e275fa861bc504d083e6ec77b9a8d2d515c47"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/file-ingest-store.js",
+      "sha256": "4f5a0557a1769377661082ec052fa3facfa34aa3eb5c5eea41eb47aedf6d6da9"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/file-punch-store.js",
+      "sha256": "882227f35df2a1faf121f252eb02341cd57ae22f322ff9fbc3e5e269e4765bc0"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/tidb-admin-read-store.js",
+      "sha256": "53f324437fd24c1d8117f166d7545fefb23b2f73f9503ad219050367ac42a62c"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/tidb-audit-store.js",
+      "sha256": "7e595929b370f7c6231ea53c8cc36c59ade8e11e2519d56f2d47b4d2155f0268"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/tidb-device-store.js",
+      "sha256": "62f3320a058bb763490642eae02c1d033c751f0c0746861ca11c08eceb54be22"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/tidb-final-events-read-store.js",
+      "sha256": "29dfbd26245954c6d6df6dab5218feae4c89a34137448cd13dc7ea2ebe65fd40"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/tidb-finalization-store.js",
+      "sha256": "1ef9d8ff988746cf9395ea1ab64e112a7dd0b4e53ffd224c68d04045586a3cd7"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/tidb-historical-replay-store.js",
+      "sha256": "942f0fad2eeaf47811a56f7c23dfd2253337c30737551ee09e9e9cff8ab66d79"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/tidb-ingest-store.js",
+      "sha256": "9b777795d59483963d65db2fa2d5b1dc5f0f1176caf222f2be54060de553bf0b"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/tidb-people-store.js",
+      "sha256": "4ed867be83c50602f653544b0c0b16054c8ff9c42037a9e78aa4a5f3d4234f10"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/tidb-person-device-user-store.js",
+      "sha256": "8e3c198980cc9b0daae584bdc176a0189b7ed2984e0af329199dd2a0ca612150"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/tidb-person-directory-read-store.js",
+      "sha256": "a38aaed0eca852061505a61af9903dfc3c591385553043f5ff3c1de288b02b37"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/storage/tidb-punch-store.js",
+      "sha256": "97829a836232d7ffe602146222400b3fc0c31fd61391919d14601c623a949f7d"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/vendors/vendor-adapter-registry.js",
+      "sha256": "2caa8cad32bc2a486687294c096dacd972fe670006ea36f955562d687bbb7c2a"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/vendors/zkteco/adms-parser.js",
+      "sha256": "c5d80d83c01dcbd9b330b5299d7756c891504fa9d8af810328b0dbae7a7e499e"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/vendors/zkteco/adms-response.js",
+      "sha256": "19d523eabd4898305c8a125dc01e768d38e80d9b391861d4914e07d5e64c9c7f"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/vendors/zkteco/attlog-normalization.js",
+      "sha256": "b9e81ee8f0498baa7d192eb2126f400c525c1ea277aeb1e150447fb65964b81d"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/vendors/zkteco/attlog-observation.js",
+      "sha256": "bd0fdd6b45e0d97551b1f8e80d2761aac20540f4144f647965d8cdbae4a75cdc"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/vendors/zkteco/device-options.js",
+      "sha256": "d50ddedc250c22a602882224aea96b95690178bae25d763dd32a6a39201cff69"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/vendors/zkteco/http-adapter.js",
+      "sha256": "575f28fdfee92c8b7b8adc041df7b5c6b369051a1957e90feb85f410851943bc"
+    },
+    {
+      "path": "biometric-service/src/infrastructure/vendors/zkteco/operlog-observer.js",
+      "sha256": "46a069237590b007d15dc7544bcb554feacf4a2b49493c9c986a53f0c11d1e89"
+    },
+    {
+      "path": "biometric-service/src/ports/admin-read-store.js",
+      "sha256": "e6b4cd71b64eff732458bc79b385d386a0fbbf24df7bee81966d40714d7a7524"
+    },
+    {
+      "path": "biometric-service/src/ports/audit-store.js",
+      "sha256": "b2ceb4402aa271601e1bb358af69032334bf40a9f5b7bd8924a31e6fdc6beddf"
+    },
+    {
+      "path": "biometric-service/src/ports/device-registry.js",
+      "sha256": "e767867cbc101c787d7802d9dbfc2205f402fbebf1b51058dcb65586c1d2d6cd"
+    },
+    {
+      "path": "biometric-service/src/ports/diagnostic-log.js",
+      "sha256": "340bfaf21e72fe26f7a0e845683eb98e3615b208a4782cc782c846ae1d7107cb"
+    },
+    {
+      "path": "biometric-service/src/ports/final-events-read-store.js",
+      "sha256": "e85de06c312b4f4c569238b6b9c0182ad3af64821859ac5bc4d61e72175d4af0"
+    },
+    {
+      "path": "biometric-service/src/ports/finalization-store.js",
+      "sha256": "8e57db28c5678b3bd465d1c5a8bb426d0f1dc115eea42d9cdac954cf4b068453"
+    },
+    {
+      "path": "biometric-service/src/ports/historical-replay-store.js",
+      "sha256": "eb859a37feabd111e4053137e6d602f2f7b88d41fe67c522f9af0d2884f87e08"
+    },
+    {
+      "path": "biometric-service/src/ports/ingest-store.js",
+      "sha256": "ab45a2705e4aff0e352458bd21ecd6d4be481a51c7a3719a3cd189f748b3d5af"
+    },
+    {
+      "path": "biometric-service/src/ports/people-store.js",
+      "sha256": "7dc4522348e2fa16252256800fc18d16d93ee7acbc52d7a3c1d9f9160df35666"
+    },
+    {
+      "path": "biometric-service/src/ports/person-device-user-store.js",
+      "sha256": "354ba8ea7e347fc824305ad204e96a6a74021f0f3addd628f4ca06decd3d1888"
+    },
+    {
+      "path": "biometric-service/src/ports/person-directory-read-store.js",
+      "sha256": "41e50342032e716d17056213f955060b76a6033eccad5195c4d81e9525923da9"
+    },
+    {
+      "path": "biometric-service/src/ports/punch-store.js",
+      "sha256": "ecab9e8d0230cdea43af8a765ee7bcdfbca9bb8930b17652369bc34f3c25744e"
+    },
+    {
+      "path": "biometric-service/tests/admin-http-server.test.js",
+      "sha256": "6eb2ca73054a6de49dc40b183eaf501c8ffaf266cf3989dfdfdf12e2a743876e"
+    },
+    {
+      "path": "biometric-service/tests/admin-ui-localization.test.js",
+      "sha256": "508f04dc2a8d77dbc70d55f06ec9b1553667be9a62a8da4e20c1c24e9bb702cb"
+    },
+    {
+      "path": "biometric-service/tests/adms-parser.test.js",
+      "sha256": "fc96350fdf72249a776df10231956f4871a29aef50a324c995c88b91d48f68dc"
+    },
+    {
+      "path": "biometric-service/tests/architecture-boundaries.test.js",
+      "sha256": "2e13fc15634a92b59f4ff363e828aede6c819be9dca264ce511dd1d73a27d6ee"
+    },
+    {
+      "path": "biometric-service/tests/automatic-finalization-retry-loop.test.js",
+      "sha256": "cae8912352a7276c90570ab51bbc1ee5e2862993cfbdb2768388b3e918c70ee6"
+    },
+    {
+      "path": "biometric-service/tests/automatic-finalizing-punch-store.test.js",
+      "sha256": "f23d4c76259a66423726aa54baf25a44f67ed7bc925e6f2db11b370fc4447b70"
+    },
+    {
+      "path": "biometric-service/tests/cli-package-scripts.test.js",
+      "sha256": "c85e94a4f887236659268fcf93b58933dc7bedbd1c3f260bfc5a6e9dbcbbb4dc"
+    },
+    {
+      "path": "biometric-service/tests/config-database.test.js",
+      "sha256": "363a94f54d8f1515d98497403efcc3006dfd83434af0f032dcabc413e717d0f1"
+    },
+    {
+      "path": "biometric-service/tests/database-schema-check.test.js",
+      "sha256": "40766a43f9b7282c8148cf4678c575c491ef97ea77457a83cecad168e30a1229"
+    },
+    {
+      "path": "biometric-service/tests/device-policy.test.js",
+      "sha256": "018f05302c25aab8460ed23f54733c7e718ce430784a3fc644d4dc5659dd0009"
+    },
+    {
+      "path": "biometric-service/tests/device-registry.test.js",
+      "sha256": "00b739fb37ed40efee85237b906b7af0ad6b22593ea2dd54eca46063310fa87a"
+    },
+    {
+      "path": "biometric-service/tests/diagnostic-log.test.js",
+      "sha256": "b666289e43fe3664e810a0461f89bb5f1d1a50d5f9fc2951ab530380984649fb"
+    },
+    {
+      "path": "biometric-service/tests/file-punch-store.test.js",
+      "sha256": "d17aeaf599aaae4edad71b47ba9546b711e21a1359e732812192c5c15ae864a7"
+    },
+    {
+      "path": "biometric-service/tests/final-events-api-server.test.js",
+      "sha256": "0ed699c9c9b72e8bf2ef118c56d28d7df944b9da99204e39b1530a07bc41e70f"
+    },
+    {
+      "path": "biometric-service/tests/final-events-read-service.test.js",
+      "sha256": "bb587365712513ad8f67225fdaca3debd49e1475f3fe412da3bc990d2313b0ea"
+    },
+    {
+      "path": "biometric-service/tests/finalization-service.test.js",
+      "sha256": "2a61e9be07e231d594356d13d7b7c994cf2907ac669a5c15c7e00398210dcb17"
+    },
+    {
+      "path": "biometric-service/tests/historical-final-events-replay-service.test.js",
+      "sha256": "e9db854be8c318ed348fb98d6de95c73aa010c79d1dae687d9043e6fff55c166"
+    },
+    {
+      "path": "biometric-service/tests/http-server.test.js",
+      "sha256": "146f6064b67544fe659bce0498613cc99421783b9e87ec803d6484dd56da9a5b"
+    },
+    {
+      "path": "biometric-service/tests/person-directory-read-service.test.js",
+      "sha256": "867564e134f0d252a56a133265447e7830ddc9824837dac213b102bf66aef92e"
+    },
+    {
+      "path": "biometric-service/tests/receive-punch-batch.test.js",
+      "sha256": "3a8e0e7571510994256ec22f54d2082b2d27634f4d187d3d09e0377b5feeb678"
+    },
+    {
+      "path": "biometric-service/tests/replay-durable-ingest.test.js",
+      "sha256": "ea8be0fb06b525b2a4acadb8b2d9ebf10f1e33c6e6c15725781c641dce3ca186"
+    },
+    {
+      "path": "biometric-service/tests/retry-loop.test.js",
+      "sha256": "52b7ed02471e55cbb89a4dc32cf5cde330fcc6fb4067308f1d189cfe37460272"
+    },
+    {
+      "path": "biometric-service/tests/standalone-admin-service.test.js",
+      "sha256": "3ab70d84a46617db69a114822877c433b8c9f3c833d0e7a91d029db31c849ce4"
+    },
+    {
+      "path": "biometric-service/tests/standalone-management-service.test.js",
+      "sha256": "fb6513a5abf26f40448664e21ed10f794a8b81e80e558e9dad44483568692143"
+    },
+    {
+      "path": "biometric-service/tests/storage-identity.test.js",
+      "sha256": "ef379c7eb6c4abaed0cdcc89b1cba7aff1a86dabd19af487a9e7a73cd15892f2"
+    },
+    {
+      "path": "biometric-service/tests/tidb-admin-read-store.test.js",
+      "sha256": "fbb1486308e8ce0d6fd18fdfd17db52fc9f8e293e1eb9b274d13fe0811c3fd70"
+    },
+    {
+      "path": "biometric-service/tests/tidb-audit-store.test.js",
+      "sha256": "7ff4cc09a3034271dbb52185b960b0c54acc08b3872c9040f6444ba3c8c17ca9"
+    },
+    {
+      "path": "biometric-service/tests/tidb-device-store.test.js",
+      "sha256": "95966e729f9b64173038e4cbeba1efcb71566c5d38e7bff6e85e1bf1cf371511"
+    },
+    {
+      "path": "biometric-service/tests/tidb-final-events-read-store.test.js",
+      "sha256": "1a25e223b3a5230ff945178a5759eabecaaf4b991eb1d6cf6fc0ad5c12d70485"
+    },
+    {
+      "path": "biometric-service/tests/tidb-finalization-store.test.js",
+      "sha256": "2956cd43103d87ea6d6890472028942fcde136fa29b96feb955d4197cbcb0281"
+    },
+    {
+      "path": "biometric-service/tests/tidb-historical-replay-store.test.js",
+      "sha256": "3d5570129efebb810e7edff1c307131e95ea1cd4a8032175e032b55e02a7ba41"
+    },
+    {
+      "path": "biometric-service/tests/tidb-ingest-store.test.js",
+      "sha256": "594d5bfd369144f6332e4a697523cb76be1993c38ab027db4259822a8c0dc097"
+    },
+    {
+      "path": "biometric-service/tests/tidb-people-store.test.js",
+      "sha256": "5cb52c256d5c026e9eeee818335df0b4fe6960b9f41277f7720458bec68a4119"
+    },
+    {
+      "path": "biometric-service/tests/tidb-person-device-user-store.test.js",
+      "sha256": "93dd9dbff7b46c124787c5308d6ae539b16f41e7e33df8e4ec9334eba54aa8cb"
+    },
+    {
+      "path": "biometric-service/tests/tidb-person-directory-read-store.test.js",
+      "sha256": "f07fd08b66eeb4228e49abbcc7b83c83b90e7c4fdcdb0e108b5d2885c69c17dc"
+    },
+    {
+      "path": "biometric-service/tests/tidb-punch-store.test.js",
+      "sha256": "b016cef76c45a83f8c9994f0dfdf741cdd14a0b72b529426f5b651ce7a808cc6"
+    },
+    {
+      "path": "biometric-service/tests/timezone.test.js",
+      "sha256": "0471fb698e575f8c7ea647a1a17e3e6de7431e750301d46cda62d25ff2016d0f"
+    },
+    {
+      "path": "biometric-service/tests/vendor-adapter-registry.test.js",
+      "sha256": "94e16c245dd7fb04949f47e8c2797ff1af14ebf30cb897791b484338b6e5f97e"
+    },
+    {
+      "path": "biometric-service/tests/web-bridge-push-service.test.js",
+      "sha256": "024ca7b6507f98c8402de5a320f17c4870ca208c957f0f7db401ef1e7b1b25c5"
+    },
+    {
+      "path": "biometric-service/tests/zkteco-attlog-normalization.test.js",
+      "sha256": "460185202f70cf66a85ccb67a54e1a1b89afbd450b2c52c3223f0f23bef12b4e"
+    },
+    {
+      "path": "biometric-service/var/captures/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "CHANGED_FILES.txt",
+      "sha256": "8d4a42aff3bed1f56b4c269eb034cf12029c411ae805031d0d6e6d945e1142de"
+    },
+    {
+      "path": "CHANGED_FILES_BIOMETRIC_WEB_BRIDGE_LOCAL_TEST_2026-09-06.txt",
+      "sha256": "47032e93ccf955a0657757f1317322e38d05fcc6d2b828f18dfd227fed2e16c2"
+    },
+    {
+      "path": "CHANGED_FILES_MAIN_APP_FINAL_EVENTS_IMPORTER.txt",
+      "sha256": "35bb103f354aff4a26df90f72882b01f3d4d485bae35abf97649dd1888e55fea"
+    },
+    {
+      "path": "CHANGED_FILES_OPERATIONS_PHASE1_2026-09-08.txt",
+      "sha256": "0d91724594e8631e89ea73f15d6d3338532bc0026d9f95a92e0e803296aafd84"
+    },
+    {
+      "path": "CHANGED_FILES_WORKER_BIOMETRIC_LINK.txt",
+      "sha256": "728822d35eedabbe1f7e431f3b3954d1a6eba09cbae251d2c2db4c3f2770a86c"
+    },
+    {
+      "path": "client/index.html",
+      "sha256": "c5185e64e86211000c52b8e92b454c0bdd19bdf05d5cc890f0928cea67d013c5"
+    },
+    {
+      "path": "client/public/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "client/public/db-console.html",
+      "sha256": "fd8bca737d9bf43f1f02e00b3b9e02aca073f4b07c8469fbb234e934ae97bbcc"
+    },
+    {
+      "path": "client/public/favicon.ico",
+      "sha256": "419067012078c7d99476c147af15a52fae2bccc3da485f262bdf2643e8708acc"
+    },
+    {
+      "path": "client/public/pwa-192x192.png",
+      "sha256": "f53f412d3076d9fa10a9b8a46ea4d128e2a679066a1406d11135c9bd526bdfc8"
+    },
+    {
+      "path": "client/public/pwa-512x512.png",
+      "sha256": "5e1dd68251101f4d6862da18fc46fbea66f251841e3a66b5775774d41db4113a"
+    },
+    {
+      "path": "client/src/App.tsx",
+      "sha256": "527e97b4e2e7b0f124c8498f00ed2e982901c3a0145ea0d918b575059ad5913c"
+    },
+    {
+      "path": "client/src/components/AIChatBox.tsx",
+      "sha256": "c97ae745ae8f4db0b5e1a96d851fe9fd6943c53bc1bc6c28603bce36058ce28a"
+    },
+    {
+      "path": "client/src/components/DashboardLayout.tsx",
+      "sha256": "89ff36c18f9356310c6e43afb455698e802dcf84cf73a50be5d679fee45a1557"
+    },
+    {
+      "path": "client/src/components/DashboardLayoutSkeleton.tsx",
+      "sha256": "7b6eab8ac4d4118bdf2be88f23e7db5318d975ac03e6451f773d5eb15feb34cc"
+    },
+    {
+      "path": "client/src/components/EmptyGroupsMessage.tsx",
+      "sha256": "7d990908a5720f4d17d8f07030d7ff979f4798f82e8fe3649de5603ecf5d89e5"
+    },
+    {
+      "path": "client/src/components/ErrorBoundary.tsx",
+      "sha256": "3b0bdb7a19758fcd440138ccfb5f306b96836564f15d7c8c9663d7dd7417e972"
+    },
+    {
+      "path": "client/src/components/ExcelImportExportDialog.tsx",
+      "sha256": "4a6b4631999a25737586a4034b2498410542a0cfdfc8cbfb9f08928eea1a01f9"
+    },
+    {
+      "path": "client/src/components/GroupRow.tsx",
+      "sha256": "0e25e0774e6cb2432e3cd3395029ebcde04d091c74b80e881efad1be6f01d785"
+    },
+    {
+      "path": "client/src/components/GroupScheduleStatus.tsx",
+      "sha256": "9fe53c195b3c2dcb2d5ef37a1f6f695bb388610b30c657c03e1c159b8c305689"
+    },
+    {
+      "path": "client/src/components/LazyPage.tsx",
+      "sha256": "9133888de7a35f073ea13738f78a4d6f475f6349c838f92e1ffa6a788e8f64a9"
+    },
+    {
+      "path": "client/src/components/ManusDialog.tsx",
+      "sha256": "66237a756ee50b4195a074f689aa97dd4ec445cbbc6f0d11f12bb32a6fb4cd0d"
+    },
+    {
+      "path": "client/src/components/Map.tsx",
+      "sha256": "931413fea95936e68f872bc34733138f9e11a656446b1a56a98fba9532954e22"
+    },
+    {
+      "path": "client/src/components/NotificationBell.tsx",
+      "sha256": "7f5eef35da75862c26eddac5e7e5c8c80a4dcc978c801148c2964b0512f4aaaa"
+    },
+    {
+      "path": "client/src/components/OperationsTransfersTab.tsx",
+      "sha256": "65f120cd4bc61d3af4e9737dc73124fd9da1236a1abac8c39a53f56894649028"
+    },
+    {
+      "path": "client/src/components/payroll/StatusBadge.tsx",
+      "sha256": "3670cf12a6e11968702b4d79c156ad712eeee8e4c20f91df880a02c3a9fd2f37"
+    },
+    {
+      "path": "client/src/components/PayrollCharts.tsx",
+      "sha256": "8d77a81383da6c6e8b98f772f2a3393442f670de4a38b9182528dd434addc92c"
+    },
+    {
+      "path": "client/src/components/PayrollSummaryCard.tsx",
+      "sha256": "91764e781a202fdec698fb76dc22263b8fd15ed70788b57b66af77a6274d0668"
+    },
+    {
+      "path": "client/src/components/PayrollTable.tsx",
+      "sha256": "c891880936fd843938f244e0f613b5ba9af3774707e92735afd5895332e3b534"
+    },
+    {
+      "path": "client/src/components/PeriodSelector.tsx",
+      "sha256": "c1a63cf4901b2eb7a1216d329268ab6e8c006196aba9b76cf415b04141b91323"
+    },
+    {
+      "path": "client/src/components/ProtectedRoute.tsx",
+      "sha256": "5f9e5d6ff78177ae3aa583f874063899cbcebb06c2dfdd6b60bc2979606bc3a8"
+    },
+    {
+      "path": "client/src/components/PushNotificationToggle.tsx",
+      "sha256": "7a6b2b81e35773212b9dfad81d737e69d627f32a648f3d0e4901cd5e5f76b229"
+    },
+    {
+      "path": "client/src/components/PWAInstallButton.tsx",
+      "sha256": "932fe21594de6e49fb6d5918791060ab8bcd8afb9e5571d854cf2bd9c2d87140"
+    },
+    {
+      "path": "client/src/components/QRScanner.tsx",
+      "sha256": "7b3836f7ab2fc2ab2595d94a1067c9d18d347ff5994d08fea54f760538e6bf79"
+    },
+    {
+      "path": "client/src/components/reports/OfficialPayrollReport/ReportAmountInWords.tsx",
+      "sha256": "2bb91bd4af6d98c0ab8d4530d4cec682fc40daeb2625723fd76dd5ebbbc53722"
+    },
+    {
+      "path": "client/src/components/reports/OfficialPayrollReport/ReportHeader.tsx",
+      "sha256": "2c1ce2d83ebcd08dfce72d26c5bae434ec7035538b69e4c2f98e874459765ebb"
+    },
+    {
+      "path": "client/src/components/reports/OfficialPayrollReport/ReportSignatures.tsx",
+      "sha256": "e337d907784ed138f732d7a12ad44cf28f404dc1e15bd07dc017945183a7b11b"
+    },
+    {
+      "path": "client/src/components/reports/OfficialPayrollReport/ReportTable.tsx",
+      "sha256": "bb31dfcc84b0c3f1dfd3a264790363b78df2f0d97975387663f5108b15a004d6"
+    },
+    {
+      "path": "client/src/components/reports/OfficialPayrollReport/ReportTotals.tsx",
+      "sha256": "625b7804a4d1070226969199b3fd408df303b262778ea98dfecd4706135e2371"
+    },
+    {
+      "path": "client/src/components/SkeletonLoader.tsx",
+      "sha256": "f35c72f95370b54395319678a11c103a308a53079737bbcb98e20c2441d90974"
+    },
+    {
+      "path": "client/src/components/ThemeToggle.tsx",
+      "sha256": "8b213afe312b6cccb55fa74cdb2418ba826464460557e0fb935401a02e401b9d"
+    },
+    {
+      "path": "client/src/components/ui/accordion.tsx",
+      "sha256": "7b96cf50388ad3d07be64924ab33ba5f63b79a6a5749ebe4d31c789c0bc00d44"
+    },
+    {
+      "path": "client/src/components/ui/alert-dialog.tsx",
+      "sha256": "aeecd7967eb0be3bad2753b6633d9a43cc4c08cb35de872ffdc0b9f2b6a9b26c"
+    },
+    {
+      "path": "client/src/components/ui/alert.tsx",
+      "sha256": "eccfc7f6ca9d51407cb413a3ca4b5ac721898ac93d38e95c02c35188ad674abe"
+    },
+    {
+      "path": "client/src/components/ui/aspect-ratio.tsx",
+      "sha256": "654f5d6e9ed17472305d7e6fc5de30453875ffae585f5d064aedc9e6945bdbb0"
+    },
+    {
+      "path": "client/src/components/ui/avatar.tsx",
+      "sha256": "c2382ff71d7ef3492096ed6ef35bf82e1fd421a81d55ca80453f5f5138eac360"
+    },
+    {
+      "path": "client/src/components/ui/badge.tsx",
+      "sha256": "51fd797c59e63d164ade736769f19f26e41c157daba29aa0b327b3b226f4d4ac"
+    },
+    {
+      "path": "client/src/components/ui/breadcrumb.tsx",
+      "sha256": "dd84657e30691ea7f14a785c13b660d6cd626c08ba1df8439c3eca858ee3cd7e"
+    },
+    {
+      "path": "client/src/components/ui/button-group.tsx",
+      "sha256": "ba1d824f0f4d8b5dd78a80fa766e3543eefb9173143652be2c7cb765af1864f5"
+    },
+    {
+      "path": "client/src/components/ui/button.tsx",
+      "sha256": "b08b4785e03566c7a6063b3d57234deae41649676870cbbb9ab2448d816e1739"
+    },
+    {
+      "path": "client/src/components/ui/calendar.tsx",
+      "sha256": "89308bce82e8b23b611cfbc88bc19f7b341d7109ab9a2838c04cb50922113501"
+    },
+    {
+      "path": "client/src/components/ui/card.tsx",
+      "sha256": "1397e7d264d90162220ea7473b311e434651886267c71e7f58d4488be9d8ff39"
+    },
+    {
+      "path": "client/src/components/ui/carousel.tsx",
+      "sha256": "42f66e6fde568c209df5d58a4ca13c3ae92d120a04fd99f7be695d6a570ef0a9"
+    },
+    {
+      "path": "client/src/components/ui/chart.tsx",
+      "sha256": "47c4de202fe1dc229af94d2c86197251d279bee131d2a6fb75ab9e58cec71aab"
+    },
+    {
+      "path": "client/src/components/ui/checkbox.tsx",
+      "sha256": "4fc309590e66d3c41e3be5fb73f988b0e916e7bf5fff321c22c3a64cd4fe97cf"
+    },
+    {
+      "path": "client/src/components/ui/collapsible.tsx",
+      "sha256": "95b5b9ea89a4105045c58b7eba539e57a1f4abc5a54d43ea0f7168f46b645eeb"
+    },
+    {
+      "path": "client/src/components/ui/command.tsx",
+      "sha256": "47910540789d4de9e890de63bfc0046f9cf6bfaa86d496a98c79622900f8520c"
+    },
+    {
+      "path": "client/src/components/ui/context-menu.tsx",
+      "sha256": "fe63c0a0dcabe749874ad19e07dee8418337c62dd64452fc08b5abf27b49b9eb"
+    },
+    {
+      "path": "client/src/components/ui/dialog.tsx",
+      "sha256": "3ffd83bd2940c1191fde091bc47311aebc2b79d78824965a5c446115e58190aa"
+    },
+    {
+      "path": "client/src/components/ui/drawer.tsx",
+      "sha256": "573deecc31f90fcd96f53a37b2e5363eb326fe737cbdb28cac38a5d014734fc8"
+    },
+    {
+      "path": "client/src/components/ui/dropdown-menu.tsx",
+      "sha256": "ede99252b737a29eb1f05370956e2b842be161b6a661f1429155ac561653d029"
+    },
+    {
+      "path": "client/src/components/ui/empty.tsx",
+      "sha256": "c0b612929b15fd498b984d8d98d1b082a3eb294be5aa8eb9cb53b67cf152f465"
+    },
+    {
+      "path": "client/src/components/ui/field.tsx",
+      "sha256": "f093424ca5eadf43d46b020ed780aee7aa5f6d90d0b48fb50c031e3d7b0528c7"
+    },
+    {
+      "path": "client/src/components/ui/form.tsx",
+      "sha256": "0157362d572713567d989b726277879e75c60c24684ade4aef854867dc2fac48"
+    },
+    {
+      "path": "client/src/components/ui/hover-card.tsx",
+      "sha256": "bdfe831708e7de6b9fbb14d8fe5af5a0985f67cff3c2b5755b4b570c3b4e7ad5"
+    },
+    {
+      "path": "client/src/components/ui/input-group.tsx",
+      "sha256": "f62f2be2ad4c2c7711e7b25b0d6c03572f7871cb4022e9f4f6860dcd77dd9e57"
+    },
+    {
+      "path": "client/src/components/ui/input-otp.tsx",
+      "sha256": "45fc7fed882aa5024d8eea52d9b392d13b1d80f2b7f846365bc2586e3d16253d"
+    },
+    {
+      "path": "client/src/components/ui/input.tsx",
+      "sha256": "0aaad971269e84519fb14928a70777db539b4cacf9f145fecd905ba483a199c6"
+    },
+    {
+      "path": "client/src/components/ui/item.tsx",
+      "sha256": "89f2ed48c2270064d63e0a40f755c1da14e99e7db46bceac56d6dee7b45b8798"
+    },
+    {
+      "path": "client/src/components/ui/kbd.tsx",
+      "sha256": "4f8f3e521b2b007643b8a2c8f86cf547bd87e703dc2bed067083ca48f901d6ad"
+    },
+    {
+      "path": "client/src/components/ui/label.tsx",
+      "sha256": "7fdad17d8e83912ad0cfc372c551a901ab98523ef17c0792a17c592a147db732"
+    },
+    {
+      "path": "client/src/components/ui/menubar.tsx",
+      "sha256": "53fb1c058fabaf0cfb3fb2cfdb9b17ccc8762376d62cc011150d919209b82c1a"
+    },
+    {
+      "path": "client/src/components/ui/navigation-menu.tsx",
+      "sha256": "aafccbe2b05d9f80b7d007301b51aaede4692efc468304c5fb11b21cd0c0ef43"
+    },
+    {
+      "path": "client/src/components/ui/pagination.tsx",
+      "sha256": "8f0d822b4688eb131e37fbf2330e19b269ab6487583be3249b98f3b68bb07928"
+    },
+    {
+      "path": "client/src/components/ui/popover.tsx",
+      "sha256": "5e7bec05904d9091a7b53963f5b49660bf3564b02a057ef8640ab6855d6e32fd"
+    },
+    {
+      "path": "client/src/components/ui/progress.tsx",
+      "sha256": "2297e3c13d5b2a04a9164c3900c8cae2e477c07ebed35c4bbda98d1232ab7b7e"
+    },
+    {
+      "path": "client/src/components/ui/radio-group.tsx",
+      "sha256": "025f03d81d4e304eb27d94e6517f37072a3941df8f8603ac55cfb42b17cd99ef"
+    },
+    {
+      "path": "client/src/components/ui/resizable.tsx",
+      "sha256": "52e1027a4b4a5f70f0479f69fe40046dfa112952b7e568292727e1618348ee80"
+    },
+    {
+      "path": "client/src/components/ui/scroll-area.tsx",
+      "sha256": "793c5d69e6e5ce8bcbe453b8834d53f3a90839fc8e8e1f9fe5f77e7626566677"
+    },
+    {
+      "path": "client/src/components/ui/select.tsx",
+      "sha256": "40945665ec8363e55ae38f26115ee763cbc5548bed585eed569d406cbc4b7a75"
+    },
+    {
+      "path": "client/src/components/ui/separator.tsx",
+      "sha256": "23bbf3f74d01f55533f6f22ebbc2b299137421e07896cb7af21245756a10c27e"
+    },
+    {
+      "path": "client/src/components/ui/sheet.tsx",
+      "sha256": "ab22e38f2cf312a31a84fb91f7e912f0da66e809f6e1ae675ec6cf0c8ec0ba61"
+    },
+    {
+      "path": "client/src/components/ui/sidebar.tsx",
+      "sha256": "7376cc76497b38189c97f748e458542e05ba2ed4b0047f19bfb9b411eea45a61"
+    },
+    {
+      "path": "client/src/components/ui/skeleton.tsx",
+      "sha256": "1f75b999a5ad2f65e8fb807faa2b3fccef9eb333996fb4c9030575dac7393091"
+    },
+    {
+      "path": "client/src/components/ui/slider.tsx",
+      "sha256": "9c458646597836916678a9bce2f3064d4d5cdb0c65d32d92bc71f57d7569fb6b"
+    },
+    {
+      "path": "client/src/components/ui/sonner.tsx",
+      "sha256": "a65fe9ded89363ec546f28401a26caec1a3aa38c52259eb829cfa33723dbe3a5"
+    },
+    {
+      "path": "client/src/components/ui/spinner.tsx",
+      "sha256": "ecd836d476573adb4403747c3457339276805433c20eacf3408303b76ec283ff"
+    },
+    {
+      "path": "client/src/components/ui/switch.tsx",
+      "sha256": "688cccb52220e05f6770fb5e8296375f2a784bcf6585eb26a721a9f29361ab60"
+    },
+    {
+      "path": "client/src/components/ui/table.tsx",
+      "sha256": "085566291cf03c9fea590aa9b77339feebf04cf8ce23494a3667f84bf4811e29"
+    },
+    {
+      "path": "client/src/components/ui/tabs.tsx",
+      "sha256": "394b62295cee5185e858bcabfafcd5a7287910944c962fbd9c1c06444b22cedb"
+    },
+    {
+      "path": "client/src/components/ui/textarea.tsx",
+      "sha256": "ffbad961ec02f9ca23f4157daa1a4139960c4477a245c216a793b4692dec142c"
+    },
+    {
+      "path": "client/src/components/ui/toggle-group.tsx",
+      "sha256": "92e7640e30c4ae3ffd775e9a3d845327c26d9ce0f9f39555c2e7cfc2c8671c4d"
+    },
+    {
+      "path": "client/src/components/ui/toggle.tsx",
+      "sha256": "a922c5e0534b9fd556ff8a8b56e25f7d24544be6050472cdd1ea003b8a0f3e47"
+    },
+    {
+      "path": "client/src/components/ui/tooltip.tsx",
+      "sha256": "6f0c581e2018d676e43c0b4b5aeb62d3fe68e65907cf748548208d75ac212677"
+    },
+    {
+      "path": "client/src/components/WorkerBiometricLinkPicker.tsx",
+      "sha256": "6e245b3ccfd4e9524ae65036eba9e8d319b8552b50259efa7346f07107bf5700"
+    },
+    {
+      "path": "client/src/components/WorkerPhotoPicker.tsx",
+      "sha256": "8e29dd66dbca34d1194f2c66ac8a1f0e84ade610df6f8bc9cf0e605b19874782"
+    },
+    {
+      "path": "client/src/components/WorkerPhotoPreview.tsx",
+      "sha256": "f4fd8e73b22a08bfb9eba8ded6548b1f5466c5766efa776183d73bf1af9878bc"
+    },
+    {
+      "path": "client/src/components/WorkerRow.tsx",
+      "sha256": "5de259cfc08400338153cab37aa2b049731f021d2752207b8ee048401517db7f"
+    },
+    {
+      "path": "client/src/components/__tests__/PayrollComponents.test.ts",
+      "sha256": "a7ede7e636be0e5de937f9d5f93ac25751b7a6a6e9e7ed1bb01a944578829e4c"
+    },
+    {
+      "path": "client/src/const.ts",
+      "sha256": "180a9910cf4b6b97b62a9402bfb9916e20f1936cde0c67b8509b214f2a9e632c"
+    },
+    {
+      "path": "client/src/contexts/AuthContext.tsx",
+      "sha256": "001d070bc44a96f0e509061d04d02fe3ce0aea7ba9cfb589fe7e9232c6058825"
+    },
+    {
+      "path": "client/src/contexts/LanguageContext.tsx",
+      "sha256": "a9862556de788cc6c8f5c962f88bbbad51abaf75f5665e795957de87f2e122b5"
+    },
+    {
+      "path": "client/src/contexts/ThemeContext.tsx",
+      "sha256": "e025cdb51ad747757235b16dccbb39b5e949cdf93fa9a822ff81ef6e32f65924"
+    },
+    {
+      "path": "client/src/hooks/useAuth.ts",
+      "sha256": "b969f8f4af9da16e1329966f633d84a13cb149227d416f284a733c7adbdc1fa2"
+    },
+    {
+      "path": "client/src/hooks/useComposition.ts",
+      "sha256": "674c515075a2f318d4ec2291313ba552488de0b2c1aac7f36f3d71c4e34d434e"
+    },
+    {
+      "path": "client/src/hooks/useCsrfToken.ts",
+      "sha256": "56c476aca6819411dc69a5942876cb7eba9fa9cf9d79695f161a6147821fb7c7"
+    },
+    {
+      "path": "client/src/hooks/useGroupsByCostCenter.test.ts",
+      "sha256": "438c411676724d6f1fc5fafe22351105088dce1b330496e68db40f1744f92b56"
+    },
+    {
+      "path": "client/src/hooks/useGroupsByCostCenter.ts",
+      "sha256": "c15a758dcf68f71fa50bad0e28a971d77a80fef69c703199ca0fba45d26f8b25"
+    },
+    {
+      "path": "client/src/hooks/useMobile.tsx",
+      "sha256": "464e778a9da49481e3c6dac4f92ff589e01349b33063a74c45435cfeed81e1c0"
+    },
+    {
+      "path": "client/src/hooks/usePersistFn.ts",
+      "sha256": "60cc14f39a3f8b212d7baf4beeaf35f81e09a7c78e4154bcca3477e010879511"
+    },
+    {
+      "path": "client/src/i18n/translations.ts",
+      "sha256": "98d973b04fa487eece2406d3e453414373b911bc8b038fcabf759d2f9f4cf631"
+    },
+    {
+      "path": "client/src/index.css",
+      "sha256": "64f43ee0c8c4b4959fe8cf2441af8a43224fcb5c9f040b5910de952c60738b54"
+    },
+    {
+      "path": "client/src/lib/deviceInfo.ts",
+      "sha256": "14fd3f79ef2bd0123a2b14762bc8ecaee67c350c6beaaa26ca9e5450e930b1f8"
+    },
+    {
+      "path": "client/src/lib/exportUtils.ts",
+      "sha256": "b055fbcfb96d2318a6ce13a88606e2fcc3db4af8c28cff43c17c8cc7acea757b"
+    },
+    {
+      "path": "client/src/lib/imageCompression.ts",
+      "sha256": "d88bd6692c8b3180056ea98222dbf85f6105ed54ce7220670cfa483bf131d013"
+    },
+    {
+      "path": "client/src/lib/numberToArabicWords.ts",
+      "sha256": "26600c4ecc3be54e372c1bdd539a47f98ea3df3eb97561cf896c886ed7f9dd38"
+    },
+    {
+      "path": "client/src/lib/trpc.ts",
+      "sha256": "d883ad43f46eaf73342924feaf5342ce601d04abe1a828076625071931cc0ef3"
+    },
+    {
+      "path": "client/src/lib/utils.ts",
+      "sha256": "d1f1e0d62cb8d8d1e04c26e14de842d8a151f75812d81b046c65b5d1fe8e4b27"
+    },
+    {
+      "path": "client/src/main.tsx",
+      "sha256": "c6a928897c206af15457fa9a7a940235ac8fb466652851e5f1e1d285f8677721"
+    },
+    {
+      "path": "client/src/pages/AttendanceExport.tsx",
+      "sha256": "e4b61892545269d4e4044e7fe71f6f5c77945ecc88227b5436ee901a71c45c50"
+    },
+    {
+      "path": "client/src/pages/AttendanceLog.tsx",
+      "sha256": "24a2e361b984d0cedd8dcb2017396229ef06e244300fd3943ef018b98cc8d9f0"
+    },
+    {
+      "path": "client/src/pages/AttendanceReports.tsx",
+      "sha256": "e302a92738b3a367e7cd1093a91f75678acb8c84665d732c1d7c531c86ca5c1f"
+    },
+    {
+      "path": "client/src/pages/AttendanceScanner.tsx",
+      "sha256": "5555156b26188f4fa4ff7e5f68bc1d36c5efb97dca28d131c1ee267e2a15a966"
+    },
+    {
+      "path": "client/src/pages/AuditLog.tsx",
+      "sha256": "07c6a533e3f68a42cc7cf91b49d5ba4d275ad0a5532eb1c84f8e9bec8441bba9"
+    },
+    {
+      "path": "client/src/pages/Backfill.tsx",
+      "sha256": "29ca9b5b883afc4304a2f92bb82ee97e0851d59fcb65ec2918917642f8d3346c"
+    },
+    {
+      "path": "client/src/pages/Backup.tsx",
+      "sha256": "c7d70cd8165094872b6bc9831555ff200600ef652ad5c61dac59ad99e8494e4d"
+    },
+    {
+      "path": "client/src/pages/CostCenters.tsx",
+      "sha256": "80b14bc9037b3bff13c2c7a5d4aad44b0c60639d1885d08b9a0e71f85cfa9b26"
+    },
+    {
+      "path": "client/src/pages/DailyManagement.tsx",
+      "sha256": "44238584f9d7c1ff000fd466b4d8375d483d09765757c4f2239bfb0f0bda6d92"
+    },
+    {
+      "path": "client/src/pages/Dashboard.tsx",
+      "sha256": "ba8e9f18995b386d1a78b253c6a6d85d3e3cd0a2ea9eecd8b4b88a82313f8841"
+    },
+    {
+      "path": "client/src/pages/DatabaseConsole.tsx",
+      "sha256": "e80f1855c9eb6e8eb60775cb1e89fc5e3a436abb1c66a81cda0b04cbddd000e4"
+    },
+    {
+      "path": "client/src/pages/Deductions.tsx",
+      "sha256": "ce79cbe3e9d5c15c754e40d205155a4d8d328571c24a3e09be331d7d6a4f56f5"
+    },
+    {
+      "path": "client/src/pages/ExecutiveDashboard.tsx",
+      "sha256": "acaeaaa6962c84b1e146ebb7615845711b3a96167648377b671119e643853ac7"
+    },
+    {
+      "path": "client/src/pages/ExecutiveFinanceDashboard.tsx",
+      "sha256": "a955d7d7aac055a94628e5349dfed31edeaf8f0323c73f44f3429051e2e80db3"
+    },
+    {
+      "path": "client/src/pages/FinanceEntry.tsx",
+      "sha256": "7a3d15b69d72e79795c8049f4b66a21233984d6db28552e6567602c32d204d9b"
+    },
+    {
+      "path": "client/src/pages/FinancialRecalculation.tsx",
+      "sha256": "5ccf86045a403a5073b6775b6dcc7d27a2554a3c3f3fcc164b99d06423e2cfa8"
+    },
+    {
+      "path": "client/src/pages/Groups.tsx",
+      "sha256": "03262f9d0f336ca0d6ccf45875eef04a50f9c2acb42c7b9be82f9cf5445c27e7"
+    },
+    {
+      "path": "client/src/pages/Home.tsx",
+      "sha256": "997f2ff983f520057bc6a7d55afd74d6fe2dfec7c0b17248f863f69ea7cd8374"
+    },
+    {
+      "path": "client/src/pages/LandingPage.tsx",
+      "sha256": "c72ea447443887895dd737365d90b54103c4b8e0c035458df16b482d8b20b0e5"
+    },
+    {
+      "path": "client/src/pages/LocalLogin.tsx",
+      "sha256": "b7eecd4718db1150c40905266777360b9584d5d7aead042d198540a0a92c62b4"
+    },
+    {
+      "path": "client/src/pages/Migration.tsx",
+      "sha256": "8600f3002a0929ac50b626a4d88ed356cc9b42bcdc8fb6d5ad9d119140a8e320"
+    },
+    {
+      "path": "client/src/pages/NotFound.tsx",
+      "sha256": "4062794318dde4d0a321e0332cdee2cea68d19c1d9d81889ff425b02ed183f64"
+    },
+    {
+      "path": "client/src/pages/OfficialPayrollReport.tsx",
+      "sha256": "00226da15d913c2e3562cffe4d60b80c3fc801fec12b04a59c35fab6565fb22c"
+    },
+    {
+      "path": "client/src/pages/OperationalDashboard.tsx",
+      "sha256": "b4a3a06a16811ad8be24eeb383866d922eb51b12b4617dff96066e321ffe7154"
+    },
+    {
+      "path": "client/src/pages/OperationalFlagsSimple.tsx",
+      "sha256": "83213b54ea408a0f9aaf7cc3e97a3172ddecf8260328540b90884b82315d7300"
+    },
+    {
+      "path": "client/src/pages/OperationalNotesReview.tsx",
+      "sha256": "605de9243acb46b8422fef799bb96ad17f56637b2826abf9b2c8a44c5769e3be"
+    },
+    {
+      "path": "client/src/pages/OperationalRecordsReport.tsx",
+      "sha256": "6cd6889260f3d50b0a38b60cc32d2249849a90ad20075f5f692dfb9e428722ef"
+    },
+    {
+      "path": "client/src/pages/Operations.tsx",
+      "sha256": "981a5060e9e1bd7b2da407df7b11aa9448f432a939b6c10c4a56e7c5e510ae9f"
+    },
+    {
+      "path": "client/src/pages/PaymentVoucher.tsx",
+      "sha256": "380c4f1a0f31dbb1ce89f1846c375d2803597a4fbf23822c3ad497df86b6e6a6"
+    },
+    {
+      "path": "client/src/pages/PayOverrides.tsx",
+      "sha256": "70892a87887c7a23d7f7cbf2e3d177902ebeefd59e6bec82d8f8547cd0709212"
+    },
+    {
+      "path": "client/src/pages/payroll/AccountantReview.tsx",
+      "sha256": "0a4b0296932133fbce4e931c265dc95d71ce67b900de414fd117cf1f1f867689"
+    },
+    {
+      "path": "client/src/pages/payroll/AccountsManagerReview.tsx",
+      "sha256": "f733cff9b55a96a4e2b50884aa3a964c7589c29f0f42d0801bb348b879504c46"
+    },
+    {
+      "path": "client/src/pages/payroll/AdvancedPayrollPage.tsx",
+      "sha256": "e61e4526369426c2d59befe3ee59897f58ab03863537780344e79390254ec255"
+    },
+    {
+      "path": "client/src/pages/payroll/FinancialReview.tsx",
+      "sha256": "9ddd18defc9cd56b9a03b4dc5b646c820519540b9ed653fc7a0755b71b607e4a"
+    },
+    {
+      "path": "client/src/pages/payroll/GroupCoverageReport.tsx",
+      "sha256": "79402de64aef7c2a32e40e5097fd49fa4146457ed4fbecef95ddae14284ce9a6"
+    },
+    {
+      "path": "client/src/pages/payroll/PayrollBatchCreate.tsx",
+      "sha256": "bedcb356b06b5919ab6f0975245c074132a0bdc5d37c45b88a3aa67d157a374f"
+    },
+    {
+      "path": "client/src/pages/payroll/PayrollBatchCreateSimple.tsx",
+      "sha256": "db292244f96c54579c9bba4f6ef58f45579f313076044540148a5b92493da231"
+    },
+    {
+      "path": "client/src/pages/payroll/PayrollBatchDetails.tsx",
+      "sha256": "060bd6b6ad2fe2b1ab8d50369d48aadcc4793cbae6de0750824a1285a24d1388"
+    },
+    {
+      "path": "client/src/pages/payroll/PayrollBatchList.tsx",
+      "sha256": "2b43de2d7063f17fefac53b07f2354a97ea9e6075a0f6c8554dfa69461ccbdbd"
+    },
+    {
+      "path": "client/src/pages/payroll/PayrollBatchReview.tsx",
+      "sha256": "50abf6cf78bf71f9cf7c7073e7bb4976dbfbc16286f5b222b850152009941017"
+    },
+    {
+      "path": "client/src/pages/payroll/__tests__/PayrollBatchCreate.test.ts",
+      "sha256": "bf9ab2671fc2ca5f433a080ed75d67f53fda7fe5a63c35e300363996aee29bf2"
+    },
+    {
+      "path": "client/src/pages/payroll/__tests__/PayrollBatchCreateAdvanced.test.ts",
+      "sha256": "50ab87d586d43857404ec14692c1de4a5116aad41a2e72edbbbba79ed630328c"
+    },
+    {
+      "path": "client/src/pages/PayrollBatches.tsx",
+      "sha256": "da2dd2396ebf3384ed4fa674f8d16c397799775262b2e5000e58b326cb8a6d55"
+    },
+    {
+      "path": "client/src/pages/PayrollBatchHistory.tsx",
+      "sha256": "e7f0f146d9ff53b904a014b3fd7e6ad88bee9f7b30ec36ba37399df260b54a22"
+    },
+    {
+      "path": "client/src/pages/PayrollDashboard.tsx",
+      "sha256": "e79a43da7bdd612f88c1d195be0eff3cb97106f1507cff5d9a21920a15ddc26c"
+    },
+    {
+      "path": "client/src/pages/PayrollManagement.tsx",
+      "sha256": "c1092fa50d35ef88ec530bfd400277177cc48765b5c0403b34bb7fc452c82f63"
+    },
+    {
+      "path": "client/src/pages/PayrollReport.tsx",
+      "sha256": "d49b8f36f64750d89cbac4a3651cd39bf523467be8109fcc662365b53ccee233"
+    },
+    {
+      "path": "client/src/pages/Profile.tsx",
+      "sha256": "59e188d8a69b2cfcbf009cb6e0544b694af48ba85d60f45c8419e4422c4d6739"
+    },
+    {
+      "path": "client/src/pages/PunchesReviewCenter.tsx",
+      "sha256": "620029424a47745971d15f741799d9bb3d6ce77805304b388b0dacf7f74e61e2"
+    },
+    {
+      "path": "client/src/pages/reports/CeoReports.tsx",
+      "sha256": "204b4b109b8992210dfaef05191afb94120887857e4b3743c006a16403e57cf1"
+    },
+    {
+      "path": "client/src/pages/reports/CostCenterReport.tsx",
+      "sha256": "747f874727e1bb003f30945b8bf43ba1e466ab5a661c0c0043939486281e2eb3"
+    },
+    {
+      "path": "client/src/pages/reports/DailyAttendanceReports.tsx",
+      "sha256": "6bf3fc7d1018dab371db294ea979281c49e551b4c7ae05766a742cee482e1f46"
+    },
+    {
+      "path": "client/src/pages/reports/DailyPayrollReport.tsx",
+      "sha256": "7ea13f29732781cf93a9d8b3fddd08ba431408d6e52f459bc177491384cbe3f1"
+    },
+    {
+      "path": "client/src/pages/reports/FinancialReports.tsx",
+      "sha256": "21ff899e4f169e0f0417f17f2c18919a81c59e6c5ca5779fc0161f0ce7a87b2c"
+    },
+    {
+      "path": "client/src/pages/RestaurantCostReport.tsx",
+      "sha256": "fc5f26fe59761278f20c687ae4877f4c470cd7deb0af3fc4c2c044f098eccfa2"
+    },
+    {
+      "path": "client/src/pages/RestaurantsManagement.tsx",
+      "sha256": "bd409cf39597e4f78efca0966882de09eaae3d1517d63e6ec5ab28bd585c65ae"
+    },
+    {
+      "path": "client/src/pages/SupervisorPerformance.tsx",
+      "sha256": "63425337484a3051b0da2e7c7002d5b12931564376be23b96164447bdf37bf94"
+    },
+    {
+      "path": "client/src/pages/TemporaryAssignments.tsx",
+      "sha256": "20f755552c3b745b184259846b6c59fde87979da920801558ab2416dbc1e90bc"
+    },
+    {
+      "path": "client/src/pages/Users.tsx",
+      "sha256": "843133961276a84c9f6308d353aac54fb769a40e9658dec879399dd217788b82"
+    },
+    {
+      "path": "client/src/pages/WeeklyShifts.tsx",
+      "sha256": "7b222dd60b59375d9afbd2c6ae924591245bd2b1c5e42ba080bd4a12973e0140"
+    },
+    {
+      "path": "client/src/pages/WorkDays.tsx",
+      "sha256": "a628274da843963c89d2e95323e103f08cc1dddb645a68d1acdd4d1d3954cffa"
+    },
+    {
+      "path": "client/src/pages/WorkerCard.tsx",
+      "sha256": "144752fe3bf3cd652f335759787b03689c636c574c7d69bce6b57052e8d6210b"
+    },
+    {
+      "path": "client/src/pages/WorkerDetails.tsx",
+      "sha256": "d70a497b86c51112391c7aeb00d64ca1b8aca11e9d493e04712bca43215d2476"
+    },
+    {
+      "path": "client/src/pages/Workers.tsx",
+      "sha256": "b7334105fc70e1f1a4c89996dd4292c25fc12fe6d82956b973d86148646f0932"
+    },
+    {
+      "path": "client/src/sw.ts",
+      "sha256": "1f95cd9dfafe5e6d565af7b778d68e5a49815f4674ebe8dd4cf2256005357baa"
+    },
+    {
+      "path": "client/src/utils/tafqeet.ts",
+      "sha256": "ca1a87b272be0e2c881cef4680d1c58992742dcf9cb77136a4381422060bb506"
+    },
+    {
+      "path": "client/src/utils/transliterate.ts",
+      "sha256": "86856df3eb1e90a58e2080aefa6d92b27aae79fa37c5e00368ed806300f1e9ac"
+    },
+    {
+      "path": "client/src/_core/hooks/useAuth.ts",
+      "sha256": "8e1b078d3e491047382d49ce0fcad148b2fdf5512fce6959dad42bc70be0df3c"
+    },
+    {
+      "path": "components.json",
+      "sha256": "8be0e54515838be398164884e96319b52bcfcbd52b2e63171d51df4131cfcb03"
+    },
+    {
+      "path": "Dockerfile",
+      "sha256": "857aa292ffe74f4324c673d4a0b4ff1bbeee829ab1e2da70ee8a736e93355d33"
+    },
+    {
+      "path": "docs/ADMIN_DAY_BOUNDARY_0440_TRANSITION_2026-09-19.md",
+      "sha256": "a14de4fc30736db34298a1649e63a9449843d3984807eb8920d48411a95c6fca"
+    },
+    {
+      "path": "docs/APPLY_BIOMETRIC_UPDATE.md",
+      "sha256": "31598bf4573e01c341ee837b7e0f63d025856463bf4903475e9d39ca0602eb3a"
+    },
+    {
+      "path": "docs/audit_log_v2.md",
+      "sha256": "cda329fdc8e3ba660477cf7ba499f1e593ee65379a1bd8527c874480c0ac06ea"
+    },
+    {
+      "path": "docs/audit_log_v2_dev_guide.md",
+      "sha256": "2548c05bdf238a40517fa01b0b54ce8017ccb39f7ec764210daef24c89f456db"
+    },
+    {
+      "path": "docs/audit_log_v2_todo.md",
+      "sha256": "c9cb868ac8c04f35d1afa62e974e4bfacb8467f1ed609f300713fea6ef361000"
+    },
+    {
+      "path": "docs/biometric/21_WINDOWS_SERVICE_WINSW_LOCAL_PC_2026-09-07.md",
+      "sha256": "7130ce82889154ef6a6c170aef5271448cd62842ab2f51600e7a1dc5c05068df"
+    },
+    {
+      "path": "docs/biometric/22_DEFERRED_MAIN_APP_BIOMETRIC_MANAGEMENT_UI_2026-09-07.md",
+      "sha256": "e5125761543fa97594963bfb0675322fe10399e13c7cf51e431b2abd3de27b83"
+    },
+    {
+      "path": "docs/biometric/scripts/Install-TolanBiometricService-v2.ps1",
+      "sha256": "40159e9ed8ebe16d5ddc37436be73181a9f348d5a6d0cb07bd147e46e5ac3025"
+    },
+    {
+      "path": "docs/BIOMETRIC_CHANGELOG_2026-08-09.md",
+      "sha256": "05865f081a98260f66758ed18027ce2868d4c688ac993293fec69ff9a7513f09"
+    },
+    {
+      "path": "docs/BIOMETRIC_INTEGRATION.md",
+      "sha256": "f2ce4c97381b37a2e3026673b32c6c5ce4d8c50dba200017a7efacd6bc015c66"
+    },
+    {
+      "path": "docs/BIOMETRIC_STANDALONE_EXECUTION_PLAN_2026-11-08.md",
+      "sha256": "53b16631c552999eac048674fe9885c59d00f9d6244cd3cb32d35fbcdb4cd7d4"
+    },
+    {
+      "path": "docs/CEO_REPORT_DYNAMIC_SIGNATURES_DOCUMENTATION_2026-09-19.md",
+      "sha256": "25daa8f4044904ecf52a4bfc4dd3768c0b24b2d8e99f905d029f73eaff2e019c"
+    },
+    {
+      "path": "docs/DAILY_WORK_ASSIGNMENT_FINANCE_RECALC_FIX_2026-09-20.md",
+      "sha256": "11c777a168d2158c3433eb064f7939604817a757851d7dc29e211c8f597209d8"
+    },
+    {
+      "path": "docs/INDEX.md",
+      "sha256": "c2e9a14934ebea0dcdf2cf5437b618f3df746bf911402a8dfcc353bec9fa742d"
+    },
+    {
+      "path": "docs/INDEX_updated.md",
+      "sha256": "1a2cdfae53f9126451d05eb0617d122b9ebe03d7baf290441734ded45ee0821a"
+    },
+    {
+      "path": "docs/LEGACY_BIOMETRIC_REMOVAL_2026-11-08.md",
+      "sha256": "a5ffc17b9dbab2cf8d93996289f30eac2b7a9ffca00c613698328e36af6b72c3"
+    },
+    {
+      "path": "docs/notifications_plan.md",
+      "sha256": "70c6f25160378fa451c9b0733e694370d6bf4a3613f43592971de0a56c7219b0"
+    },
+    {
+      "path": "docs/OPERATIONAL_CALL_CLOSING_REPORTS_IMPLEMENTATION_2026-09-26.md",
+      "sha256": "b019fd141399ae9ddad0f1a2850b00187dce5bc8539296382ec305c07db10fe1"
+    },
+    {
+      "path": "docs/OPERATIONAL_CLOSING_SCOPE_FIX_2026-09-26.md",
+      "sha256": "2c4f133235b507a15631f1f5450f4b5a9fe1817d63020a334901e868d7e56ac9"
+    },
+    {
+      "path": "docs/OPERATIONAL_GROUP_ASSIGNMENT_EXEMPTION_2026-09-28.md",
+      "sha256": "2e3fe22fc63de6db4725e7397a66b38c8d93921634772396fd004c8b9da68f75"
+    },
+    {
+      "path": "docs/OPERATIONAL_GROUP_SCOPE_PERMISSIONS_2026-09-26.md",
+      "sha256": "1970b939143e4caaf867439c8a3d1f488a4c83fb858cef7837a355802902f090"
+    },
+    {
+      "path": "docs/OPERATIONS_CARDS_TOP_LAYOUT_2026-09-26.md",
+      "sha256": "82b607d09be77b5bfbf10158ed5747a8d2536c6906e7935ceb7b3f060210ed58"
+    },
+    {
+      "path": "docs/OPERATIONS_DAILY_REPORTS_ROLE_VISIBILITY_2026-09-26.md",
+      "sha256": "f0e5ef67ad5d8d61785734c32a06e5cdb568f05a882838ce58af5a5ee7b9d2ba"
+    },
+    {
+      "path": "docs/OPERATIONS_QUICK_STAFFING_MOBILE_DIALOG_SCROLL_FIX_2026-10-03.md",
+      "sha256": "1afdd8bf9ad51943426b75da6cdfc407ab5fc531d2ea27bc3edcb15f6f5b720f"
+    },
+    {
+      "path": "docs/PAYROLL_ALL_TAB_PAGINATION_2026-09-24.md",
+      "sha256": "b67c6c8eafcfc7f1e24ccd7a3af4ca5c5c96931bb516f3888a0937486f9f93f0"
+    },
+    {
+      "path": "docs/PAYROLL_BATCH_TABS_LAYOUT_FIX_2026-09-24.md",
+      "sha256": "8cda288105fe32b49c42afb7a555d2ccf72331a1c7fa0a44d679a87eb49618bb"
+    },
+    {
+      "path": "docs/PAYROLL_BATCH_TABS_WORKFLOW_2026-09-24.md",
+      "sha256": "7e577af034e4dbd098d7f6d1bfc42af47f8207440003e014d457d94850d91f17"
+    },
+    {
+      "path": "docs/PAYROLL_OPERATIONAL_DAY_CLOSE_FLAG_2026-10-03.md",
+      "sha256": "652b4814d113d1662e4e842e5858ecbee4beac87169372bf6eb7b693e4e9ef74"
+    },
+    {
+      "path": "docs/PENDING_TASK_ATTENDANCE_EVENT_SOFT_DELETE_2026-09-20.md",
+      "sha256": "30e160968205132ca43774f1a81dec6e558de405aca3727a4ea024e90c67f95d"
+    },
+    {
+      "path": "docs/PHASE4_CLOSURE_PHASE5_START_2026-09-21.md",
+      "sha256": "5efa9df1029366d3f6bba062c65a0bee719f6c7d0e1999f4b332e3a69662d436"
+    },
+    {
+      "path": "docs/PHASE5_COST_REPORT_BACKEND_RBAC_FIX_2026-09-21.md",
+      "sha256": "19b4e8c176c20cf670de7445e3f2d8053c72344234846a536e90084e81d7ead8"
+    },
+    {
+      "path": "docs/PHASE5_COST_REPORT_FRONTEND_RBAC_FIX_2026-09-21.md",
+      "sha256": "a324e4f3292dcfdf97d73807333af09083851ef14ffe50a1d2700f50cde63182"
+    },
+    {
+      "path": "docs/PHASE5_OPERATIONS_AUDIT_COVERAGE_2026-09-21.md",
+      "sha256": "320ea55610d221bc9f80a56614ea08b3ed6468421d1efb05c3049c8b3c94625f"
+    },
+    {
+      "path": "docs/project_analysis_report.md",
+      "sha256": "7f35ee4f505662537d5879b21ae76233228373f1374f969ffc1184e394bf8c86"
+    },
+    {
+      "path": "docs/PROJECT_DEVELOPMENT_CLOSURE_PHASE5_PHASE6_2026-09-21.md",
+      "sha256": "75ecf1c07180590d9a860033f9bca82c890b2aed100bfbbd696091d308de7931"
+    },
+    {
+      "path": "docs/PROJECT_ROADMAP_PHASES_1_TO_6_2026-09-20.md",
+      "sha256": "c6015c7ae03da049b9751349c26b789781ebc59b4c81254f151e2f1be59df5ab"
+    },
+    {
+      "path": "docs/STRUCTURE.md",
+      "sha256": "6fda187505939bab6cd45155c3f07227c876eebea26faaef54ae45ea60a58964"
+    },
+    {
+      "path": "docs/STRUCTURE_updated.md",
+      "sha256": "0bb8a16f40d2bf8ed8315a0efbeed80ca11189bf0731d9ccbe09f38d4177bb0d"
+    },
+    {
+      "path": "docs/todo.md",
+      "sha256": "ab9a25cc8dd785dab64e1b76b9c23ed13c40c85fde2d4ccd02eda67edf49cd3a"
+    },
+    {
+      "path": "docs/WORKERS_EXPORT_GROUP_SORT_DATA_ENTRY_2026-09-28.md",
+      "sha256": "514ca057cfc210cae80b4b2e0a29a76d51111b5122a5226f4f8badaab31d8fed"
+    },
+    {
+      "path": "drizzle/0000_melodic_amazoness.sql",
+      "sha256": "814a08e40d7fc2bcfd458759d18319198ca8ae394f2fa15617a78678e9c9c93b"
+    },
+    {
+      "path": "drizzle/0000_past_quicksilver.sql",
+      "sha256": "2ff41d582bc3d857e61501fbea43b2239ed51bae13399e2cf5978682c8c3606d"
+    },
+    {
+      "path": "drizzle/0001_add_work_date_and_security.sql",
+      "sha256": "b694ff6242b8dee68fb99dd00143e0940b767a75979478224e96ae9d7c1472d2"
+    },
+    {
+      "path": "drizzle/0001_brainy_exodus.sql",
+      "sha256": "40fdd11ced359e129370271a93db3b07f26741e9f2d186174cbd594c36c5ab9c"
+    },
+    {
+      "path": "drizzle/0001_flimsy_jack_flag.sql",
+      "sha256": "ed8a388380f5f04d539b7b59add53927f64dbd1e7b86053e4b56536c6b7b9467"
+    },
+    {
+      "path": "drizzle/0002_fat_human_robot.sql",
+      "sha256": "9af6a1b670bd34e3c170cbbfb4f2eda697b6bfd04dd0b9af6b70581d80228d2c"
+    },
+    {
+      "path": "drizzle/0002_legal_tomorrow_man.sql",
+      "sha256": "2d66d0a778ba4a878b3c59825216205b34ed07adf99d58b15419cdcffd468d39"
+    },
+    {
+      "path": "drizzle/0002_lying_iron_patriot.sql",
+      "sha256": "52bd3c450adfed2f3a7a30f90cac247947284dd0750dc828e9e2c85928967ca6"
+    },
+    {
+      "path": "drizzle/0003_bizarre_carmella_unuscione.sql",
+      "sha256": "6309691a9c8065924da63fce4df025b5b7a35a6f1523413d8642fa126d6cca6d"
+    },
+    {
+      "path": "drizzle/0003_classy_yellowjacket.sql",
+      "sha256": "d56ca133ef783f8bf66cfea9dbab5c8d5642c003506bc4f2ae390ca6058eddac"
+    },
+    {
+      "path": "drizzle/0003_flippant_captain_flint.sql",
+      "sha256": "3ee25b0bfe74ece193bd1c3a9a7353fc3299c9c8871a7ba903712624f72e93a2"
+    },
+    {
+      "path": "drizzle/0004_nifty_scream.sql",
+      "sha256": "8c59dc0cb7c5c3ec5c67f4409a62f813c59157afa7f5b6941e90b96203b8b519"
+    },
+    {
+      "path": "drizzle/0004_wandering_thor.sql",
+      "sha256": "0b596e6228a3ffb96633e8ec329c38bcb34c8b6579f5589381c6fb8709ba71b6"
+    },
+    {
+      "path": "drizzle/0005_amazing_human_torch.sql",
+      "sha256": "f318ef8d5601ed6478ba39ebc5f644ea88f797678d2a0c053d97931026fefe07"
+    },
+    {
+      "path": "drizzle/0005_warm_loki.sql",
+      "sha256": "16131c59c35017299f07682424dd541b18688b15341ef357ddc7e8554562443a"
+    },
+    {
+      "path": "drizzle/0006_luxuriant_sage.sql",
+      "sha256": "74b99505c4b3f6c44ec6a50565d1d4ef887dfcf6551d2ac05cfab3b84ddaebce"
+    },
+    {
+      "path": "drizzle/0006_minor_magus.sql",
+      "sha256": "c81aaed84e258727afddf545077940ad26a9c0f72dd7832398b8a10e70316eb5"
+    },
+    {
+      "path": "drizzle/0007_easy_magus.sql",
+      "sha256": "60617e48dd825157cfee87133ea5bf70f06f3b6538f763e51603adf0df51e65f"
+    },
+    {
+      "path": "drizzle/0007_lowly_red_wolf.sql",
+      "sha256": "bd32f1b168304337893ec08870095b3a4a9398214b531cc4820ba75ba3e4ca02"
+    },
+    {
+      "path": "drizzle/0008_cold_lifeguard.sql",
+      "sha256": "d6d2ec26fe0b50826d287a29752b6c97caf86baa42a6f81a8bc5bede13a19cb9"
+    },
+    {
+      "path": "drizzle/0008_naive_paper_doll.sql",
+      "sha256": "fb6d7ca54953b6f6d9e09db7c39f6762552432fc602f5574a40f287b5c7194a6"
+    },
+    {
+      "path": "drizzle/0009_condemned_blue_marvel.sql",
+      "sha256": "de29897770dd21b95564830aed454b4d6d8d7c957e3c06287b58a8c97f214c5d"
+    },
+    {
+      "path": "drizzle/0009_tidy_sunset_bain.sql",
+      "sha256": "a2073dec70c2783e449a21050969cb7291ed26bb45f10339699534c117002cc5"
+    },
+    {
+      "path": "drizzle/0010_funny_hardball.sql",
+      "sha256": "e726cd118003da5550afa7b527a89c9083edde30d78008c06d9b59164301587c"
+    },
+    {
+      "path": "drizzle/0011_rainy_mercury.sql",
+      "sha256": "f8f90e5f050428a57e1bf43a91634a01aac438ab4910109730e19a5addbfa558"
+    },
+    {
+      "path": "drizzle/0012_flat_skrulls.sql",
+      "sha256": "027ea1110f58ea204578ba21755cd5b81aae0ced28c17ba2dd2b81d04ddc30c2"
+    },
+    {
+      "path": "drizzle/0013_daffy_big_bertha.sql",
+      "sha256": "d0fabeb6c7786bdb0980169b98f691075bed4d3749f3b6a320349272fa9c9d9b"
+    },
+    {
+      "path": "drizzle/0014_yummy_arclight.sql",
+      "sha256": "1fccd7e8e5efeaba700dbfd6b26155f62dc4edca683bd90dc5359467c5fa63f7"
+    },
+    {
+      "path": "drizzle/0015_nervous_master_mold.sql",
+      "sha256": "fe0b9fab0b65bb18f1708a5a11e09e4e7123ae4be7e6efde368741d58169a13b"
+    },
+    {
+      "path": "drizzle/0016_hot_may_parker.sql",
+      "sha256": "8417a1a869cf3b3237c9ec7136d0ad8a808d257f0afe8800266bb44d8a5b6c9c"
+    },
+    {
+      "path": "drizzle/0017_pretty_cyclops.sql",
+      "sha256": "fd704947dc8cf5da1e7a29072dbe1907403780b3e8e6da84b6cc1b0f71bb458a"
+    },
+    {
+      "path": "drizzle/0018_abandoned_newton_destine.sql",
+      "sha256": "69a445b323db471797ff77b282ad39b9ba12fd3c5564734e2251838d79744cf0"
+    },
+    {
+      "path": "drizzle/0019_high_magma.sql",
+      "sha256": "51b8a19002946de68df4e5fb8f9d735e467b986b139147537e721133eff74608"
+    },
+    {
+      "path": "drizzle/0020_flowery_layla_miller.sql",
+      "sha256": "9e90ec17e27afb30835d40ba6ee2c2197ce96846b0ef17cd5ea318d53e003e30"
+    },
+    {
+      "path": "drizzle/0021_volatile_starjammers.sql",
+      "sha256": "48b12f2cab5c90d18ad812ad4c3746087e7957f539cd10bdc136ffb81de0ba00"
+    },
+    {
+      "path": "drizzle/0022_operations_phase1.sql",
+      "sha256": "9c363b59b1c2b1758398f200b66f2bb97e4088a4e5c2f2d70d1c42ee73ef4ced"
+    },
+    {
+      "path": "drizzle/0023_operational_departments.sql",
+      "sha256": "a601b438988314d564a6292f939cb476e414110282ea8378728e8f3f294fc292"
+    },
+    {
+      "path": "drizzle/0024_operational_day_closure.sql",
+      "sha256": "be62b791126e6b000400ea9ff2f4e886a01e4648e9ef552895322e350a3b5c15"
+    },
+    {
+      "path": "drizzle/0025_operational_day_cost_center_scope.sql",
+      "sha256": "79802fc79f55d980044b84d4f09f5036c942b8faab0fe015e43025399c3dfcc7"
+    },
+    {
+      "path": "drizzle/0026_operational_day_records.sql",
+      "sha256": "cb83e7965c5a080456ce8a8babaac470c27f9d18b7115f8ee957d6f191b260cc"
+    },
+    {
+      "path": "drizzle/0027_operational_group_scope.sql",
+      "sha256": "bda8c220a9a481e8c7ea126a596aef2958d1a64e453f11776988b15969e83787"
+    },
+    {
+      "path": "drizzle/0028_operational_assignment_exempt_groups.sql",
+      "sha256": "c873eb5bfc606d9c10b9f2c1ceb05355742bc30b78ed7a29409c45bb3a3fc930"
+    },
+    {
+      "path": "drizzle/0029_operational_transfer_requests.sql",
+      "sha256": "b71d647211032da779c93e0cf5be0d3c1ac787668e14cca0b70e53e252f46253"
+    },
+    {
+      "path": "drizzle/add_operations_cost_accountant_role.sql",
+      "sha256": "2cb03b42b9345a7ed736a10ec92d1892194ed250f6e578b063fe07bf94e3d2fc"
+    },
+    {
+      "path": "drizzle/add_restaurant_operations_role.sql",
+      "sha256": "3a87dd436b99de3250d237580e43ec3e254c0b49197787e8e746d0275adaa8c4"
+    },
+    {
+      "path": "drizzle/functions.sql",
+      "sha256": "44cf0015042ba602416d5f554d866d86201f3abac52c9f61962062eb0759ceaf"
+    },
+    {
+      "path": "drizzle/functions_mysql.sql",
+      "sha256": "89b6621e9d525b9a7a40b414988330c9479d16bee22d875465f50e61beb1c50c"
+    },
+    {
+      "path": "drizzle/meta/0000_snapshot.json",
+      "sha256": "253f861651d1388a149afe9ee9237ae2b91dbf83a2b58518ac3dee991c6a4ada"
+    },
+    {
+      "path": "drizzle/meta/0001_snapshot.json",
+      "sha256": "b54d25c7b332f06abe6effccb89ee85efa714920e25bf0f0aaea3ddbb8545477"
+    },
+    {
+      "path": "drizzle/meta/0002_snapshot.json",
+      "sha256": "3a037fc75bc589a3c9a66c18d5b7aeee6166bda9a811805c8f75d50cefa404e9"
+    },
+    {
+      "path": "drizzle/meta/0003_snapshot.json",
+      "sha256": "ea2eb9e74f135388dddd15d0e5dc5ca6e9527e1d876d6ea25f41627dd1c94fd0"
+    },
+    {
+      "path": "drizzle/meta/0004_snapshot.json",
+      "sha256": "0640c6df397450fa86da4a1f06b661823be7fe06dece55f16e6f5643081c3568"
+    },
+    {
+      "path": "drizzle/meta/0005_snapshot.json",
+      "sha256": "839edc7a91ebe2e57844c3b24ad435a03e6496cc7072e2dc0ad66ccc4c63b339"
+    },
+    {
+      "path": "drizzle/meta/0006_snapshot.json",
+      "sha256": "f7b459c93196aec5d29828d1755950adf5200c891e8b7ae751c32668ebbce1ea"
+    },
+    {
+      "path": "drizzle/meta/0007_snapshot.json",
+      "sha256": "f9828bbb4958529e14668a677aa45af90825ec3e9de4553e94b9444572f280c7"
+    },
+    {
+      "path": "drizzle/meta/0008_snapshot.json",
+      "sha256": "c36d199755f811f428e05af22c2b4e38263ca635634f38f2a3bef6fbf6fef759"
+    },
+    {
+      "path": "drizzle/meta/0009_snapshot.json",
+      "sha256": "5fc621f4b63a86b925781782ff1c44f04371dc772915f38fd69b358e5cf9dd6f"
+    },
+    {
+      "path": "drizzle/meta/_journal.json",
+      "sha256": "61cc6e2faf90577713fe949e45ca611020d6ebfb0807992a58706d031488d695"
+    },
+    {
+      "path": "drizzle/migrations/20260809_add_biometric_integration.sql",
+      "sha256": "55b57eabf7431b54c06e08f24fb8d748a35200173e5a46476e832aefcd01fd1c"
+    },
+    {
+      "path": "drizzle/migrations/add_daily_rate_to_group_schedules.sql",
+      "sha256": "44d610bae8735c1155ca53b081d50e3f1d0dd048d47138ff4a9d6b3c1af70871"
+    },
+    {
+      "path": "drizzle/migrations/add_flexible_schedule.sql",
+      "sha256": "51fbbe28e1057aaaccb2183c586c8a4ae79adb6bb160415ecb623f3071e3bb35"
+    },
+    {
+      "path": "drizzle/migrations/fix_null_work_dates.sql",
+      "sha256": "67ead1f49a96cbbd46a633a6212b881e4968fbcccd6cc1a7996e44177caa9a34"
+    },
+    {
+      "path": "drizzle/prototype_technicians.sql",
+      "sha256": "13678965ac8297e56fc5ced68c783084b6ffb6acdca8f0368b4437f4d3b221a3"
+    },
+    {
+      "path": "drizzle/relations.ts",
+      "sha256": "8a4af02947004cefd3dc41cf448e42758a3a7d7ec94a9c8e0fad4231f5e70257"
+    },
+    {
+      "path": "drizzle/rls.sql",
+      "sha256": "62abf3f05c1e0b8f5d51978a589f6d33851f6ee3da7a6c1ce401d7e05e78883f"
+    },
+    {
+      "path": "drizzle/schema.ts",
+      "sha256": "c5f9d99e4371f2e0ad87f5ad3aceadc0a9b818cea582fb8ff8aadabf36278990"
+    },
+    {
+      "path": "drizzle/schema1.ts",
+      "sha256": "aae298d6eb1b0c56d7d4be1c6a26beae31aece039c17b438755e468afa909da5"
+    },
+    {
+      "path": "drizzle/triggers.sql",
+      "sha256": "dcc15047f67aa9f7cf59ed5589629d0d7e9b71a53244748a9d76756849565a97"
+    },
+    {
+      "path": "drizzle/triggers_mysql.sql",
+      "sha256": "21d563811c7c9ab49cfc260cf06f41104da14d4e7b63f80cb3993b6ff385bed1"
+    },
+    {
+      "path": "drizzle/views.sql",
+      "sha256": "d9541a2993cc625d4cf1d4f7014bfbea7a7f2dafa3af82e31fba4359c141134b"
+    },
+    {
+      "path": "drizzle.config.ts",
+      "sha256": "9610673b3fe7b6b950a8e7e54cb1e91f9dd25f87d7ae6a41d2f6ada957065d01"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "f133e55e77972f31166b47a3dcf3fa001edbd5577f5c089194ca7b28997b55d6"
+    },
+    {
+      "path": "package.json",
+      "sha256": "2cd4f9500bcf5ca4bc4afac99655d5778d565c532edee19e145f956b3fe42c12"
+    },
+    {
+      "path": "patches/wouter@3.7.1.patch",
+      "sha256": "4e16e6ff3fde7d6c1024d3e0c8605dc9eb6afb690d0d49958c2f449091813072"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "9b3634708554db7bd57c8ca16a8ce76b189dbfa89f2e1f61073925a531453b70"
+    },
+    {
+      "path": "railway_vars.json",
+      "sha256": "2a04a471d8566cbb6bd48d86b8798d72452e04b7bf0bec7a31f1b2ad34e4590f"
+    },
+    {
+      "path": "README.md",
+      "sha256": "05a16c1df232148215b19059f4939d8bb72bd502b078a76aaccade83a4a8c2b2"
+    },
+    {
+      "path": "README_ACCOUNTANT_PHOTO_PERMISSION.md",
+      "sha256": "426568e7db180afd0f99713464c58ffc1b8519b60deccbaf07ff2eec99104f9d"
+    },
+    {
+      "path": "README_BIOMETRIC_WEB_BRIDGE_LOCAL_TEST_2026-09-06.md",
+      "sha256": "4188e7d944bd88646550d748d25ebe1c49caf00a90fd93351a675686c6f694e6"
+    },
+    {
+      "path": "README_DISABLE_STARTUP_AUTO_MIGRATIONS.md",
+      "sha256": "dd9791911bcf77ef713c4dafb50b10205cd97708392d933d34c6ef3590c9e7be"
+    },
+    {
+      "path": "README_MAIN_APP_BIOMETRIC_SIDEBAR_LINK_2026-09-06.md",
+      "sha256": "a0016d3086f052cd8d13ae4f3fd3b237fd8d8bb0bd8c3fd48e4567187ae67448"
+    },
+    {
+      "path": "README_MAIN_APP_FINAL_EVENTS_IMPORTER_2026-09-06.md",
+      "sha256": "d5a2d0f17c99e2f321c7626daf27e5a1683eb87658a337606d3e2f0b4c299c3e"
+    },
+    {
+      "path": "README_OPERATIONS_PHASE1_2026-09-08.md",
+      "sha256": "bb4b8bc0aebd08c1942be4f4cfd1af301002c3b486ed55a5e242e05ea87e05c6"
+    },
+    {
+      "path": "README_UPDATE.txt",
+      "sha256": "2cfd7fc222c7000938cdbcae01bddbae1966c2988c7dea1be011aaf16fa86260"
+    },
+    {
+      "path": "README_WORKER_BIOMETRIC_LINK_UPDATE_2026-09-05.md",
+      "sha256": "197428484e2d24d8fd4552e5a151e523897af5ded34a91e7b42446b43fd4f281"
+    },
+    {
+      "path": "README_WORKER_PHOTO_AUDIT_V2_UPDATE.md",
+      "sha256": "2316704f411105cbb85e300728766b9d010fb79be856f25803179df03c125b57"
+    },
+    {
+      "path": "README_WORKER_PHOTO_UPDATE.md",
+      "sha256": "8fff5514832a57023eab6e3947478fa6dcfe852cd916969f08c7d6a5b9e98a02"
+    },
+    {
+      "path": "scripts/backfill-work-dates.ts",
+      "sha256": "e8b53c748bacf696b76150dd32076c1309b2e9cd78ca80877d9ad438eec57dc2"
+    },
+    {
+      "path": "scripts/configure-local-biometric-web-bridge.ps1",
+      "sha256": "165fa54307c5233f5c05c269a04dd3cf98ba26a1b09ca1f55e04ed061e9d5b61"
+    },
+    {
+      "path": "scripts/diagnostics/analyze_deductions.ts",
+      "sha256": "05cd6301932ed9ebf9bf4f4757ed9caabb099b50e85102476729a7337bc8513e"
+    },
+    {
+      "path": "scripts/diagnostics/analyze_empty_batch.ts",
+      "sha256": "f0fb2d3d9c721b3c53968a4cac07ed8e96f1cca741b8bd2f0f6d92464759aba0"
+    },
+    {
+      "path": "scripts/diagnostics/analyze_shiraz.ts",
+      "sha256": "1c0c0e7231cb9b557da97523a6c98fdf40ebf96fd1694f5f58277a0c8abdc20c"
+    },
+    {
+      "path": "scripts/diagnostics/check_abrar_in_batch.ts",
+      "sha256": "3925f3ffc7926be451c8aa2bc154ef794817c2e198976d694ed79804f993453a"
+    },
+    {
+      "path": "scripts/diagnostics/check_abrar_simple.ts",
+      "sha256": "51057a022a031b2eee010a8da0bf447fa1903cd7c3eb01899c56cb657b740f37"
+    },
+    {
+      "path": "scripts/diagnostics/check_attendance.mjs",
+      "sha256": "5ae611760f54ce4900ec5d51b508a0bbeaa58b91c508b48545b41334296b0408"
+    },
+    {
+      "path": "scripts/diagnostics/check_attendance_simple.mjs",
+      "sha256": "63e0a8120620335f1f5f8e7adccef6785bfe357cd6cbee5d9072085110394270"
+    },
+    {
+      "path": "scripts/diagnostics/check_batch_salary.ts",
+      "sha256": "cabd799497f5fa0a3239c3c33cdad48e390da74b62bf20bc014355a0d3a0ff2b"
+    },
+    {
+      "path": "scripts/diagnostics/check_payroll_batch.ts",
+      "sha256": "de39050011612e4f87363556947efce1732fa273ae5d1ac88b525f1cedc92116"
+    },
+    {
+      "path": "scripts/diagnostics/check_schedules.ts",
+      "sha256": "3ff4334c00dd6ae525326afac9a59dafa0440c403d0dc1c01b5eeec26ed44789"
+    },
+    {
+      "path": "scripts/diagnostics/check_schema.mjs",
+      "sha256": "727d662b8dbe8df410e9ee5a8184490fa3ea6ea1e0f058b008295894c569c3dd"
+    },
+    {
+      "path": "scripts/diagnostics/get_batch_by_id.ts",
+      "sha256": "f87fad9752a5a4e1cb351c0a044e5a13bdde69c48fe6a664a2bc649829bad211"
+    },
+    {
+      "path": "scripts/diagnostics/investigate_abrar.ts",
+      "sha256": "f1a95d35f6b57a4d0429b6a98652dbd200ab3d5b93dd27415e69dc988b0fea50"
+    },
+    {
+      "path": "scripts/diagnostics/investigate_abrar_tidb.ts",
+      "sha256": "0ef484c32b2af980024821cfd70f71c8e81db7519d0a88cda4268beb4014f008"
+    },
+    {
+      "path": "scripts/diagnostics/investigate_w32.ts",
+      "sha256": "61bd1ec3b9a630faeeab1f98989ec0a8269ec606c96c3c94fce227adfcce075d"
+    },
+    {
+      "path": "scripts/diagnostics/query_db.js",
+      "sha256": "5f0fc7229b8d6e5db60263d4e7fb73611acc4be0c876188309abe3e5d845e22e"
+    },
+    {
+      "path": "scripts/diagnostics/query_db.mjs",
+      "sha256": "c9fbce416e7ad0b8b379415857dffac1f3a6bd5ed013bb2da1014b4a56024b1f"
+    },
+    {
+      "path": "scripts/diagnostics/query_workers.ts",
+      "sha256": "1ca969fadc136962f71884c18b96e2bb35e8f68e1b58c3fc33aa4871b926fa83"
+    },
+    {
+      "path": "scripts/diagnostics/query_workers_direct.ts",
+      "sha256": "eb8a84394303f67e55f60e6028a242434fab028561f20a5cfc9a34f9d76549f2"
+    },
+    {
+      "path": "scripts/diagnostics/recalc_test.ts",
+      "sha256": "09a1e6c429fe3433d38fd5f121d424c90f91c7146f533d765d32fbf4ac2cdd5d"
+    },
+    {
+      "path": "scripts/maintenance/apply_schema.py",
+      "sha256": "fe5ef3f7976a2a3604a0650e312355d525db388ab2c72f623e3ac6c902fa18d2"
+    },
+    {
+      "path": "scripts/maintenance/call_cleanup_api.ts",
+      "sha256": "81230d096d19c81eb008aaed2d8b0c1092a466bc14ad8b992e2b65e85a9a0f66"
+    },
+    {
+      "path": "scripts/maintenance/cleanup_now.ts",
+      "sha256": "3c38cc1b1e4adb03da969183bf0906c2d9e51890965c1b1a105c028fad38bab3"
+    },
+    {
+      "path": "scripts/maintenance/cleanup_orphan_records.ts",
+      "sha256": "c6d61cee5d38c97e56e3b0740e24bafee1eb29c77a50941643a5df00b8765363"
+    },
+    {
+      "path": "scripts/maintenance/migrate.js",
+      "sha256": "702a0eb9fd9f9459d1f1b8bdc887f5ccd9944be9ee2e3cffd4dc4d0124bca5b7"
+    },
+    {
+      "path": "scripts/maintenance/recalculate_finance.mjs",
+      "sha256": "a8090f114880e10a08ed0c0ee655a6945fbd3463d8bf5c5d5d6ebf755d4c65bf"
+    },
+    {
+      "path": "scripts/maintenance/recalculate_w32.mjs",
+      "sha256": "bfccfa766cf0e7f89bcd61efb7a8b4b6a511cb93050329509d98808c58b792ed"
+    },
+    {
+      "path": "scripts/maintenance/seed-comprehensive-data.mjs",
+      "sha256": "0d1382f2884d9bec6857d1b1d883db805c27b2d69a4659e8ad3ab30f15e2ae3f"
+    },
+    {
+      "path": "scripts/maintenance/trigger_recalc.mjs",
+      "sha256": "068e84f34073097ab104a98385f9eb9742437d9618e88d5608a9818d19dfff98"
+    },
+    {
+      "path": "scripts/sql/add_notif_tables.sql",
+      "sha256": "ab644ff4abc71b73489605d6da4a2cd5a64fe252dab12cac8a2b20507e9c6d5f"
+    },
+    {
+      "path": "scripts/sql/analyze_feb13.sql",
+      "sha256": "0a4e9780b7f8ccab5f0c2000f367d93e35c8879d9df4511afdad55c9c7ca234d"
+    },
+    {
+      "path": "server/analytics.ts",
+      "sha256": "b082e324d0a2ad595cc099b34bba49ae359f142ee077c6561ba9bb47430f69cc"
+    },
+    {
+      "path": "server/API_DOCUMENTATION.md",
+      "sha256": "3c4b19d5fd13d4193a43ac932e1d6bd9bc8ec7a50c50cd872ec0830065924d03"
+    },
+    {
+      "path": "server/attendance-logic.ts",
+      "sha256": "5767d837fa0c1b9255bd0c1f9a2e2b2048cb5df9f8a42318fa71c69cc1f8afc1"
+    },
+    {
+      "path": "server/biometric-final-events-importer.ts",
+      "sha256": "33d8c5099b388787f075fd447a1f4a2f1600d8d57f038a9109ece7bc28781d8c"
+    },
+    {
+      "path": "server/biometric-integration.ts",
+      "sha256": "283823a6e27bfdb0a9e0dbdcf074590d9faf3d748ef2529b4175b55a07b479ac"
+    },
+    {
+      "path": "server/biometric-web-bridge.ts",
+      "sha256": "4ef8f42be695a961b785a6aba7af7eceb9922d208873c4523b274e279aa70a99"
+    },
+    {
+      "path": "server/ceoReports.ts",
+      "sha256": "e874ddabf64101b3318b899d7bc83dbbc4d8b3a2ea0487d07c00a37d43002e16"
+    },
+    {
+      "path": "server/ceoReportsPdf.ts",
+      "sha256": "5f9c9bb9edf5e2787d9abcadf908102822432af5f161c2024a7756176b79cec8"
+    },
+    {
+      "path": "server/dailyAttendanceReports.ts",
+      "sha256": "5a7f5a39c40b18ecc7d811acdd99701bf5135dec092e6f6595e5ee7373720349"
+    },
+    {
+      "path": "server/dailyAttendanceReportsPdf.ts",
+      "sha256": "2be259d4786888d72d3773aa8c8ccc88074a6bca2f376a97a7bd0db560ec1b66"
+    },
+    {
+      "path": "server/dailyPayrollReport.ts",
+      "sha256": "07753ce69268ede1b3d08cca367278635cd055d76e86a7925c9f22df033e6fcb"
+    },
+    {
+      "path": "server/dailyPayrollReportPdf.ts",
+      "sha256": "a3596dae60d6bb59e4ceb2fbcc22683ada7cc16da38ebd6bf254effe8504d2c4"
+    },
+    {
+      "path": "server/db/advanced-payroll.ts",
+      "sha256": "d84998548fb3258c99bc091a38a8a371218a52cf200db20ffaab357b03e649c6"
+    },
+    {
+      "path": "server/db/assignment-settlements.ts",
+      "sha256": "a5481fc8bcecd0b3eb1d214e65356c3bd9c57d0e137520aae1001281773eff39"
+    },
+    {
+      "path": "server/db/attendance-adjustments.ts",
+      "sha256": "1cb3d69eedee1b4c28dcf9a1f8a1dc1e538b0aa123ddf0c96b16c3bf5f568528"
+    },
+    {
+      "path": "server/db/attendance-export.ts",
+      "sha256": "27f0e4e747c059891ab86271ce0ecfac7aa8313d50a94176d0190227ded798f1"
+    },
+    {
+      "path": "server/db/attendance.ts",
+      "sha256": "5cdf4ff41fedf34338e03d38b06ede00f745bd71b7c49e29d3b909bb675ab2e6"
+    },
+    {
+      "path": "server/db/audit-v2.ts",
+      "sha256": "6361220ed424aed655b9011a01e0e8bfa45a3f47c0f4c766001af9633c6203fe"
+    },
+    {
+      "path": "server/db/audit.ts",
+      "sha256": "cf32327e017c41f91752643b1861f6996a433f0cd649f3dc4586d72942fc0d99"
+    },
+    {
+      "path": "server/db/auth-local.ts",
+      "sha256": "ba8f16ac0a43f7e582c14cd9df5e105f5594c6a7e9592f35744e36ae90ee40ce"
+    },
+    {
+      "path": "server/db/auto-finance.ts",
+      "sha256": "759ed85da3c622273b0aab118422cfb34d1316568182b4d4e65101574808ccad"
+    },
+    {
+      "path": "server/db/backup.ts",
+      "sha256": "3fdaefa2106d2e4c8477d77eb6ba9c5691670590b31612040f51a84d592d513b"
+    },
+    {
+      "path": "server/db/batch-worker-operations.ts",
+      "sha256": "d4489a0c049ddd1592c2acfd092057f98bd94210a6935218e2780fd37b48a81d"
+    },
+    {
+      "path": "server/db/connection.ts",
+      "sha256": "f84f6f2cb810664df2b693f6a2078a8c6a47489d26e15191313dd4ed4c560c43"
+    },
+    {
+      "path": "server/db/cost-center-report.ts",
+      "sha256": "2e58b8976e3e13f2062be65596fa813531425cbfbca4d7c4d9eff274d9694cbd"
+    },
+    {
+      "path": "server/db/cost-centers.ts",
+      "sha256": "1e552c6a9405a0263f3224103167be3330954f2d0a1ed9c63e464d0458794b37"
+    },
+    {
+      "path": "server/db/daily-finance-entries.ts",
+      "sha256": "61c84c0ca6f56191e6ffc5c7b6ae90e02f97212ef86674b6f141cbb6e5e14a40"
+    },
+    {
+      "path": "server/db/daily-finance.ts",
+      "sha256": "e5894e72275bc1285ee79bc97a6ebac5caebdb7b84a65f3dff3da766ab8fbad2"
+    },
+    {
+      "path": "server/db/daily-management.ts",
+      "sha256": "ca6d239ef1044fed6967b7690840b25689944117e6fd3caeaea542a4e9170182"
+    },
+    {
+      "path": "server/db/daily-work-assignments.ts",
+      "sha256": "ec8e7f3be3e549b990b889477dac76962146afb9e11ba6883f68d59f924acd8a"
+    },
+    {
+      "path": "server/db/db.ts",
+      "sha256": "fc65b47c955f6fd916f1792ee9c97a0015ec02ccb30a48a11f94c7f8ea0d3021"
+    },
+    {
+      "path": "server/db/deductions.ts",
+      "sha256": "6e3eb5b5f285924c0af0b6336d0cf181163cdf4f439ffe62a09504adcd76b1eb"
+    },
+    {
+      "path": "server/db/executive-dashboard.ts",
+      "sha256": "2c506cbd8552046b61d72b501c5d36c7d2def22570d187334de24049e9def800"
+    },
+    {
+      "path": "server/db/finance-entries.ts",
+      "sha256": "2224d2510c546e81288f0ce2bb924ec6f1154c476b9fcc9cddec98ca57f38b12"
+    },
+    {
+      "path": "server/db/financial-reports.ts",
+      "sha256": "7a99ad414d61e400a5f1dd357bda5b233403316ba116060ff4574def389dc9ff"
+    },
+    {
+      "path": "server/db/full-day-overrides.ts",
+      "sha256": "52c819309057918eb751085a3aafaf2d2da05aa84130891b969c5bef725f02df"
+    },
+    {
+      "path": "server/db/group-coverage.ts",
+      "sha256": "ce05828e0a87d589938238bd1989f37ec613e9c3e9ca51185d360f585d2f49db"
+    },
+    {
+      "path": "server/db/group-schedules.ts",
+      "sha256": "26abffbdb0485aa13c8cc5565dff2dd74fed1af3f3b43aa2216ccea9178dbb1b"
+    },
+    {
+      "path": "server/db/groups.ts",
+      "sha256": "dc2e4ef965bd554a0031e4fae5793baab2b574a5ef04c226641e8c3fef2a0915"
+    },
+    {
+      "path": "server/db/notifications-db.ts",
+      "sha256": "074699df8d3ad230862dd32e8fd27baa5b8988d9d05fe7cc9ee6beb0afb002a6"
+    },
+    {
+      "path": "server/db/operational-dashboard.ts",
+      "sha256": "dc73f46185153df116002f43bc5ce3f7c0f7dd3976d3a650bd3072a41a406d2b"
+    },
+    {
+      "path": "server/db/operational-days.ts",
+      "sha256": "e1235789afffb26d85a11b18287963fd387d2046cc2a28777c33dba485824f86"
+    },
+    {
+      "path": "server/db/operational-flags.ts",
+      "sha256": "bfd965ad4797302afc3146d7c7a096a95e3ee4d670c4b8c9b4203945da7d18a8"
+    },
+    {
+      "path": "server/db/operational-transfers.ts",
+      "sha256": "f69b9013fb99e1ed927da16d29fb5657afedb6ed310e4c677856a5135a8d83f7"
+    },
+    {
+      "path": "server/db/pagination.ts",
+      "sha256": "b5b34e62d87232deb36d55f366d985beadbef2382004e36cee36c2ea62e2e150"
+    },
+    {
+      "path": "server/db/pay-overrides.ts",
+      "sha256": "00aa307d77ae18466952f435fb5b12c5a9d1b45f1c241ed319c71355a35f1220"
+    },
+    {
+      "path": "server/db/payroll-batches.ts",
+      "sha256": "1996ab81d86412f70f7b6578abcae07d4ceffcfcb6d0ba5e20952962d7277ac0"
+    },
+    {
+      "path": "server/db/payroll-locks.ts",
+      "sha256": "85cea0c3cc34f3e6911a2c0e99b256d00f16e0ebc0a9b9ed83f2fda5c30e92e9"
+    },
+    {
+      "path": "server/db/payroll-workflow.ts",
+      "sha256": "ebdd69b25bce1f58feea994b708efa43faab5b8b06a9e140ca409a714d7b8008"
+    },
+    {
+      "path": "server/db/recalculation.ts",
+      "sha256": "f616a25b70992fcea17d7e11a55bde911cd36379d8b21b2d24e87edd28dc5ee4"
+    },
+    {
+      "path": "server/db/restaurant-costs.ts",
+      "sha256": "ab81d67d8ca2e2939328e92198261016817afa6b883eb250f6ac0cb5342b2f72"
+    },
+    {
+      "path": "server/db/restaurants.ts",
+      "sha256": "7826010a71ed15f51454b3b797458423a8a1d1949eca7d1ee9e723ca5008f785"
+    },
+    {
+      "path": "server/db/roles.ts",
+      "sha256": "40a804d8c7cfc61ba34fbbfae0e69b6cae0040fcb60d80ceadb83ce80cae2c53"
+    },
+    {
+      "path": "server/db/statistics.ts",
+      "sha256": "13ed7e46da75bfbe5e41642f4150e022a5551da0f3bcc73345b36cea8b1d3c17"
+    },
+    {
+      "path": "server/db/temporary-assignments.ts",
+      "sha256": "69435c1688b2cb937599ba1ffcc281bcb9a90c720190885d37d2ee2a747cec05"
+    },
+    {
+      "path": "server/db/test-helpers.ts",
+      "sha256": "b16c3bf821aaa31696c9a16d8d6861480ccdec14d439a2f8bed637dae076ed35"
+    },
+    {
+      "path": "server/db/user-cost-centers.ts",
+      "sha256": "83e81521d0d6655884a6814aaf4a67fa35cb916065a450601f4994e6c1ceeff4"
+    },
+    {
+      "path": "server/db/users.ts",
+      "sha256": "62ab8ea60de279ce914854fd149f5e7422c3c1046a61dbe8e1b23ea8c9b360de"
+    },
+    {
+      "path": "server/db/users_db.ts",
+      "sha256": "6804a55b31fdeb699bd728e10518516fd9b224659f666afde1db2bae6a41e22c"
+    },
+    {
+      "path": "server/db/work-group-settings.ts",
+      "sha256": "446d88b5cdb1304fb16c521cc34b98575b0669bb29a305b247e0cc893ee6ac30"
+    },
+    {
+      "path": "server/db/workers.ts",
+      "sha256": "49c547b204198ab4d3bcc3c2f1f6402900aa1fd22676a28acd2630cfe059ccfb"
+    },
+    {
+      "path": "server/db/_shared.ts",
+      "sha256": "f5cadf579b99c17af531f8ad389181ea7a5efef4e51742299a18f3df3553adb7"
+    },
+    {
+      "path": "server/db.ts",
+      "sha256": "562c891eda71bec3c774e1492ac0415f697d6a520aec2f152b9514c019a7b5b3"
+    },
+    {
+      "path": "server/db_batch_notes.ts",
+      "sha256": "94a4b24c7ebd705598845bed1c86585120c838e1145a0f03bdaad1bc4318aa14"
+    },
+    {
+      "path": "server/error-handling.ts",
+      "sha256": "9aedbf43b0cc4b6df2f51a57524615384c4c39830e4539a241baee6e385e4d74"
+    },
+    {
+      "path": "server/excel-export.ts",
+      "sha256": "a8f95f39b3c88aa98873da167099eb4e5464acbedcf596db60a747ec18535a71"
+    },
+    {
+      "path": "server/excelExport.ts",
+      "sha256": "a58ef314a7eb4c2f360aa07e618fa5ae336d1cbe5ce4ecae36b3cdb2fb1b4771"
+    },
+    {
+      "path": "server/excelImportExport.ts",
+      "sha256": "70cd41bc5455f4dade95eace436c520062417b9f332015ab6ae7b48488a32d30"
+    },
+    {
+      "path": "server/fonts/NotoSansArabic-Regular.ttf",
+      "sha256": "63111b5b2e074dd48cc67692e0a2726d86ee94c1c37fe8598257b7b4e87e869e"
+    },
+    {
+      "path": "server/middleware.ts",
+      "sha256": "d55247baa1af26f73cc951c8f397e028ddbb4eaac21d7de0fc52a232d0b63d6f"
+    },
+    {
+      "path": "server/notifications.ts",
+      "sha256": "178d069b96e4fec1968f9eb160675054c01d604a01c4175b082c88dd9b2be8e9"
+    },
+    {
+      "path": "server/permissions.ts",
+      "sha256": "69fe572bc7efe285bf12a293dab5a7262c5ec4c18202ecb666aeb71435207034"
+    },
+    {
+      "path": "server/routers/analytics.ts",
+      "sha256": "c3a752aec72802235d67413de6a756efb827209e2a3f5ce6834e09357dd9e285"
+    },
+    {
+      "path": "server/routers/attendance-adjust.ts",
+      "sha256": "f688a756f34e62ad9507f914376435742d0dc0b61d59296273dd27208bcce48c"
+    },
+    {
+      "path": "server/routers/attendance-status.ts",
+      "sha256": "98fa42d657146c2df2590650de4e814f62bfe1aa40bb33df63628670f99a9698"
+    },
+    {
+      "path": "server/routers/attendance.ts",
+      "sha256": "0782312ceeb7ab2c044f64b2c978a9bd6651ca45fa4ba584b850ab159d825c27"
+    },
+    {
+      "path": "server/routers/audit.ts",
+      "sha256": "a45b4ab90c3490020183f7e91bacc125e5acfe4a42554020be1ab35f8532fcde"
+    },
+    {
+      "path": "server/routers/auth.ts",
+      "sha256": "7411435469c90a7374806c5d2979cd48dddc1dcccfc74f96320f556ade8c2c93"
+    },
+    {
+      "path": "server/routers/backup.ts",
+      "sha256": "3aca191c69ce19bbff91f5091a3594036ea253c0a9b423e9e878a377138dea51"
+    },
+    {
+      "path": "server/routers/ceo-reports.ts",
+      "sha256": "ffd4a58bf24a7ad8631bbe35c4df230d28f407dfbb8b78c045131fa564af373c"
+    },
+    {
+      "path": "server/routers/cost-center-report.ts",
+      "sha256": "c0fb15d6fae2f9ee1d97ab88ea1f9dd00de6c7dc386dd3a6d8e8dc4c1117878c"
+    },
+    {
+      "path": "server/routers/cost-centers.ts",
+      "sha256": "b13052a728ddb0b96b1c1fe6ea609364a79206dc525222986af2b9bdca7d477b"
+    },
+    {
+      "path": "server/routers/daily-attendance-reports.ts",
+      "sha256": "95eded978dad158f37f9de678d34d05d16652d98b6b2a502b3d5d33c4bdb0e92"
+    },
+    {
+      "path": "server/routers/daily-finance.ts",
+      "sha256": "57eaa15c086b4530d51643434509a1229da145cd3d455037228bd62c4523d093"
+    },
+    {
+      "path": "server/routers/daily-payroll-report.ts",
+      "sha256": "3180fc051e6b91d64edecb39778e1bfe0c6750fdef53785882dbbab17748dcff"
+    },
+    {
+      "path": "server/routers/dashboard.ts",
+      "sha256": "1ea522ea191f77e0951aae2eb1aceff042e59f41e38cfeb669f1fd225d83cfd2"
+    },
+    {
+      "path": "server/routers/deductions.ts",
+      "sha256": "e4f4e6facd3aaef69c564ae86168fc04ceab28f583caaa3e0066a39a227d31e3"
+    },
+    {
+      "path": "server/routers/excel-import-export.ts",
+      "sha256": "b42c436bb317493505768bd85fde3492feefd9059959ac9a335469044cf1eaf9"
+    },
+    {
+      "path": "server/routers/executive.ts",
+      "sha256": "1275ded2c98583f6809ed4af716e5be0515f0f588383926734063d8f01fac287"
+    },
+    {
+      "path": "server/routers/export.ts",
+      "sha256": "31f089507323c8e0fcc823a1cfa9653ccb6af09e8e589bcdf13697a3ca432323"
+    },
+    {
+      "path": "server/routers/financial-recalculation.ts",
+      "sha256": "0673c2d8d88f77f94716a2c5841c37b8204b2696fece339fcee9f803bde18301"
+    },
+    {
+      "path": "server/routers/financial-reports.ts",
+      "sha256": "1b3f86426f11b5187176f4ead6e93aa06660d8f43f4623ce8c8ad4aa5a3ef78f"
+    },
+    {
+      "path": "server/routers/group-schedules.ts",
+      "sha256": "85ef458cab2a436236152e5837c92f030445f1356e7490ca2295d4e90d351bae"
+    },
+    {
+      "path": "server/routers/groups.ts",
+      "sha256": "7a5cfe51a319bdc04d163da02865dbdb27869054b44517a7081bcfc8feaee698"
+    },
+    {
+      "path": "server/routers/index.ts",
+      "sha256": "d9e48988f64c8cd02d3ebd2527c1816f3176ba99d34e535511a4e5d23b1a07d4"
+    },
+    {
+      "path": "server/routers/migration.ts",
+      "sha256": "7ed0c29d4eb593f4d2f55ec4994ace18b7c30caf03c3b8fd5fcb2224acb51277"
+    },
+    {
+      "path": "server/routers/notifications.ts",
+      "sha256": "322ce6216b07d4fb7b543f104b1871351d17ccdeb25d4321dbd1dfdf8fb9b90d"
+    },
+    {
+      "path": "server/routers/operational-dashboard.ts",
+      "sha256": "378b0cff1f90450bcbc02d7970c97160a02605fa88aaca35cd01e133d6ea0eba"
+    },
+    {
+      "path": "server/routers/operational-flags.ts",
+      "sha256": "402bce5d2a5bcd318e844d63c277f1acaae6b63fc2e164a4a9cfd82d07526a95"
+    },
+    {
+      "path": "server/routers/operational-transfers.ts",
+      "sha256": "a9a5be2dca814389f712ec000b427299efc8e3caf4a013b5dc41668d3050e8c3"
+    },
+    {
+      "path": "server/routers/pay-overrides.ts",
+      "sha256": "ac06595ab2f01474ede2de735b97b54877a57b7d73ec486aed6b9f6aafd29fdb"
+    },
+    {
+      "path": "server/routers/payroll-functions.ts",
+      "sha256": "ebbcfe4943f4793b398b16894f2275a3b0d36b6e28a585a1cd4558714a767e9a"
+    },
+    {
+      "path": "server/routers/payroll.ts",
+      "sha256": "bc9d9d7c903269cc3ee48432d212fc13ea9bd992e9b4c98385b1a5abcca9642e"
+    },
+    {
+      "path": "server/routers/profile.ts",
+      "sha256": "4dd6f186dba5679eae9becc17a6a393e350789ffab7f3aa543cf5d9e0544383c"
+    },
+    {
+      "path": "server/routers/restaurants.ts",
+      "sha256": "58e15fa4d67524ff3a3b840720a726c34a3a601780adc7bfe21e2c42a0d96b46"
+    },
+    {
+      "path": "server/routers/temporary-assignments.ts",
+      "sha256": "22d0b56025e8d787ebf39269a8306c90f292f62877eae8b05ad463f71aa3821a"
+    },
+    {
+      "path": "server/routers/users.ts",
+      "sha256": "810ce5d125a1e67c702714e57c20de2af8d4c420309b8ba03ce58c0944a77ea2"
+    },
+    {
+      "path": "server/routers/users_router.ts",
+      "sha256": "89d079ddd79844527599fe610ac658ab85f8bf787a7d6d3e71874f15f3afbb49"
+    },
+    {
+      "path": "server/routers/work-days.ts",
+      "sha256": "c74b2b3bb14446cbf2ada9e02d28269c6bd4de88c37bf216e022240a80a44d56"
+    },
+    {
+      "path": "server/routers/workers.ts",
+      "sha256": "d35cdf1c08f7eb48b76a59f5b8c3dde287a1ec9910a5f81111e4b4153afbd458"
+    },
+    {
+      "path": "server/routers-index.ts",
+      "sha256": "36d34002b6f0612369fa63bbe5173d053437aa0bd07e481f6a0e700013eda3db"
+    },
+    {
+      "path": "server/routers.ts",
+      "sha256": "fe8ea7390c9aa8259c59a2b9805601b88c981400b091255f23404bd03b2111eb"
+    },
+    {
+      "path": "server/storage.ts",
+      "sha256": "3188209fe6395442c8e87c7d3d587a1710c8334f048d2cbb688d679b4c43c71f"
+    },
+    {
+      "path": "server/validation.ts",
+      "sha256": "8468fe7a63d9113b6ad1238addb44c1959f35e106bd379b1b98e569a7f2b712e"
+    },
+    {
+      "path": "server/worker-photos.ts",
+      "sha256": "403c0b3bd4a6f757880f4a2422240463fff4ebb1777b04094b0c2495fb96eb30"
+    },
+    {
+      "path": "server/_core/context.ts",
+      "sha256": "97dac3609783861be10845cf5389a675ebe78ac3538e6326e2b6e95398f170d3"
+    },
+    {
+      "path": "server/_core/cookies.ts",
+      "sha256": "ab67561c5a78ae4c86c76c013f61b3f7c02fef39f6f143ae0aa732c0e2ef2811"
+    },
+    {
+      "path": "server/_core/dataApi.ts",
+      "sha256": "194ef8e309abde283a1132aa383af10ae583e27e983afa30dfcece3aa9ce27a7"
+    },
+    {
+      "path": "server/_core/env.ts",
+      "sha256": "15356c6c79afa61c60b20e126691853d07b51c48b9e57f205b7ce63dd02d622b"
+    },
+    {
+      "path": "server/_core/errorHandler.ts",
+      "sha256": "49d91e101890d713bdffd57de768f0a36e7a3f9e2a29d0f00c0a1b601a45b38b"
+    },
+    {
+      "path": "server/_core/imageGeneration.ts",
+      "sha256": "ded064bba9a74a5463c6888b4b865302b3eabdbe484f13358c9508d140ed7004"
+    },
+    {
+      "path": "server/_core/index.ts",
+      "sha256": "ab23980c194bc127fcc12ceb66cef1cf168e64d6616e6f919ad9329454bdae08"
+    },
+    {
+      "path": "server/_core/llm.ts",
+      "sha256": "c97e3f5b9662dccb7488d965630f90d1e57ea147228aa7ce5df6cc29cddb05c3"
+    },
+    {
+      "path": "server/_core/map.ts",
+      "sha256": "c04f24ee38ef6840d56053f3464091d164a6236fc36e37672d555a684461ab7e"
+    },
+    {
+      "path": "server/_core/notification.ts",
+      "sha256": "550bf6544bf792b6d13c68539679deb363b70fbf07c0dbde189a98787f66f003"
+    },
+    {
+      "path": "server/_core/oauth.ts",
+      "sha256": "6f0aece8587d07b6ab43c46a5bf042449c51583b71d38519f22b31ddd456d544"
+    },
+    {
+      "path": "server/_core/performance.ts",
+      "sha256": "a5c165003de7368c7792a5c0f3d6a9f9b666ea08bb0d0400930d451a227f838a"
+    },
+    {
+      "path": "server/_core/sdk.ts",
+      "sha256": "9ecffd7460ebf022feb6c9e06c6e0a0b3dbe208c232d85d5c31792461d8459a8"
+    },
+    {
+      "path": "server/_core/security.ts",
+      "sha256": "fdd6875edca6d32bcf522631f57a08d6ef157d00d179d0e058c92848329e89c5"
+    },
+    {
+      "path": "server/_core/systemRouter.ts",
+      "sha256": "2c651361d3a38ae6ef797c2246b6640c8030fb892e13b3118e29987ee9e2fd39"
+    },
+    {
+      "path": "server/_core/trpc.ts",
+      "sha256": "997b6874d82a696c5248ffca9a27093d0595584006d7c435771dd17e9a3c0e13"
+    },
+    {
+      "path": "server/_core/types/cookie.d.ts",
+      "sha256": "c2ed733d67b16ae4621164dbce09e99de0233b4a0ed05227bc35096822173c05"
+    },
+    {
+      "path": "server/_core/types/manusTypes.ts",
+      "sha256": "25753a7c11b83252cec75d6ee6b5190e76a020dde493f84fdf9038ccbd75e569"
+    },
+    {
+      "path": "server/_core/validation.ts",
+      "sha256": "128b08730d418fe4008cb3b5ac6340affff416e0cf0846de9072d380814fe4ec"
+    },
+    {
+      "path": "server/_core/vite.ts",
+      "sha256": "957da5abe4ca740e48fedf9cd3c26ce1c9eca473ed50d7e7588f2173798f6b1b"
+    },
+    {
+      "path": "server/_core/voiceTranscription.ts",
+      "sha256": "c53b328b12e54adfacbc632e668c2b58b9954547ce9d3313907096c8b2db330c"
+    },
+    {
+      "path": "server/__tests__/absent-workers.test.ts",
+      "sha256": "f2b1485e1033f3f9f20a40a507b939377a5aaa63b5c6f099c9fbb70c726052c2"
+    },
+    {
+      "path": "server/__tests__/add-attendance-jan30-simple.test.ts",
+      "sha256": "e8f5abb1e3a2b141c3a986ced66aac139ddb406ebf3ba5e62732ffe31fb189db"
+    },
+    {
+      "path": "server/__tests__/administrative-day-boundary.test.ts",
+      "sha256": "ea1b986574ce7c0f3b35ab42e7fc6dc0d14526afd94b496a151052992b0e71c4"
+    },
+    {
+      "path": "server/__tests__/advanced-payroll.test.ts",
+      "sha256": "3153cf15c2e302ef8ecb029c4a8147f794ec95c09f754a803306dcb9a8bafcfe"
+    },
+    {
+      "path": "server/__tests__/attendance.test.ts",
+      "sha256": "e11fdbea5407fb0622904f225be6a8c773aafda2081275e0eaa335077292a4fa"
+    },
+    {
+      "path": "server/__tests__/auth.localLogin.test.ts",
+      "sha256": "b19a3549bf5ed9964a7f40a7aae9f615e3e7e5d7cb521fb54906f55308add566"
+    },
+    {
+      "path": "server/__tests__/auth.logout.test.ts",
+      "sha256": "31ce032116726d7f088ddac59eca26f1bc911ddf1c9b52463e3783b00a60839c"
+    },
+    {
+      "path": "server/__tests__/auto-finance.test.ts",
+      "sha256": "343c2595535efabae7d4654cc7c09051b891f0be409f2def6c2d95d3b050ba43"
+    },
+    {
+      "path": "server/__tests__/biometric-final-events-importer.test.ts",
+      "sha256": "cdd866337f260e642e14f4426202d4114409067345bae69107f728461343aaa0"
+    },
+    {
+      "path": "server/__tests__/biometric-integration.test.ts",
+      "sha256": "7b0df457e94505d96e399f8c78e19f8e95fd52f2c8eb197953a5c8030df435ad"
+    },
+    {
+      "path": "server/__tests__/biometric-web-bridge.test.ts",
+      "sha256": "f883f596fe72cd4377b4942f9654a9be4c4327b3b23237932cb94c73a4cbcf54"
+    },
+    {
+      "path": "server/__tests__/ceoReportsAggregation.test.ts",
+      "sha256": "d9e7f6dbc155bad344f0dfddddad1954d794e7944b000cf4f5d2e1f1c903f5b8"
+    },
+    {
+      "path": "server/__tests__/daily-finance.test.ts",
+      "sha256": "90046de431a4c35ab6870f9e1caebace1d396959552b3d90511e5a59628c326b"
+    },
+    {
+      "path": "server/__tests__/daily-work-assignment-finance-recalc.test.ts",
+      "sha256": "b7d90563979179a4b97298497e6e276b017eafcb1adb92b615bd3ea8e55a941a"
+    },
+    {
+      "path": "server/__tests__/date-comparison.test.ts",
+      "sha256": "b7ba0e7760055bc78626f23f842cc0a89ea050d258c71fc2760d01232163ad92"
+    },
+    {
+      "path": "server/__tests__/date-range-report.test.ts",
+      "sha256": "6497bd3e33e39eda3c2a1063e516a9bcd2786253e9f7e4d2cff42f619c02ff34"
+    },
+    {
+      "path": "server/__tests__/duplicate-code.test.ts",
+      "sha256": "f1a97774be22aef7e51a69dbacf7b4dafbaec76ef4f115355ec93a90dc7567bd"
+    },
+    {
+      "path": "server/__tests__/excelImportExport.test.ts",
+      "sha256": "11446aff22be1d87bd8abee6f267302c611c8e350c90dc6be0977778e37e1e35"
+    },
+    {
+      "path": "server/__tests__/executive-finance.test.ts",
+      "sha256": "3e6b3ed1fa2a999ec5d4765d85f4ba853cc0db87e9e1941b01ee70897333f01d"
+    },
+    {
+      "path": "server/__tests__/export.test.ts",
+      "sha256": "7953af4cbadfd141679b00f877f3dff71632a7cd45924f8480e8015c4d948d7a"
+    },
+    {
+      "path": "server/__tests__/financialReports.test.ts",
+      "sha256": "a5ccdaa6f592370235e12f51df0b257742e3387822da6e1676eff442b80323b0"
+    },
+    {
+      "path": "server/__tests__/group-edit-test.test.ts",
+      "sha256": "d8fe1c437a028855895d4d0b53d821ce74df587356ae92296e437dc311539b84"
+    },
+    {
+      "path": "server/__tests__/groups-workers.test.ts",
+      "sha256": "9c0c1488e3d5555442a3bcf1bc30c59f7f6a7997d7fa8beed0bc5d5a1de95cc2"
+    },
+    {
+      "path": "server/__tests__/groupsByCostCenter.test.ts",
+      "sha256": "d1bed97d945cb5225d150a3c718d5ba304fc22d75f5fd27b59eef481de6c2d9c"
+    },
+    {
+      "path": "server/__tests__/groupSchedules.test.ts",
+      "sha256": "ea3d9357c93aaef8de87690ea16fe81e9fd347f32e634e481905e12b8b31a76a"
+    },
+    {
+      "path": "server/__tests__/local-auth.test.ts",
+      "sha256": "a2ffbbb630f1d480b3734e16af777aba9e3dc485c24953bc3a0e728991ec8101"
+    },
+    {
+      "path": "server/__tests__/night-shift-fix.test.ts",
+      "sha256": "3faa3e161a919f40fd266c6d3e4e4b5c3a41acef89b8045e2d14559c36b8d133"
+    },
+    {
+      "path": "server/__tests__/night-shift.test.ts",
+      "sha256": "d076a1402e84aa54bd5c78c3aa7f9a337f3c71fd7479765e6ce945de72ca22f1"
+    },
+    {
+      "path": "server/__tests__/operational-dashboard.test.ts",
+      "sha256": "0e2f4b40a33300c8709514b64b03ae5856917fa8f2596d97640c5ceabe018e1d"
+    },
+    {
+      "path": "server/__tests__/operational-flags.test.ts",
+      "sha256": "bab7716a9957a1b496aea7ce3e1e990379756a3c5caf9660f040186748dd534f"
+    },
+    {
+      "path": "server/__tests__/operational-transfers.test.ts",
+      "sha256": "a95c267df676b0e9582ab880728db3a37db66a9db2f48616986a200bedb7decc"
+    },
+    {
+      "path": "server/__tests__/overnight-shift.test.ts",
+      "sha256": "21b15f37cd4bf93c5f61b9a4dd5de37e1cd89a59d11fc74863be508bdf3deb11"
+    },
+    {
+      "path": "server/__tests__/payroll-finance.test.ts",
+      "sha256": "08529ae25ac5c6f341aac0210af65fc517ce85423f68ae7235cb19b84c232400"
+    },
+    {
+      "path": "server/__tests__/payroll-flags-check.test.ts",
+      "sha256": "282576c78a7a72b9b0bf13578875f6e5a941ec5c6d84ac9648e50e8fd1f942dc"
+    },
+    {
+      "path": "server/__tests__/payroll-group-sort.test.ts",
+      "sha256": "c6385be13607b1169525a2e11ae504aa20e4eab3172cf3fc9d6b5de2bd38f525"
+    },
+    {
+      "path": "server/__tests__/payroll-history.test.ts",
+      "sha256": "9b99f97b280f1c461a8b8ccad77ef6d040cf60057f90b421365c74c8b35fa430"
+    },
+    {
+      "path": "server/__tests__/payroll-lock.test.ts",
+      "sha256": "40dc239dca70e0224387005311948461fc179c80c69e2d85ad608539e86c7440"
+    },
+    {
+      "path": "server/__tests__/payroll-report.test.ts",
+      "sha256": "348e8235c23802cc76117feaa37d4bb0b7de5575bc16f3e2bb9bf16b4f3ffee5"
+    },
+    {
+      "path": "server/__tests__/payroll-reports.test.ts",
+      "sha256": "2ddad89c5e1d8adbf7de10e7776d0f6b40734e0696bb1685f0571c316a833e9e"
+    },
+    {
+      "path": "server/__tests__/payroll-updates.test.ts",
+      "sha256": "7b7f249eb9168b346bb13dd61c409466e54c0dc1050b964561c2a9e58e28b445"
+    },
+    {
+      "path": "server/__tests__/payrollBatch.test.ts",
+      "sha256": "b9b51c12296773f292a171660c6caff6d1937a22e7f6855f7329195662c75913"
+    },
+    {
+      "path": "server/__tests__/phase4-complete.test.ts",
+      "sha256": "8b882098e79834c97b8df5a16b99401a3296b0127c957a7dee8cf5264dba0c0c"
+    },
+    {
+      "path": "server/__tests__/production-workflow.test.ts",
+      "sha256": "f7171468170fe3bc3d4f7b194f79b2dc986c3739e3e02d450ee40a156d6e3a84"
+    },
+    {
+      "path": "server/__tests__/punches-review.test.ts",
+      "sha256": "86660c02659cfafe210c8f17dc276111e538885b70a6fdfe51c8dcc8de3167cc"
+    },
+    {
+      "path": "server/__tests__/qr-export.test.ts",
+      "sha256": "2fd65b78d1e7aa46882f59d0b0438897ca298fdd8c82ba06c777cd9a55a7b589"
+    },
+    {
+      "path": "server/__tests__/qrExport.test.ts",
+      "sha256": "fef57f3be9487868ad4a2bfb2bde8c2b195e2d9d419ff5c99116c7718260596c"
+    },
+    {
+      "path": "server/__tests__/rbac.test.ts",
+      "sha256": "da53dae9e07c41cc06cf146a8b72ed2c39da887c0074cc8bf84c4b62db3b11a8"
+    },
+    {
+      "path": "server/__tests__/restaurant-cost-report-rbac.test.ts",
+      "sha256": "c4dd50364cb5cc34e8d55737007175fb27be878439f5d94a04a1d9bcc20517ac"
+    },
+    {
+      "path": "server/__tests__/roles.test.ts",
+      "sha256": "a5d0f31b2fa15f5b7db9012b132e6ed3fe7f1b45e5bf09773df875d543b4f0ac"
+    },
+    {
+      "path": "server/__tests__/security.test.ts",
+      "sha256": "5dbab65efe2e14313199da4c00b4a6d3147db713a1c96e856f1d397c1718ec32"
+    },
+    {
+      "path": "server/__tests__/seed-data.test.ts",
+      "sha256": "eaad61dc6b1d792b56fcb317550b6fcfca46e7d37fd0a7e658a712907a596834"
+    },
+    {
+      "path": "server/__tests__/shift-system.test.ts",
+      "sha256": "577bedf7ce586d0f2445c50afe392f90b89a646ae6ae1cbc4893e5d13709aadb"
+    },
+    {
+      "path": "server/__tests__/special-cases.test.ts",
+      "sha256": "4fbf281148aeadbaa4fedf81a7adece6a4dd0fc32011b61890dc1b3328346fc9"
+    },
+    {
+      "path": "server/__tests__/supabase-connection.test.ts",
+      "sha256": "3bb52c1cc5ad5046610a05defb4988ddc862010c40af1d270e9a2ad9f1a63db4"
+    },
+    {
+      "path": "server/__tests__/users.test.ts",
+      "sha256": "65003f7af331aa8d17c19279dc1085967eca5b83abaab180d50bc58e8c1a5e5c"
+    },
+    {
+      "path": "server/__tests__/work-group-settings.test.ts",
+      "sha256": "166e6a8677e7d67e3bcb6e4a08ff7db862d489423d59616be0fd18491cea434b"
+    },
+    {
+      "path": "server/__tests__/worker-details.test.ts",
+      "sha256": "4b74176edd1e5deb111d980c8d0f7890fcd54ae2d70b75825dadb9e012201d56"
+    },
+    {
+      "path": "server/__tests__/worker-photos.test.ts",
+      "sha256": "a6f88cec11b2b41f8db2229aa1d262ac039444112f0744b874ef77144b7cf48d"
+    },
+    {
+      "path": "server/__tests__/worker.code.test.ts",
+      "sha256": "9da35463b47febf72f9aef4f571bef69686f3ba5b1956207583a5f3038975d3c"
+    },
+    {
+      "path": "SHA256SUMS.txt",
+      "sha256": "dfb9ed3edc48b345c902ef2370386ae34f4ca68e644d30e1e5ec18a4b0fe4fe0"
+    },
+    {
+      "path": "SHA256SUMS_BIOMETRIC_WEB_BRIDGE_LOCAL_TEST_2026-09-06.txt",
+      "sha256": "9ed391043f28ab1c5272fef8b52c337abac451e6dd887a936b615cdaca7be0ec"
+    },
+    {
+      "path": "SHA256SUMS_MAIN_APP_BIOMETRIC_SIDEBAR_LINK_2026-09-06.txt",
+      "sha256": "c6578ee7158ec06b2f9c16e99a78d5de8808ecad58bd9f608f5facb300a449bc"
+    },
+    {
+      "path": "SHA256SUMS_MAIN_APP_FINAL_EVENTS_IMPORTER.txt",
+      "sha256": "a93b28f919765d9ee3f1ee89fe6909ea5178eb8e7ec0f8cc9ce4d7432e1e4cf7"
+    },
+    {
+      "path": "SHA256SUMS_WORKER_BIOMETRIC_LINK.txt",
+      "sha256": "9c954e108de4f0ad3a1e8e5eea3b315413c9eecb56c5aaf5650af4714d73367e"
+    },
+    {
+      "path": "shared/ceoReportsAggregation.ts",
+      "sha256": "b8900c2b3406eb63a5aff114e4060eedb4243eb46f1e8e128234eb13e993e322"
+    },
+    {
+      "path": "shared/const.ts",
+      "sha256": "11da03d221aa253356704b97fcd8ffb90975a34446dda1f3c50b528ec191583d"
+    },
+    {
+      "path": "shared/dailyAttendanceReportGrouping.ts",
+      "sha256": "6f9999e7a8c460fd6627f53c7ba390e99b4aa6ffe6369e8c16cf4322d635d11e"
+    },
+    {
+      "path": "shared/permissions.ts",
+      "sha256": "bb6f59b5d42b8afaa4459215f32f82783325cc230eb9eee18342ae3d1e35465f"
+    },
+    {
+      "path": "shared/systemPermissions.ts",
+      "sha256": "8497d8edec1395be833bf6a8969cd43a4e9278126bade2f1be0ff0ad7a85cb5d"
+    },
+    {
+      "path": "shared/types.ts",
+      "sha256": "959aeb30b032e203677e278922e97988b7cbcb56485694458298859af5589974"
+    },
+    {
+      "path": "shared/workerPhotoPolicy.ts",
+      "sha256": "6cc59f97bfb801a97887390ddbcaa9582255710cd3da97f727db5f35f875d7fe"
+    },
+    {
+      "path": "shared/_core/errors.ts",
+      "sha256": "52bee7d152045eaa009083e26a4cbc21d413c80b0403a23c4b5572141dec942a"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "4bea0e0003e3c943f455346abc4854d1666d604adbaa6aa8eda11f94fb8f1396"
+    },
+    {
+      "path": "verification/tolanhr-pilot-mysql.mjs",
+      "sha256": "9d6f806e58fcdcc45f26daa5aeb8b66e0004c09e2c5bd3dfb7bbb5eb45aedf4c"
+    },
+    {
+      "path": "verification/tolanhr-pilot-result.json",
+      "sha256": "cd4008f2da114325c911d1706fb3430a39d7f19d1b96460b29655bc04f781bdb"
+    },
+    {
+      "path": "verification/tolanhr-pilot-schema.sql",
+      "sha256": "6533ecd92da1f9d2f38e278c427f65ea2b7a0b0b094fc84b1204ec2d056d00d5"
+    },
+    {
+      "path": "verification/tolanhr-pilot.mts",
+      "sha256": "bff302f8a463f0e9a4421fc53d336f2ff0576a6d685635ae46d32fad59592473"
+    },
+    {
+      "path": "vite.config.ts",
+      "sha256": "26a466aa14080bc80c0207bafdb4d8f565255b861711c34bc173558be5e2ee53"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "a0de83b3967226a98302bbb34aa2e1321890dba9ac1d1c8ce8a6b7989af87e44"
+    }
+  ]
+}

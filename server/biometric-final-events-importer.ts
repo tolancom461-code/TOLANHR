@@ -1,8 +1,9 @@
-import { and, desc, eq, gte, lte } from 'drizzle-orm';
+import { and, desc, eq, gte, isNotNull, lte } from 'drizzle-orm';
 import {
   attendanceEvents,
   biometricFinalEventImports,
   settings,
+  workerDailyFinance,
   workers,
 } from '../drizzle/schema';
 import { getAdministrativeWorkDate } from './attendance-logic';
@@ -11,8 +12,10 @@ import {
   fetchBiometricFinalEventsPage,
   type BiometricFinalEvent,
 } from './biometric-integration';
-import { getDb } from './db/connection';
+import { getDb, type DatabaseReadExecutor } from './db/connection';
 import { processAttendanceToFinance } from './db/daily-finance';
+import { checkPayrollBatchForDate } from './db/payroll-locks';
+import { getEffectiveGroupForWorkerOnDate } from './db/recalculation';
 
 const CURSOR_SETTING_KEY = 'biometric_final_events_cursor';
 const CURSOR_SETTING_DESCRIPTION = 'Main app cursor for biometric-service Final Events API';
@@ -22,6 +25,16 @@ const MAX_POLL_INTERVAL_MS = 300_000;
 const PAGE_LIMIT = 100;
 const BOOTSTRAP_PAGE_LIMIT = 500;
 const DUPLICATE_WINDOW_MS = 3 * 60 * 1000;
+const UTC_TIMESTAMP = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})(\.\d{1,6})?Z$/;
+
+export class BiometricImportCutoffError extends Error {
+  readonly code = 'BIOMETRIC_IMPORT_CUTOFF_INVALID';
+
+  constructor() {
+    super('BIOMETRIC_FINAL_EVENTS_IMPORT_FROM_UTC must be a valid UTC ISO timestamp ending in Z');
+    this.name = 'BiometricImportCutoffError';
+  }
+}
 
 export type BiometricFinalEventImportStatus =
   | 'processed'
@@ -29,6 +42,8 @@ export type BiometricFinalEventImportStatus =
   | 'unmapped'
   | 'worker_inactive'
   | 'unsupported_event'
+  | 'before_cutoff'
+  | 'period_locked'
   | 'already_processed';
 
 type SupportedAttendanceEventType = 'check_in' | 'check_out';
@@ -53,10 +68,32 @@ export function isSupportedFinalAttendanceEventType(value: string): value is Sup
   return value === 'check_in' || value === 'check_out';
 }
 
+function parseUtcTimestamp(value: string) {
+  const match = UTC_TIMESTAMP.exec(value);
+  if (!match) return null;
+  const seconds = `${match[1]}T${match[2]}`;
+  const fraction = match[3] ?? '';
+  const microseconds = fraction.slice(1).padEnd(6, '0');
+  const time = new Date(`${seconds}.${microseconds.slice(0, 3)}Z`);
+  if (!Number.isFinite(time.getTime()) || time.toISOString().slice(0, 19) !== seconds) return null;
+  return {
+    time,
+    // Fixed-width UTC keys preserve the database's microsecond precision.
+    sortKey: `${seconds}.${microseconds}`,
+    sqlDateTime: `${match[1]} ${match[2]}${fraction}`,
+  };
+}
+
 export function finalEventUtcToSqlDateTime(value: string): string {
-  const match = value.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})(\.\d{1,6})?Z$/);
-  if (!match) throw new Error('Invalid biometric Final Event UTC timestamp');
-  return `${match[1]} ${match[2]}${match[3] ?? ''}`;
+  const timestamp = parseUtcTimestamp(value);
+  if (!timestamp) throw new Error('Invalid biometric Final Event UTC timestamp');
+  return timestamp.sqlDateTime;
+}
+
+function requireImportCutoff(): string {
+  const cutoff = parseUtcTimestamp(process.env.BIOMETRIC_FINAL_EVENTS_IMPORT_FROM_UTC?.trim() ?? '');
+  if (!cutoff) throw new BiometricImportCutoffError();
+  return cutoff.sortKey;
 }
 
 function isImporterEnabled(): boolean {
@@ -163,9 +200,28 @@ async function existingImportOutcome(event: BiometricFinalEvent): Promise<Biomet
   };
 }
 
+async function isWorkerPeriodLocked(database: DatabaseReadExecutor, workerId: number, workDate: string): Promise<boolean> {
+  const [lockedDay] = await database.select({ lockedBatchId: workerDailyFinance.lockedBatchId })
+    .from(workerDailyFinance)
+    .where(and(
+      eq(workerDailyFinance.workerId, workerId),
+      eq(workerDailyFinance.workDate, workDate),
+      isNotNull(workerDailyFinance.lockedBatchId),
+    ))
+    .limit(1);
+  if (lockedDay) return true;
+
+  const groupId = await getEffectiveGroupForWorkerOnDate(workerId, workDate, database);
+  const batch = await checkPayrollBatchForDate(workDate, groupId ?? undefined, database);
+  return batch !== null;
+}
+
 export async function importOneBiometricFinalEvent(
   event: BiometricFinalEvent,
 ): Promise<BiometricFinalEventImportOutcome> {
+  const cutoff = requireImportCutoff();
+  const timestamp = parseUtcTimestamp(event.eventTimeUtc);
+  if (!timestamp) throw new Error('Invalid biometric Final Event UTC timestamp');
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -184,6 +240,21 @@ export async function importOneBiometricFinalEvent(
           status: 'already_processed' as const,
           workerId: alreadyImported.workerId ?? null,
           attendanceEventId: alreadyImported.attendanceEventId ?? null,
+          eventType: event.eventType,
+        };
+      }
+
+      if (timestamp.sortKey < cutoff) {
+        await insertImportRecord(tx, event, {
+          workerId: null,
+          status: 'before_cutoff',
+          message: 'Event predates the configured biometric import start',
+        });
+        return {
+          eventId: event.eventId,
+          status: 'before_cutoff' as const,
+          workerId: null,
+          attendanceEventId: null,
           eventType: event.eventType,
         };
       }
@@ -238,8 +309,7 @@ export async function importOneBiometricFinalEvent(
         };
       }
 
-      const eventTime = new Date(event.eventTimeUtc);
-      if (Number.isNaN(eventTime.getTime())) throw new Error('Invalid Final Event time');
+      const eventTime = timestamp.time;
 
       // QR and biometric can coexist. Only the SAME movement type inside the
       // 3-minute window is treated as a duplicate. check_in vs check_out stay distinct.
@@ -273,6 +343,21 @@ export async function importOneBiometricFinalEvent(
       }
 
       const workDate = getAdministrativeWorkDate(eventTime);
+      if (await isWorkerPeriodLocked(tx, worker.id, workDate)) {
+        await insertImportRecord(tx, event, {
+          workerId: worker.id,
+          status: 'period_locked',
+          message: 'The worker’s administrative day is locked for payroll',
+        });
+        return {
+          eventId: event.eventId,
+          status: 'period_locked' as const,
+          workerId: worker.id,
+          attendanceEventId: null,
+          eventType: event.eventType,
+        };
+      }
+
       const result = await tx.insert(attendanceEvents).values({
         workerId: worker.id,
         eventType: event.eventType,
@@ -319,13 +404,22 @@ export async function importOneBiometricFinalEvent(
     });
 
     if (outcome.status === 'processed' && outcome.eventType === 'check_out') {
+      let financeNote: string | null = null;
       try {
-        await processAttendanceToFinance(outcome.workerId!, outcome.workDate);
-      } catch (error) {
-        console.error('[Biometric Final Events] Daily finance recalculation failed:', error);
+        // Re-read outside the attendance transaction to see a lock added after commit.
+        if (await isWorkerPeriodLocked(db, outcome.workerId!, outcome.workDate)) {
+          financeNote = 'Attendance was recorded, but daily finance was skipped because the period became locked';
+        } else {
+          await processAttendanceToFinance(outcome.workerId!, outcome.workDate);
+        }
+      } catch {
+        financeNote = 'Attendance was recorded, but daily finance could not be recalculated and requires review';
+      }
+      if (financeNote) {
+        console.warn(`[Biometric Final Events] ${financeNote}`);
         try {
           await db.update(biometricFinalEventImports).set({
-            message: 'Attendance was recorded, but daily finance recalculation failed and should be retried',
+            message: financeNote,
           }).where(eq(biometricFinalEventImports.eventUuid, event.eventId));
         } catch {
           // Attendance/import idempotency must not depend on diagnostic message updates.
@@ -354,11 +448,11 @@ export async function runBiometricFinalEventsImportOnce(): Promise<BiometricFina
     return { state: 'disabled', cursor: null, fetched: 0, skippedHistorical: 0, counts: {} };
   }
 
+  requireImportCutoff();
   const currentCursor = await readCursor();
   if (currentCursor === null) {
-    // Safe first start: establish a tail cursor without importing historical events.
-    // This prevents the five existing test/finalized events (or any older history)
-    // from suddenly changing the main attendance ledger when the consumer is enabled.
+    // Initialize at the current tail without importing existing Final Events.
+    // The UTC cutoff also applies to movements that are finalized later.
     const tail = await discoverCurrentTail();
     await saveCursor(tail.cursor);
     return {

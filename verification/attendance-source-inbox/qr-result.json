@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "completedAtUtc": "2026-11-19T08:20:06.108Z",
+  "fixture": "Real QR attendance callers with synthetic workers on a process-owned random loopback MySQL instance",
+  "checks": [
+    "A fresh synthetic MySQL schema, random loopback port and owned datadir verified before loading the application",
+    "Actual confirmAttendance refuses a missing inbox migration before changing attendance, workers or finance",
+    "Explicit QR check-in is acknowledged with its real attendance ID; stable attempt replay and changed-intent conflict preserve the saved movement",
+    "The current cooldown still rejects a distinct checkout within three minutes and retains the same rejection on source-attempt replay",
+    "Actual QR checkout retains the current 120-minute finance result and accepted replay changes neither finance nor attendance",
+    "Six concurrent confirmations of one source attempt produce one attendance movement and later replay returns that same result",
+    "Legacy scanQR infers checkout and manualEntry remains manual without manufacturing explicit-intent source receipts",
+    "Disabling the feature runs the existing explicit QR path successfully even while the inbox table is unavailable",
+    "The actual workflow sees a pending receipt before insertion; failed acknowledgement preserves its success and prevents a second attendance or finance calculation",
+    "A failure after the real attendance insert is recorded for manual review with its saved ID and cannot automatically replay the old workflow"
+  ],
+  "cleanup": {
+    "localConnectionsClosed": true,
+    "mysqlStopped": true,
+    "bootstrapRemoved": true,
+    "graceful": true,
+    "syntheticFixtureRetained": true
+  }
+}

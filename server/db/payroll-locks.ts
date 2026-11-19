@@ -31,15 +31,15 @@ import { getRoleLabel } from '../permissions';
 import { inArray, isNull, isNotNull, between } from "drizzle-orm";
 import type { Worker as DbWorker } from "../../drizzle/schema";
 import { ENV } from '../_core/env';
-import { getDb } from './connection';
+import { getDb, type DatabaseReadExecutor } from './connection';
 
 // ============================================
 // Payroll Lock Functions
 // ============================================
 
 // Check if payroll batch exists for a date (excluding cancelled and unlocked)
-export async function checkPayrollBatchForDate(date: string, groupId?: number) {
-  const db = await getDb();
+export async function checkPayrollBatchForDate(date: string, groupId?: number, database?: DatabaseReadExecutor) {
+  const db = database ?? await getDb();
   if (!db) return null;
 
   const baseConditions = and(

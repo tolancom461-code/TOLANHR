@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import type { Express, Request, Response } from 'express';
 import {
+  BiometricImportCutoffError,
   importOneBiometricFinalEvent,
   type BiometricFinalEventImportOutcome,
 } from './biometric-final-events-importer';
@@ -150,7 +151,10 @@ export function registerBiometricWebBridgeRoutes(app: Express): void {
         results,
       });
     } catch (error) {
-      console.error('[Biometric Web Bridge] ingest failed:', error);
+      if (error instanceof BiometricImportCutoffError) {
+        return res.status(503).json({ error: error.code });
+      }
+      console.error('[Biometric Web Bridge] ingest failed');
       return res.status(500).json({ error: 'INGEST_FAILED' });
     }
   });

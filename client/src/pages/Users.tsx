@@ -22,6 +22,7 @@ const ROLES = [
   { value: 'supervisor_malqa', label: 'موظف تشغيل الملقا', description: 'التشغيل اليومي للمراكز المسندة للمستخدم (يُربط عادةً بمركز الملقا)', color: 'bg-cyan-500' },
   { value: 'admin_affairs', label: 'شؤون إدارية', description: 'كل الصلاحيات ما عدا لوحة الإدارة العليا', color: 'bg-emerald-500' },
   { value: 'accountant', label: 'محاسب مالي', description: 'اعتماد/رفض الدفعات من الشؤون الإدارية (المرحلة 1)', color: 'bg-teal-500' },
+  { value: 'operations_cost_accountant', label: 'محاسب تكاليف التشغيل', description: 'استعراض تقرير تكاليف التشغيل فقط', color: 'bg-sky-500' },
   { value: 'auditor', label: 'مراجع مالي', description: 'اعتماد/رفض الدفعات من المحاسب (المرحلة 2) - بدون حذف', color: 'bg-amber-500' },
   { value: 'finance_manager', label: 'مدير مالي', description: 'الاعتماد النهائي/رفض الدفعات من المراجع (المرحلة 3) - بدون حذف', color: 'bg-purple-500' },
   { value: 'executive', label: 'إدارة عليا', description: 'لوحات التحكم فقط (استعراض)', color: 'bg-indigo-500' },

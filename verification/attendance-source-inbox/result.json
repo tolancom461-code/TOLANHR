@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "completedAtUtc": "2026-11-19T08:00:07.780Z",
+  "fixture": "Synthetic records on a process-owned random loopback MySQL instance; no application bootstrap or live database",
+  "checks": [
+    "Owned random loopback port, datadir and schema verified before using an explicit local pool",
+    "Missing migration and wrong expected database reject without changing the existing ledger",
+    "Reviewed CREATE TABLE applied by replacing only the exact qualified target with the owned synthetic schema",
+    "MyISAM, manufactured outcome defaults and extra indexes reject before capture; exact schema restored after every local tamper",
+    "All six states retained with exact UTC microseconds and device identity; only in/out eligible and no attendance or finance effects",
+    "Unmapped receipts and four review-only states remain queryable without automatic processing",
+    "Same source/key replays immutably, changed payload conflicts, and QR has its own technical source namespace",
+    "Ten distinct same-worker/same-type receipts one second apart remain separate pending receipts",
+    "Twelve concurrent same-source arrivals produce one immutable receipt with eleven replays",
+    "Outcome acknowledgement verifies an existing attendance reference, preserves auxiliary eligibility, and leaves the entire prior ledger unchanged"
+  ],
+  "cleanup": {
+    "localConnectionsClosed": true,
+    "mysqlStopped": true,
+    "bootstrapRemoved": true,
+    "graceful": true,
+    "syntheticFixtureRetained": true
+  }
+}

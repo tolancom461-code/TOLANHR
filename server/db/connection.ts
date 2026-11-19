@@ -228,6 +228,8 @@ export async function getDb() {
   return _db;
 }
 
+export type DatabaseReadExecutor = Pick<NonNullable<Awaited<ReturnType<typeof getDb>>>, 'select'>;
+
 // Get raw MySQL connection for direct queries
 export async function getRawConnection() {
   if (!_rawConnection && process.env.DATABASE_URL) {
