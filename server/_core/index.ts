@@ -56,6 +56,7 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
   let stopBiometricFinalEventsImporter: () => void = () => undefined;
+  let stopBiometricSourceImporter: () => void = () => undefined;
 
   // ==========================================
   // SECURITY MIDDLEWARE
@@ -231,8 +232,15 @@ async function startServer() {
     // Final Events consumer is disabled unless explicitly enabled by environment.
     // First enable initializes its cursor at the current API tail, so historical
     // biometric events are not backfilled into attendance automatically.
-    const importer = await import('../biometric-final-events-importer');
-    stopBiometricFinalEventsImporter = importer.startBiometricFinalEventsImporter();
+    if (process.env.BIOMETRIC_SOURCE_IMPORT_ENABLED === 'true' && /^(?:1|true|yes|on)$/i.test(process.env.BIOMETRIC_FINAL_EVENTS_IMPORT_ENABLED?.trim() ?? '')) {
+      console.error('[Biometric source inbox] BIOMETRIC_SOURCE_IMPORT_MODE_CONFLICT');
+    } else if (process.env.BIOMETRIC_SOURCE_IMPORT_ENABLED === 'true') {
+      const sourceImporter = await import('../biometric-source-importer/runtime');
+      stopBiometricSourceImporter = sourceImporter.startBiometricSourceImporter();
+    } else {
+      const importer = await import('../biometric-final-events-importer');
+      stopBiometricFinalEventsImporter = importer.startBiometricFinalEventsImporter();
+    }
   });
   
   // ==========================================
@@ -243,6 +251,7 @@ async function startServer() {
   process.on('SIGTERM', () => {
     console.log('[Server] SIGTERM received, shutting down gracefully...');
     stopBiometricFinalEventsImporter();
+    stopBiometricSourceImporter();
     server.close(() => {
       console.log('[Server] HTTP server closed');
       process.exit(0);
@@ -259,6 +268,7 @@ async function startServer() {
   process.on('SIGINT', () => {
     console.log('[Server] SIGINT received, shutting down gracefully...');
     stopBiometricFinalEventsImporter();
+    stopBiometricSourceImporter();
     server.close(() => {
       console.log('[Server] HTTP server closed');
       process.exit(0);

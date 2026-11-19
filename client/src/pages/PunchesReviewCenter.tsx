@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Clock, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { formatRiyadhAttendanceTime, riyadhDateTime } from '@shared/attendance-time';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function PunchesReviewCenter() {
@@ -104,16 +105,12 @@ export default function PunchesReviewCenter() {
   const handleConfirmAction = () => {
     if (!selectedRecord) return;
 
-    const workDate = new Date(selectedDate);
-    
     if (selectedRecord.actionType === 'check_in') {
       if (!timeInput) {
         toast.error("يرجى إدخال وقت الحضور");
         return;
       }
-      const [hours, minutes] = timeInput.split(':');
-      const checkInDate = new Date(workDate);
-      checkInDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      const checkInDate = riyadhDateTime(selectedDate, timeInput);
       
       addCheckInMutation.mutate({
         workerId: selectedRecord.workerId,
@@ -125,9 +122,7 @@ export default function PunchesReviewCenter() {
         toast.error("يرجى إدخال وقت الانصراف");
         return;
       }
-      const [hours, minutes] = timeInput.split(':');
-      const checkOutDate = new Date(workDate);
-      checkOutDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      const checkOutDate = riyadhDateTime(selectedDate, timeInput);
       
       addCheckOutMutation.mutate({
         workerId: selectedRecord.workerId,
@@ -153,19 +148,12 @@ export default function PunchesReviewCenter() {
   const handleAddFullSession = () => {
     if (!sessionWorkerId || !sessionCheckIn || !sessionCheckOut) return;
 
-    const workDate = new Date(selectedDate);
-
-    const [inH, inM] = sessionCheckIn.split(':');
-    const checkInDate = new Date(workDate);
-    checkInDate.setHours(parseInt(inH), parseInt(inM), 0, 0);
-
-    const [outH, outM] = sessionCheckOut.split(':');
-    const checkOutDate = new Date(workDate);
-    checkOutDate.setHours(parseInt(outH), parseInt(outM), 0, 0);
+    const checkInDate = riyadhDateTime(selectedDate, sessionCheckIn);
+    const checkOutDate = riyadhDateTime(selectedDate, sessionCheckOut);
 
     // لو الخروج قبل الدخول — يعني تجاوز منتصف الليل
     if (checkOutDate < checkInDate) {
-      checkOutDate.setDate(checkOutDate.getDate() + 1);
+      checkOutDate.setTime(checkOutDate.getTime() + 24 * 60 * 60 * 1000);
     }
 
     addFullSessionMutation.mutate({
@@ -352,10 +340,7 @@ export default function PunchesReviewCenter() {
                       {record.checkInTime ? (
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4 text-green-600" />
-                          {new Date(record.checkInTime).toLocaleTimeString('ar-SA', { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
+                          {formatRiyadhAttendanceTime(record.checkInTime)}
                         </span>
                       ) : (
                         <span className="text-red-500">-</span>
@@ -365,10 +350,7 @@ export default function PunchesReviewCenter() {
                       {record.checkOutTime ? (
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4 text-blue-600" />
-                          {new Date(record.checkOutTime).toLocaleTimeString('ar-SA', { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
+                          {formatRiyadhAttendanceTime(record.checkOutTime)}
                         </span>
                       ) : (
                         <span className="text-red-500">-</span>

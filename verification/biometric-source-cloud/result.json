@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "completedAtUtc": "2026-11-19T12:09:41.346Z",
+  "archiveCount": 8,
+  "fixture": "Owned random loopback MySQL and HTTP; synthetic records only; no env file, application startup, live database or device",
+  "checks": [
+    "Owned random loopback MySQL port, data directory and synthetic schema verified before any fixture DDL",
+    "Only the three reviewed CREATE definitions were retargeted exactly to the owned schema; production GRANT was never executed",
+    "Real SQL and authenticated HTTP export all six valid movement states across pages, including null and archived identities, with no final-event prerequisite",
+    "Leading-zero PINs, identifiers beyond JS safe integers and UTC microseconds survive; unsupported, contradictory, untimed and unproven legacy states stay at source",
+    "Consumer HTTP -> inbox SQL -> dedicated durable progress archives only: in/out unmapped and four auxiliary states review-only; all existing settings and ledger unchanged",
+    "Fresh consumer instance and pooled connections reload durable progress; replay returns the same six receipt UUIDs",
+    "Full reconciliation recovers a newly committed ID below the tail once, while the independent tail cursor imports newer IDs",
+    "Malformed source event yields a fixed source failure and does not advance that page or fabricate an archive item",
+    "Revoking one durable key immediately denies its requests without progress movement; the other program key continues without duplicate receipts",
+    "Only credential digests/prefixes persist, plaintext keys never enter punch exports/inbox/progress/list metadata, and unrelated attendance/finance/worker data stays identical"
+  ],
+  "cleanup": {
+    "httpServerClosed": true,
+    "localConnectionsClosed": true,
+    "mysqlStopped": true,
+    "bootstrapRemoved": true,
+    "graceful": true,
+    "syntheticFixtureRetained": true
+  }
+}

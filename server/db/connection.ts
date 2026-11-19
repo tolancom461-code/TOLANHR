@@ -31,6 +31,7 @@ import { getRoleLabel } from '../permissions';
 import { inArray, isNull, isNotNull, between } from "drizzle-orm";
 import type { Worker as DbWorker } from "../../drizzle/schema";
 import { ENV } from '../_core/env';
+import { configureAttendanceTimeSession } from './attendance-time-session';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 let _rawConnection: any = null;
@@ -219,6 +220,8 @@ export async function getDb() {
           keepAliveInitialDelay: 30000, // First keepalive after 30s
         }
       });
+      // Attendance columns have an explicit Riyadh codec; retain the legacy UTC SQL session.
+      configureAttendanceTimeSession(_db.$client);
       console.log('[Database] Connection pool initialized (limit: 5, idle timeout: 60s)');
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
@@ -235,7 +238,14 @@ export async function getRawConnection() {
   if (!_rawConnection && process.env.DATABASE_URL) {
     try {
       const mysql = await import('mysql2/promise');
-      _rawConnection = await mysql.createConnection(process.env.DATABASE_URL);
+      const connection = await mysql.createConnection(process.env.DATABASE_URL);
+      try {
+        await connection.query("SET SESSION time_zone = '+00:00'");
+      } catch (error) {
+        connection.destroy();
+        throw error;
+      }
+      _rawConnection = connection;
       console.log('[Database] Raw connection established');
     } catch (error) {
       console.warn("[Database] Failed to create raw connection:", error);

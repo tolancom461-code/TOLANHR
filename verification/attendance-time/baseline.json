@@ -1,0 +1,33 @@
+{
+  "recordedAtUtc": "2026-11-19T10:00:59.875Z",
+  "files": [
+    {
+      "path": "drizzle/schema.ts",
+      "sha256": "c5f9d99e4371f2e0ad87f5ad3aceadc0a9b818cea582fb8ff8aadabf36278990"
+    },
+    {
+      "path": "server/db/connection.ts",
+      "sha256": "f84f6f2cb810664df2b693f6a2078a8c6a47489d26e15191313dd4ed4c560c43"
+    },
+    {
+      "path": "server/attendance-logic.ts",
+      "sha256": "a76f6f3c0182638820e475acce58556ce22e7873b02da80573cb6774d9521793"
+    },
+    {
+      "path": "server/db/daily-finance.ts",
+      "sha256": "e5894e72275bc1285ee79bc97a6ebac5caebdb7b84a65f3dff3da766ab8fbad2"
+    },
+    {
+      "path": "client/src/pages/AttendanceLog.tsx",
+      "sha256": "24a2e361b984d0cedd8dcb2017396229ef06e244300fd3943ef018b98cc8d9f0"
+    },
+    {
+      "path": "client/src/pages/AttendanceScanner.tsx",
+      "sha256": "70e122cd8dc4f7eb64bef7e5a4415ff228b63d82161b6af1757f759af5e0a5dc"
+    },
+    {
+      "path": "client/src/pages/WorkerDetails.tsx",
+      "sha256": "d70a497b86c51112391c7aeb00d64ca1b8aca11e9d493e04712bca43215d2476"
+    }
+  ]
+}

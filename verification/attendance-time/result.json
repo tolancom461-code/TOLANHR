@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "completedAtUtc": "2026-11-19T10:06:56.085Z",
+  "fixture": "Synthetic legacy Riyadh wall-clock TIMESTAMP rows on owned loopback MySQL; Asia/Riyadh application runtime with local driver Date timezone",
+  "storageContract": "Preserve Riyadh physical attendance wall clocks; source and import audit DATETIME UTC fields remain UTC",
+  "checks": [
+    "Application runs in Asia/Riyadh with a verified owned loopback database and no UTC driver timezone option masking Date conversion",
+    "Four codecs decode legacy wall clocks with +03:00 while old attendance and financial rows remain identical; application SQL sessions pin UTC independently",
+    "A raw legacy 13:00 check-in is found as the open session and still triggers the current three-minute cooldown at Riyadh 13:01",
+    "Actual QR legacy 13:00 plus new 15:00 gives 120 minutes/net120.00; raw Riyadh attendance and UTC source refer to the same instant",
+    "Actual QR lookup ISO values and day-report values agree on Riyadh13:00/15:00 and the same administrative day",
+    "Date-based manual insert and ISO-offset edit roundtrip through the actual column codec without changing the seeded historical rows",
+    "Actual QR keeps Riyadh04:39:59 on the prior administrative day and Riyadh04:40:00 on the current day",
+    "The existing final-event importer stores UTC10:00 as legacy Riyadh13:00 attendance and retains UTC10:00 in its source audit"
+  ],
+  "cleanup": {
+    "localConnectionsClosed": true,
+    "mysqlStopped": true,
+    "bootstrapRemoved": true,
+    "graceful": true,
+    "syntheticFixtureRetained": true
+  }
+}

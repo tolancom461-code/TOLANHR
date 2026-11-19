@@ -1,5 +1,6 @@
 import { mysqlTable, mysqlSchema, AnyMySqlColumn, index, uniqueIndex, foreignKey, int, bigint, smallint, decimal, date, datetime, char, json, mysqlEnum, text, timestamp, varchar, tinyint, unique, primaryKey } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
+import { riyadhAttendanceTimestamp } from './attendance-time-column';
 
 export const assignmentSettlements = mysqlTable("assignment_settlements", {
 	id: int().autoincrement().notNull(),
@@ -30,7 +31,7 @@ export const attendanceEvents = mysqlTable("attendance_events", {
 	id: int().autoincrement().notNull(),
 	workerId: int("worker_id").notNull().references(() => workers.id, { onDelete: "cascade", onUpdate: "cascade" } ),
 	eventType: mysqlEnum("event_type", ['check_in','check_out']).notNull(),
-	eventTime: timestamp("event_time", { mode: 'string' }).notNull(),
+	eventTime: riyadhAttendanceTimestamp("event_time").notNull(),
 	deviceId: int("device_id"),
 	verifiedBy: int("verified_by").references(() => users.id, { onDelete: "set null", onUpdate: "cascade" } ),
 	method: varchar({ length: 50 }),
@@ -1017,8 +1018,8 @@ export const workerDailyFinance = mysqlTable("worker_daily_finance", {
 	workerId: int("worker_id").notNull().references(() => workers.id, { onDelete: "cascade", onUpdate: "cascade" } ),
 	// you can use { mode: 'date' }, if you want to have Date as type for this column
 	workDate: date("work_date", { mode: 'string' }).notNull(),
-	checkInTime: timestamp("check_in_time", { mode: 'string' }),
-	checkOutTime: timestamp("check_out_time", { mode: 'string' }),
+	checkInTime: riyadhAttendanceTimestamp("check_in_time"),
+	checkOutTime: riyadhAttendanceTimestamp("check_out_time"),
 	workedMinutes: int("worked_minutes").default(0),
 	financialMinutes: int("financial_minutes").default(0),
 	baseSalary: decimal("base_salary", { precision: 10, scale: 2 }).default('0.00'),
@@ -1061,7 +1062,7 @@ export const workers = mysqlTable("workers", {
 	qrToken: varchar("qr_token", { length: 100 }),
 	manualCode: varchar("manual_code", { length: 20 }),
 	status: mysqlEnum(['active','inactive','archived']).default('active'),
-	lastAttendanceAt: timestamp("last_attendance_at", { mode: 'string' }),
+	lastAttendanceAt: riyadhAttendanceTimestamp("last_attendance_at"),
 	// you can use { mode: 'date' }, if you want to have Date as type for this column
 	hireDate: date("hire_date", { mode: 'string' }),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),

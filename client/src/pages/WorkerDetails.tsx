@@ -1,5 +1,6 @@
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { formatRiyadhAttendanceTime, parseAttendanceTime } from '@shared/attendance-time';
 import DashboardLayout from "@/components/DashboardLayout";
 import WorkerPhotoPreview from "@/components/WorkerPhotoPreview";
 import { Button } from "@/components/ui/button";
@@ -79,7 +80,7 @@ export default function WorkerDetails() {
   };
 
   const formatTime = (date: Date | string) => {
-    return new Date(date).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+    return formatRiyadhAttendanceTime(date);
   };
 
   const formatDate = (date: Date | string) => {
@@ -110,7 +111,7 @@ export default function WorkerDetails() {
 
   // Group attendance events by date
   const groupedAttendance = attendance?.reduce((acc, event) => {
-    const dateKey = formatDate(event.eventTime);
+    const dateKey = parseAttendanceTime(event.eventTime).toLocaleDateString('ar-SA', { timeZone: 'Asia/Riyadh' });
     if (!acc[dateKey]) {
       acc[dateKey] = { checkIn: null, checkOut: null };
     }
@@ -333,8 +334,8 @@ export default function WorkerDetails() {
                     </TableHeader>
                     <TableBody>
                       {groupedAttendance && Object.entries(groupedAttendance).map(([date, events]) => {
-                        const checkInTime = events.checkIn ? new Date(events.checkIn.eventTime) : null;
-                        const checkOutTime = events.checkOut ? new Date(events.checkOut.eventTime) : null;
+                        const checkInTime = events.checkIn ? parseAttendanceTime(events.checkIn.eventTime) : null;
+                        const checkOutTime = events.checkOut ? parseAttendanceTime(events.checkOut.eventTime) : null;
                         let hoursWorked = '-';
                         
                         if (checkInTime && checkOutTime) {

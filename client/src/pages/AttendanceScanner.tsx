@@ -28,6 +28,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import QRScanner from '@/components/QRScanner';
 import { createQrAttemptId } from '@/lib/qr-attempt-id';
 import { getDeviceInfo } from '@/lib/deviceInfo';
+import { formatRiyadhAttendanceTime } from '@shared/attendance-time';
 
 export default function AttendanceScanner() {
   const { user } = useAuth();
@@ -445,7 +446,7 @@ export default function AttendanceScanner() {
                   <Clock className="h-5 w-5 text-gray-500" />
                   <div>
                     <div className="text-sm text-gray-500">الوقت الحالي</div>
-                    <div className="font-semibold">{new Date().toLocaleTimeString('ar-SA')}</div>
+                    <div className="font-semibold">{formatRiyadhAttendanceTime(new Date(), { second: '2-digit' })}</div>
                   </div>
                 </div>
               </div>
@@ -457,8 +458,7 @@ export default function AttendanceScanner() {
                   <div className="space-y-1 text-sm">
                     {workerData.todayEvents.map((event: any, index: number) => {
                         const eventDate = event.eventTime || event.timestamp;
-                        const dateObj = typeof eventDate === 'string' ? new Date(eventDate) : eventDate;
-                        const timeStr = isNaN(dateObj.getTime()) ? 'Invalid Date' : dateObj.toLocaleTimeString('ar-SA');
+                        const timeStr = formatRiyadhAttendanceTime(eventDate, { second: '2-digit' });
                         return (
                           <div key={index} className="flex justify-between">
                             <span>{event.eventType === 'check_in' ? '✓ حضور' : '✗ انصراف'}</span>
@@ -567,7 +567,7 @@ export default function AttendanceScanner() {
                               <span className="text-muted-foreground">حضور</span>
                               <span className="font-mono font-medium text-green-600">
                                 {w.checkInTime
-                                  ? new Date(w.checkInTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+                                  ? formatRiyadhAttendanceTime(w.checkInTime)
                                   : '—'}
                               </span>
                             </div>
@@ -575,7 +575,7 @@ export default function AttendanceScanner() {
                               <span className="text-muted-foreground">انصراف</span>
                               <span className={`font-mono font-medium ${w.checkOutTime ? 'text-blue-600' : 'text-orange-500'}`}>
                                 {w.checkOutTime
-                                  ? new Date(w.checkOutTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+                                  ? formatRiyadhAttendanceTime(w.checkOutTime)
                                   : 'لم ينصرف بعد'}
                               </span>
                             </div>
@@ -593,7 +593,7 @@ export default function AttendanceScanner() {
                               <span className="text-muted-foreground">حضور</span>
                               <span className="font-mono font-medium text-green-600">
                                 {s.checkInTime
-                                  ? new Date(s.checkInTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+                                  ? formatRiyadhAttendanceTime(s.checkInTime)
                                   : '—'}
                               </span>
                             </div>
@@ -601,7 +601,7 @@ export default function AttendanceScanner() {
                               <span className="text-muted-foreground">انصراف</span>
                               <span className={`font-mono font-medium ${s.checkOutTime ? 'text-blue-600' : 'text-orange-500'}`}>
                                 {s.checkOutTime
-                                  ? new Date(s.checkOutTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+                                  ? formatRiyadhAttendanceTime(s.checkOutTime)
                                   : 'لم ينصرف بعد'}
                               </span>
                             </div>
@@ -676,7 +676,7 @@ export default function AttendanceScanner() {
                     {lastResult.eventType === 'check_in' ? 'تسجيل حضور' : 'تسجيل انصراف'}
                   </p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    {new Date().toLocaleTimeString('ar-SA')}
+                    {formatRiyadhAttendanceTime(new Date(), { second: '2-digit' })}
                   </p>
                 </>
               )}

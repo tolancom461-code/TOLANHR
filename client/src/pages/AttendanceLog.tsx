@@ -27,6 +27,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { attendanceTimeInput, formatRiyadhAttendanceTime, parseAttendanceTime, riyadhDateTime } from '@shared/attendance-time';
 
 export default function AttendanceLog() {
   const { user } = useAuth();
@@ -284,8 +285,7 @@ export default function AttendanceLog() {
       }
 
       const fmtTime = (d: string | Date | null | undefined) => {
-        if (!d) return '-';
-        return new Date(d).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true });
+        return formatRiyadhAttendanceTime(d, { hour12: true });
       };
       const fmtHours = (mins: number) => {
         const h = Math.floor(mins / 60);
@@ -308,8 +308,8 @@ export default function AttendanceLog() {
                 checkOut: record.checkOutTime ? { eventTime: record.checkOutTime, method: record.checkOutMethod } : null,
               }];
           for (const session of sessions) {
-            const checkInDate = session.checkIn?.eventTime ? new Date(session.checkIn.eventTime) : null;
-            const checkOutDate = session.checkOut?.eventTime ? new Date(session.checkOut.eventTime) : null;
+            const checkInDate = session.checkIn?.eventTime ? parseAttendanceTime(session.checkIn.eventTime) : null;
+            const checkOutDate = session.checkOut?.eventTime ? parseAttendanceTime(session.checkOut.eventTime) : null;
             const workMinutes = checkInDate && checkOutDate
               ? Math.round((checkOutDate.getTime() - checkInDate.getTime()) / 60000)
               : null;
@@ -483,8 +483,8 @@ export default function AttendanceLog() {
           for (const session of sessions) {
             rowCounter++;
             const altClass = rowCounter % 2 === 0 ? 'alt-row' : '';
-            const checkInDate = session.checkIn?.eventTime ? new Date(session.checkIn.eventTime) : null;
-            const checkOutDate = session.checkOut?.eventTime ? new Date(session.checkOut.eventTime) : null;
+            const checkInDate = session.checkIn?.eventTime ? parseAttendanceTime(session.checkIn.eventTime) : null;
+            const checkOutDate = session.checkOut?.eventTime ? parseAttendanceTime(session.checkOut.eventTime) : null;
             // دقائق هذه الجلسة تحديدًا (مو إجمالي اليوم) — حتى ما تتكرر نفس القيمة لو فيه أكثر من جلسة بنفس اليوم
             const sessionMinutes = checkInDate && checkOutDate
               ? Math.round((checkOutDate.getTime() - checkInDate.getTime()) / 60000)
@@ -647,16 +647,11 @@ export default function AttendanceLog() {
         }];
 
     const builtSessions = sessions.map((s: any) => {
-      const formatT = (t: any) => {
-        if (!t) return '';
-        const d = new Date(t);
-        return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-      };
       return {
         checkInId: s.checkIn?.id || null,
         checkOutId: s.checkOut?.id || null,
-        checkInTime: formatT(s.checkIn?.eventTime),
-        checkOutTime: formatT(s.checkOut?.eventTime),
+        checkInTime: attendanceTimeInput(s.checkIn?.eventTime),
+        checkOutTime: attendanceTimeInput(s.checkOut?.eventTime),
       };
     });
 
@@ -682,14 +677,9 @@ export default function AttendanceLog() {
   const handleSaveEdit = () => {
     if (!editingRecord || editingSessions.length === 0) return;
 
-    const baseDate = new Date(selectedDate);
-    baseDate.setHours(0, 0, 0, 0);
-
     for (const session of editingSessions) {
       if (session.checkInTime && session.checkInId) {
-        const [h, m] = session.checkInTime.split(':');
-        const newTime = new Date(baseDate);
-        newTime.setHours(parseInt(h), parseInt(m), 0, 0);
+        const newTime = riyadhDateTime(selectedDate, session.checkInTime);
         updateEventMutation.mutate({
           eventId: session.checkInId,
           newTime: newTime.toISOString(),
@@ -698,15 +688,11 @@ export default function AttendanceLog() {
       }
 
       if (session.checkOutTime && session.checkOutId) {
-        const [h, m] = session.checkOutTime.split(':');
-        const newTime = new Date(baseDate);
-        newTime.setHours(parseInt(h), parseInt(m), 0, 0);
+        const newTime = riyadhDateTime(selectedDate, session.checkOutTime);
 
         if (session.checkInTime) {
-          const [ih, im] = session.checkInTime.split(':');
-          const inRef = new Date(baseDate);
-          inRef.setHours(parseInt(ih), parseInt(im), 0, 0);
-          if (newTime <= inRef) newTime.setDate(newTime.getDate() + 1);
+          const inRef = riyadhDateTime(selectedDate, session.checkInTime);
+          if (newTime <= inRef) newTime.setTime(newTime.getTime() + 24 * 60 * 60 * 1000);
         }
 
         updateEventMutation.mutate({
@@ -733,24 +719,17 @@ export default function AttendanceLog() {
     }
 
     try {
-      const baseDate = new Date(selectedDate);
-      baseDate.setHours(0, 0, 0, 0);
-
-      const [checkInHours, checkInMinutes] = prepareCheckInTime.split(':');
-      const checkInTime = new Date(baseDate);
-      checkInTime.setHours(parseInt(checkInHours), parseInt(checkInMinutes), 0, 0);
+      const checkInTime = riyadhDateTime(selectedDate, prepareCheckInTime);
       await addCheckInMutation.mutateAsync({
         workerId: selectedAbsentWorker.workerId,
         checkInTime: checkInTime.toISOString(),
         note: prepareNote || 'تحضير يدوي'
       });
 
-      const [checkOutHours, checkOutMinutes] = prepareCheckOutTime.split(':');
-      const checkOutTime = new Date(baseDate);
-      checkOutTime.setHours(parseInt(checkOutHours), parseInt(checkOutMinutes), 0, 0);
+      const checkOutTime = riyadhDateTime(selectedDate, prepareCheckOutTime);
       
       if (checkOutTime <= checkInTime) {
-        checkOutTime.setDate(checkOutTime.getDate() + 1);
+        checkOutTime.setTime(checkOutTime.getTime() + 24 * 60 * 60 * 1000);
       }
       await addCheckOutMutation.mutateAsync({
         workerId: selectedAbsentWorker.workerId,
@@ -767,12 +746,8 @@ export default function AttendanceLog() {
     }
   };
 
-  const formatTime = (date: Date | string | null) => {
-    if (!date) return '-';
-    return new Date(date).toLocaleTimeString('ar-SA', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const formatTime = (date: Date | string | null | undefined) => {
+    return formatRiyadhAttendanceTime(date);
   };
 
   const getMethodBadge = (method: string | null) => {
@@ -1167,7 +1142,7 @@ export default function AttendanceLog() {
                             <div className="flex items-center gap-2">
                               <Clock className="h-4 w-4 text-blue-600" />
                               {(() => {
-                                let mins = Math.round((new Date(session.checkOut.eventTime).getTime() - new Date(session.checkIn.eventTime).getTime()) / 60000);
+                                let mins = Math.round((parseAttendanceTime(session.checkOut.eventTime).getTime() - parseAttendanceTime(session.checkIn.eventTime).getTime()) / 60000);
                                 if (mins < 0) mins += 1440;
                                 return mins;
                               })()} دقيقة
@@ -1181,7 +1156,7 @@ export default function AttendanceLog() {
                             <div className="flex items-center gap-2">
                               <Clock className="h-4 w-4 text-blue-600" />
                               {(() => {
-                                let mins = Math.round((new Date(session.checkOut.eventTime).getTime() - new Date(session.checkIn.eventTime).getTime()) / 60000);
+                                let mins = Math.round((parseAttendanceTime(session.checkOut.eventTime).getTime() - parseAttendanceTime(session.checkIn.eventTime).getTime()) / 60000);
                                 if (mins < 0) mins += 1440;
                                 return (mins / 60).toLocaleString("ar-SA", { maximumFractionDigits: 2 });
                               })()} ساعة

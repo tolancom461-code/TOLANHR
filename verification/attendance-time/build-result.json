@@ -1,0 +1,20 @@
+{
+  "completedAtUtc": "2026-11-19T10:11:00.451Z",
+  "inMemoryOnly": true,
+  "outputs": [
+    {
+      "target": "server",
+      "passed": true,
+      "inputs": 132,
+      "attendanceCodecReachable": true,
+      "connectionGateReachable": true
+    },
+    {
+      "target": "browser-dependency-build",
+      "passed": true,
+      "inputs": 3294,
+      "riYadhFormatterReachable": true,
+      "cssRenderingVerified": false
+    }
+  ]
+}
