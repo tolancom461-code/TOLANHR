@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "checkedAtUtc": "2026-11-25T11:03:33.238Z",
+  "syntheticLoopbackOnly": true,
+  "checks": [
+    "Numeric ordering covers every page, leading zeros, 128-digit PINs and values beyond JavaScript integer precision",
+    "Case-insensitive A–Z order is global across pages, deterministic, with empty names last",
+    "RAD, rad and rAd find MUAMEDRADMAN outside the initial page and honor the current/historical filter",
+    "Search treats percent, underscore and exclamation as literal characters",
+    "All list/search/sort requests preserve directory rows, worker links, workers, attendance and finance"
+  ],
+  "cleanup": {
+    "connectionsClosed": true,
+    "mysqlStopped": true,
+    "bootstrapRemoved": true,
+    "graceful": true,
+    "syntheticFixtureRetained": true
+  }
+}

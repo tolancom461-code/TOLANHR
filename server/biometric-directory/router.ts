@@ -44,7 +44,8 @@ export function createBiometricDirectoryWorkerProcedures(
   return {
     sourceBiometricMode: protectedProcedure.query(() => ({ enabled: enabled() })),
     sourceBiometricUsers: allowed.input(z.object({ search: z.string().max(100).optional(),
-      roster: z.enum(['current', 'historical', 'all']).default('current'), currentWorkerId: workerId.optional(),
+      roster: z.enum(['current', 'historical', 'all']).default('current'),
+      sortBy: z.enum(['device_user_id', 'name']).default('device_user_id'), currentWorkerId: workerId.optional(),
       page: z.number().int().min(1).max(10000).default(1), limit: z.number().int().min(1).max(100).default(50) }).strict())
       .query(({ input }) => guarded(({ store, streamId }) => store.listUsers({ ...input, streamId }))),
     sourceBiometricWorkerLinks: allowed.input(z.object({ workerId }).strict())

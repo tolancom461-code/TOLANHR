@@ -29,6 +29,7 @@ export interface ListDirectoryUsersInput {
   streamId: string;
   search?: string;
   roster?: 'current' | 'historical' | 'all';
+  sortBy?: 'device_user_id' | 'name';
   currentWorkerId?: number;
   page?: number;
   limit?: number;

@@ -7,6 +7,18 @@ import { identity, invalid, listInput, positiveId, revokeInput, setInput, snapsh
 
 const USERS = '`attendance_biometric_users`';
 const LINKS = '`attendance_biometric_worker_links`';
+const NUMERIC_PIN = "u.device_user_id REGEXP '^[0-9]+$'";
+const PIN_DIGITS = "TRIM(LEADING '0' FROM u.device_user_id)";
+// Length and lexical comparison retain every digit of the VARCHAR(128) PIN.
+const PIN_ORDER = `CASE WHEN ${NUMERIC_PIN} THEN 0 ELSE 1 END ASC,
+  CASE WHEN ${NUMERIC_PIN} THEN CHAR_LENGTH(${PIN_DIGITS}) END ASC,
+  CASE WHEN ${NUMERIC_PIN} THEN ${PIN_DIGITS} END ASC,
+  LOWER(u.device_user_id) ASC, u.device_user_id ASC, u.source_identity_id ASC`;
+const LIST_ORDER = {
+  device_user_id: PIN_ORDER,
+  name: `CASE WHEN NULLIF(TRIM(u.display_name), '') IS NULL THEN 1 ELSE 0 END ASC,
+    LOWER(TRIM(u.display_name)) ASC, ${PIN_ORDER}`,
+} as const;
 type Shape = [string, number | null, boolean, string | null];
 const SHAPES: Record<string, Record<string, Shape>> = {
   attendance_biometric_users: {
@@ -163,7 +175,7 @@ export function createMysqlBiometricDirectoryStore(pool: Pool, expectedDatabase:
       const params: Array<string | number> = [input.streamId];
       if (input.roster !== 'all') { clauses.push('u.status = ?'); params.push(input.roster); }
       if (input.search) {
-        clauses.push("(u.display_name LIKE ? ESCAPE '!' OR u.device_user_id LIKE ? ESCAPE '!' OR u.device_name LIKE ? ESCAPE '!' OR u.serial_number LIKE ? ESCAPE '!')");
+        clauses.push("(LOWER(u.display_name) LIKE LOWER(?) ESCAPE '!' OR LOWER(u.device_user_id) LIKE LOWER(?) ESCAPE '!' OR LOWER(u.device_name) LIKE LOWER(?) ESCAPE '!' OR LOWER(u.serial_number) LIKE LOWER(?) ESCAPE '!')");
         const pattern = `%${input.search.replace(/[!%_]/g, value => `!${value}`)}%`;
         params.push(pattern, pattern, pattern, pattern);
       }
@@ -175,7 +187,7 @@ export function createMysqlBiometricDirectoryStore(pool: Pool, expectedDatabase:
         if (!Number.isSafeInteger(total) || total < 0) throw schema();
         const [rows] = await connection.execute<RowDataPacket[]>(`SELECT ${PROFILE}, l.id AS link_id, l.worker_id AS linked_worker_id, w.id AS existing_worker_id,
           COALESCE(w.code,'') AS worker_code, COALESCE(w.full_name,l.worker_name_snapshot) AS worker_name ${joins}
-          ORDER BY u.source_identity_id ASC LIMIT ${input.limit} OFFSET ${(input.page - 1) * input.limit}`, params);
+          ORDER BY ${LIST_ORDER[input.sortBy]} LIMIT ${input.limit} OFFSET ${(input.page - 1) * input.limit}`, params);
         const items: DirectoryUser[] = rows.map(row => ({ ...decodeProfile(row), streamId: row.stream_id, lastSyncedAtUtc: row.synced_iso,
           linkedWorker: row.linked_worker_id == null ? null : { id: Number(row.linked_worker_id), code: row.worker_code, fullName: row.worker_name },
           linkedWorkerExists: row.linked_worker_id == null ? null : row.existing_worker_id != null,

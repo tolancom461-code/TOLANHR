@@ -58,15 +58,17 @@ export function identity(value: DirectoryIdentity): DirectoryIdentity {
     identityStartedAtUtc: utc(input.identityStartedAtUtc), identityEndedAtUtc: utc(input.identityEndedAtUtc) };
 }
 export function listInput(value: ListDirectoryUsersInput): Required<Omit<ListDirectoryUsersInput, 'currentWorkerId'>> & { currentWorkerId?: number } {
-  const input = snapshot(value, ['streamId', 'search', 'roster', 'currentWorkerId', 'page', 'limit']);
+  const input = snapshot(value, ['streamId', 'search', 'roster', 'sortBy', 'currentWorkerId', 'page', 'limit']);
   const search = input.search === undefined || input.search === '' ? '' : text(input.search, 128)!;
   const roster = input.roster === undefined ? 'current' : input.roster;
+  const sortBy = input.sortBy === undefined ? 'device_user_id' : input.sortBy;
   const page = input.page === undefined ? 1 : input.page;
   const limit = input.limit === undefined ? 25 : input.limit;
-  if (typeof roster !== 'string' || !['current', 'historical', 'all'].includes(roster) || !Number.isInteger(page) || Number(page) < 1 || Number(page) > 10000 ||
+  if (typeof roster !== 'string' || !['current', 'historical', 'all'].includes(roster) ||
+      typeof sortBy !== 'string' || !['device_user_id', 'name'].includes(sortBy) || !Number.isInteger(page) || Number(page) < 1 || Number(page) > 10000 ||
       !Number.isInteger(limit) || Number(limit) < 1 || Number(limit) > 100) throw invalid();
   return { streamId: uuid(input.streamId), search, roster: roster as 'current' | 'historical' | 'all',
-    page: page as number, limit: limit as number,
+    sortBy: sortBy as 'device_user_id' | 'name', page: page as number, limit: limit as number,
     ...(input.currentWorkerId === undefined ? {} : { currentWorkerId: positiveId(input.currentWorkerId) }) };
 }
 export function setInput(value: SetDirectoryLinkInput): Required<SetDirectoryLinkInput> {

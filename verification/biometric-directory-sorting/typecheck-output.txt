@@ -1,0 +1,1043 @@
+client/src/components/DashboardLayout.tsx(477,47): error TS2339: Property 'externalHref' does not exist on type '{ icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: any; path: string; color: string; } | { ...; } | { ...; } | { ...; }'.
+  Property 'externalHref' does not exist on type '{ icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: any; path: string; color: string; }'.
+client/src/components/DashboardLayout.tsx(478,45): error TS2339: Property 'externalHref' does not exist on type '{ icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: any; path: string; color: string; } | { ...; } | { ...; } | { ...; }'.
+  Property 'externalHref' does not exist on type '{ icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: any; path: string; color: string; }'.
+client/src/components/DashboardLayout.tsx(481,44): error TS2339: Property 'externalHref' does not exist on type '{ icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: any; path: string; color: string; } | { ...; } | { ...; } | { ...; }'.
+  Property 'externalHref' does not exist on type '{ icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: any; path: string; color: string; }'.
+client/src/components/DashboardLayout.tsx(482,46): error TS2339: Property 'externalHref' does not exist on type '{ icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: any; path: string; color: string; } | { ...; } | { ...; } | { ...; }'.
+  Property 'externalHref' does not exist on type '{ icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: any; path: string; color: string; }'.
+client/src/components/DashboardLayout.tsx(483,43): error TS2339: Property 'externalHref' does not exist on type '{ icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: any; path: string; color: string; } | { ...; } | { ...; } | { ...; }'.
+  Property 'externalHref' does not exist on type '{ icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: any; path: string; color: string; }'.
+client/src/components/DashboardLayout.tsx(516,57): error TS7006: Parameter 'n' implicitly has an 'any' type.
+client/src/components/ExcelImportExportDialog.tsx(47,5): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(input: { groupId?: number | undefined; } | typeof skipToken, opts: DefinedUseTRPCQueryOptions<{ success: boolean; data: any; filename: string; }, { success: boolean; data: any; filename: string; }, TRPCClientErrorLike<{ errorShape: DefaultErrorShape; transformer: true; }>, { ...; }>): DefinedUseTRPCQueryResult<...>', gave the following error.
+    Argument of type 'undefined' is not assignable to parameter of type '{ groupId?: number | undefined; } | unique symbol'.
+  Overload 2 of 2, '(input: { groupId?: number | undefined; } | typeof skipToken, opts?: UseTRPCQueryOptions<{ success: boolean; data: any; filename: string; }, { success: boolean; data: any; filename: string; }, TRPCClientErrorLike<{ input: { ...; }; output: { ...; }; transformer: true; errorShape: DefaultErrorShape; }>, { ...; }> | undefined): UseTRPCQueryResult<...>', gave the following error.
+    Argument of type 'undefined' is not assignable to parameter of type '{ groupId?: number | undefined; } | unique symbol'.
+client/src/components/NotificationBell.tsx(9,3): error TS2724: '"./ui/dropdown-menu"' has no exported member named 'DropdownMenuHeader'. Did you mean 'DropdownMenu'?
+client/src/contexts/LanguageContext.tsx(32,66): error TS2719: Type '{ readonly nav: { readonly dashboards: "📊 لوحات التحكم"; readonly hrManagement: "👥 إدارة الموارد البشرية"; readonly attendanceManagement: "⏰ إدارة الحضور والانصراف"; readonly financialManagement: "💰 الإدارة المالية"; ... 4 more ...; readonly systemSettings: "⚙️ إعدادات النظام"; }; ... 8 more ...; readonly operati...' is not assignable to type '{ readonly nav: { readonly dashboards: "📊 لوحات التحكم"; readonly hrManagement: "👥 إدارة الموارد البشرية"; readonly attendanceManagement: "⏰ إدارة الحضور والانصراف"; readonly financialManagement: "💰 الإدارة المالية"; ... 4 more ...; readonly systemSettings: "⚙️ إعدادات النظام"; }; ... 8 more ...; readonly operati...'. Two different types with this name exist, but they are unrelated.
+  Type '{ readonly nav: { readonly dashboards: "📊 Dashboards"; readonly hrManagement: "👥 HR Management"; readonly attendanceManagement: "⏰ Attendance Management"; readonly financialManagement: "💰 Financial Management"; ... 4 more ...; readonly systemSettings: "⚙️ System Settings"; }; ... 8 more ...; readonly operationalD...' is not assignable to type '{ readonly nav: { readonly dashboards: "📊 لوحات التحكم"; readonly hrManagement: "👥 إدارة الموارد البشرية"; readonly attendanceManagement: "⏰ إدارة الحضور والانصراف"; readonly financialManagement: "💰 الإدارة المالية"; ... 4 more ...; readonly systemSettings: "⚙️ إعدادات النظام"; }; ... 8 more ...; readonly operati...'.
+    The types of 'nav.dashboards' are incompatible between these types.
+      Type '"📊 Dashboards"' is not assignable to type '"📊 لوحات التحكم"'.
+client/src/pages/OfficialPayrollReport.tsx(37,65): error TS2339: Property 'getOfficialFinancialReport' does not exist on type 'DecorateRouterRecord<{ ctx: TrpcContext; meta: object; errorShape: DefaultErrorShape; transformer: true; }, DecorateCreateRouterOptions<{ createBatch: MutationProcedure<{ input: { periodStart: string; periodEnd: string; ... 4 more ...; groupIds?: number[] | undefined; }; output: { ...; }; meta: object; }>; ... 44 mo...'.
+client/src/pages/OfficialPayrollReport.tsx(175,68): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+client/src/pages/OfficialPayrollReport.tsx(175,73): error TS7006: Parameter 'row' implicitly has an 'any' type.
+client/src/pages/OperationalDashboard.tsx(56,54): error TS2339: Property 'getUserCostCenters' does not exist on type 'DecorateRouterRecord<{ ctx: TrpcContext; meta: object; errorShape: DefaultErrorShape; transformer: true; }, DecorateCreateRouterOptions<{ list: QueryProcedure<{ input: void; output: { id: number; code: string; name: string; description: string | null; isActive: number | null; createdAt: string; updatedAt: string; }[...'.
+client/src/pages/payroll/PayrollBatchDetails.tsx(299,29): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(302,27): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(322,29): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(325,27): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(363,7): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(413,7): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(545,27): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(548,25): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(1341,22): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(1344,22): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(1452,22): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(1455,22): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(1571,22): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/payroll/PayrollBatchDetails.tsx(1574,22): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+client/src/pages/Users.tsx(452,76): error TS2353: Object literal may only specify known properties, and 'reason' does not exist in type '{ id: number; }'.
+client/src/pages/WeeklyShifts.tsx(92,23): error TS2367: This comparison appears to be unintentional because the types 'number | null' and 'boolean' have no overlap.
+server/_core/context.ts(3,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/_core/sdk.ts(8,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/_core/trpc.ts(5,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/analytics.ts(70,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/analytics.ts(71,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/analytics.ts(83,35): error TS2365: Operator '>' cannot be applied to types 'string' and 'Date'.
+server/analytics.ts(90,12): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "work_date"; tableName: "worker_daily_finance"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "work_date"; tableName: "worker_daily_finance"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "work_date"; tableName: "worker_daily_finance"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "work_date"; tableName: "worker_daily_finance"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/analytics.ts(162,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/analytics.ts(163,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/attendance-logic.ts(171,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: number | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'boolean' is not assignable to parameter of type 'number | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<boolean>, right: boolean | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<boolean>'.
+      Type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<boolean>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/attendance-logic.ts(289,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/attendance-logic.ts(314,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/attendance-logic.ts(358,45): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+server/attendance-logic.ts(370,5): error TS2769: No overload matches this call.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]'.
+server/attendance-logic.ts(387,34): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+server/attendance-source-inbox/validation.ts(45,42): error TS2802: Type 'string' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/attendance-source-inbox/validation.ts(45,67): error TS2802: Type 'string' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/attendance-source-inbox/validation.ts(47,25): error TS1501: This regular expression flag is only available when targeting 'es6' or later.
+server/db/_shared.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/_shared.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/_shared.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/_shared.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/_shared.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/advanced-payroll.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/advanced-payroll.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/advanced-payroll.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/advanced-payroll.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/advanced-payroll.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/advanced-payroll.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/assignment-settlements.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/assignment-settlements.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/assignment-settlements.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/assignment-settlements.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/assignment-settlements.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/assignment-settlements.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/assignment-settlements.ts(172,7): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+server/db/assignment-settlements.ts(173,33): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+server/db/assignment-settlements.ts(264,11): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "period_start"; tableName: "payroll_batches"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "period_start"; tableName: "payroll_batches"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "period_start"; tableName: "payroll_batches"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "period_start"; tableName: "payroll_batches"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/assignment-settlements.ts(265,11): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "period_end"; tableName: "payroll_batches"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "period_end"; tableName: "payroll_batches"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "period_end"; tableName: "payroll_batches"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "period_end"; tableName: "payroll_batches"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/assignment-settlements.ts(351,44): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { workerId: number | SQL<unknown> | Placeholder<string, any>; assignmentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<...>; ... 11 more ...; appliedBy?: number | ... 3 more ... | undefined; }): MySqlInsertBase<...>', gave the following error.
+    Type 'Date' is not assignable to type 'string | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; assignmentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<...>; ... 11 more ...; appliedBy?: number | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'assignmentId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; assignmentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<...>; ... 11 more ...; appliedBy?: number | ... 3 more ... | undefined; }[]'.
+server/db/attendance-adjustments.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/attendance-adjustments.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/attendance-adjustments.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/attendance-adjustments.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/attendance-adjustments.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/attendance-adjustments.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/attendance-adjustments.ts(130,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance-adjustments.ts(131,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance-adjustments.ts(175,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance-adjustments.ts(176,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance-export.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/attendance-export.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/attendance-export.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/attendance-export.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/attendance-export.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/attendance-export.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/attendance-export.ts(130,41): error TS2345: Argument of type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }[]' is not assignable to parameter of type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }[]'.
+  Type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }' is not assignable to type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }'.
+    Types of property 'eventTime' are incompatible.
+      Type 'string' is not assignable to type 'Date'.
+server/db/attendance-export.ts(215,41): error TS2345: Argument of type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }[]' is not assignable to parameter of type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }[]'.
+  Type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }' is not assignable to type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }'.
+    Types of property 'eventTime' are incompatible.
+      Type 'string' is not assignable to type 'Date'.
+server/db/attendance-export.ts(295,41): error TS2345: Argument of type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }[]' is not assignable to parameter of type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }[]'.
+  Type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }' is not assignable to type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }'.
+    Types of property 'eventTime' are incompatible.
+      Type 'string' is not assignable to type 'Date'.
+server/db/attendance.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/attendance.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/attendance.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/attendance.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/attendance.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/attendance.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/attendance.ts(122,55): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/attendance.ts(165,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance.ts(198,52): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }): MySqlInsertBase<...>', gave the following error.
+    Type 'Date' is not assignable to type 'string | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]'.
+server/db/attendance.ts(214,34): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+server/db/attendance.ts(280,5): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance.ts(281,5): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance.ts(308,41): error TS2345: Argument of type '{ id: number; workerId: number; workerName: string; workerCode: string; groupId: number | null; eventType: "check_in" | "check_out"; eventTime: string; method: string | null; }[]' is not assignable to parameter of type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }[]'.
+  Type '{ id: number; workerId: number; workerName: string; workerCode: string; groupId: number | null; eventType: "check_in" | "check_out"; eventTime: string; method: string | null; }' is not assignable to type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }'.
+    Types of property 'eventTime' are incompatible.
+      Type 'string' is not assignable to type 'Date'.
+server/db/attendance.ts(404,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance.ts(405,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance.ts(410,41): error TS2345: Argument of type '{ id: number; workerId: number; workerName: string; workerCode: string; groupId: number | null; eventType: "check_in" | "check_out"; eventTime: string; method: string | null; }[]' is not assignable to parameter of type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }[]'.
+  Type '{ id: number; workerId: number; workerName: string; workerCode: string; groupId: number | null; eventType: "check_in" | "check_out"; eventTime: string; method: string | null; }' is not assignable to type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }'.
+    Types of property 'eventTime' are incompatible.
+      Type 'string' is not assignable to type 'Date'.
+server/db/attendance.ts(463,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance.ts(495,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance.ts(496,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance.ts(500,41): error TS2345: Argument of type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }[]' is not assignable to parameter of type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }[]'.
+  Type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }' is not assignable to type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }'.
+    Types of property 'eventTime' are incompatible.
+      Type 'string' is not assignable to type 'Date'.
+server/db/attendance.ts(564,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance.ts(565,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance.ts(569,41): error TS2345: Argument of type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }[]' is not assignable to parameter of type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }[]'.
+  Type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }' is not assignable to type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }'.
+    Types of property 'eventTime' are incompatible.
+      Type 'string' is not assignable to type 'Date'.
+server/db/attendance.ts(656,59): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+server/db/attendance.ts(675,67): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+server/db/attendance.ts(722,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance.ts(723,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/attendance.ts(729,41): error TS2345: Argument of type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }[]' is not assignable to parameter of type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }[]'.
+  Type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }' is not assignable to type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }'.
+    Types of property 'eventTime' are incompatible.
+      Type 'string' is not assignable to type 'Date'.
+server/db/audit-v2.ts(25,7): error TS2322: Type 'Set<string>' is not assignable to type 'ReadonlySet<ActionCategory>'.
+  Types of property 'forEach' are incompatible.
+    Type '(callbackfn: (value: string, value2: string, set: Set<string>) => void, thisArg?: any) => void' is not assignable to type '(callbackfn: (value: ActionCategory, value2: ActionCategory, set: ReadonlySet<ActionCategory>) => void, thisArg?: any) => void'.
+      Types of parameters 'callbackfn' and 'callbackfn' are incompatible.
+        Types of parameters 'value' and 'value' are incompatible.
+          Type 'string' is not assignable to type 'ActionCategory'.
+server/db/audit.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/audit.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/audit.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/audit.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/audit.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/audit.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/auth-local.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/auth-local.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/auth-local.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/auth-local.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/auth-local.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/auth-local.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/auth-local.ts(82,43): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { username: string | SQL<unknown> | Placeholder<string, any>; fullName: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 10 more ...; lastSignedIn?: string | ... 2 more ... | undefined; }): MySqlInsertBase<...>', gave the following error.
+    Argument of type '{ username: string; passwordHash: string; fullName: string; email: string | undefined; phone: string | undefined; isActive: boolean; loginMethod: string; role: "guard" | "supervisor_tolan" | ... 9 more ... | "data_entry"; }[]' is not assignable to parameter of type '{ username: string | SQL<unknown> | Placeholder<string, any>; fullName: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 10 more ...; lastSignedIn?: string | ... 2 more ... | undefined; }'.
+      Type '{ username: string; passwordHash: string; fullName: string; email: string | undefined; phone: string | undefined; isActive: boolean; loginMethod: string; role: "guard" | "supervisor_tolan" | ... 9 more ... | "data_entry"; }[]' is missing the following properties from type '{ username: string | SQL<unknown> | Placeholder<string, any>; fullName: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 10 more ...; lastSignedIn?: string | ... 2 more ... | undefined; }': username, fullName
+  Overload 2 of 2, '(values: { username: string | SQL<unknown> | Placeholder<string, any>; fullName: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 10 more ...; lastSignedIn?: string | ... 2 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Type 'boolean' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any> | null | undefined'.
+server/db/auth-local.ts(126,12): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/auto-finance.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/auto-finance.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/auto-finance.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/auto-finance.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/auto-finance.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/auto-finance.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/auto-finance.ts(64,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(65,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(122,11): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: number | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'boolean' is not assignable to parameter of type 'number | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<boolean>, right: boolean | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<boolean>'.
+      Type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<boolean>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(146,72): error TS2339: Property 'getTime' does not exist on type 'string'.
+server/db/auto-finance.ts(173,25): error TS2365: Operator '>' cannot be applied to types 'string' and 'Date'.
+server/db/auto-finance.ts(177,72): error TS2339: Property 'getTime' does not exist on type 'string | Date'.
+  Property 'getTime' does not exist on type 'string'.
+server/db/auto-finance.ts(187,9): error TS2365: Operator '>' cannot be applied to types 'string' and 'Date'.
+server/db/auto-finance.ts(188,45): error TS2339: Property 'getTime' does not exist on type 'string'.
+server/db/auto-finance.ts(228,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "work_date"; tableName: "worker_daily_finance"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "work_date"; tableName: "worker_daily_finance"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "work_date"; tableName: "worker_daily_finance"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "work_date"; tableName: "worker_daily_finance"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(238,9): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+server/db/auto-finance.ts(253,9): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/auto-finance.ts(259,7): error TS2769: No overload matches this call.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; workDate: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 18 more ...; effectiveGroupId?: number | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; workDate: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 18 more ...; effectiveGroupId?: number | ... 3 more ... | undefined; }[]'.
+server/db/auto-finance.ts(306,7): error TS2769: No overload matches this call.
+  Overload 2 of 2, '(values: { requiredHours: string | SQL<unknown> | Placeholder<string, any>; groupId: number | SQL<unknown> | Placeholder<string, any>; dayOfWeek: number | SQL<...> | Placeholder<...>; ... 7 more ...; effectiveDate?: string | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'groupId' does not exist in type '{ requiredHours: string | SQL<unknown> | Placeholder<string, any>; groupId: number | SQL<unknown> | Placeholder<string, any>; dayOfWeek: number | SQL<unknown> | Placeholder<...>; ... 7 more ...; effectiveDate?: string | ... 3 more ... | undefined; }[]'.
+server/db/auto-finance.ts(371,31): error TS2802: Type 'Set<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/auto-finance.ts(507,44): error TS2802: Type 'MapIterator<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/auto-finance.ts(529,14): error TS2802: Type 'MapIterator<WorkerAggregate>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/auto-finance.ts(573,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(574,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(588,12): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "work_date"; tableName: "worker_daily_finance"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "work_date"; tableName: "worker_daily_finance"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "work_date"; tableName: "worker_daily_finance"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "work_date"; tableName: "worker_daily_finance"; dataType: "string"; columnType: "MySqlDateString"; data: string; driverParam: string | number; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(610,21): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(616,21): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(686,21): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(691,21): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "created_at"; tableName: "audit_log"; dataType: "string"; columnType: "MySqlTimestampString"; data: string; driverParam: string | number; notNull: true; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(722,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: number | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'boolean' is not assignable to parameter of type 'number | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<boolean>, right: boolean | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<boolean>'.
+      Type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<boolean>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(741,12): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "is_active"; tableName: "groups"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: number | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'boolean' is not assignable to parameter of type 'number | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<boolean>, right: boolean | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "is_active"; tableName: "groups"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<boolean>'.
+      Type 'MySqlColumn<{ name: "is_active"; tableName: "groups"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<boolean>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "is_active"; tableName: "groups"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(809,20): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+server/db/auto-finance.ts(810,18): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+server/db/auto-finance.ts(953,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(954,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/auto-finance.ts(960,41): error TS2345: Argument of type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; workerCode: string; workerName: string; groupId: number | null; groupName: string | null; }[]' is not assignable to parameter of type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }[]'.
+  Type '{ id: number; workerId: number; eventType: "check_in" | "check_out"; eventTime: string; workerCode: string; workerName: string; groupId: number | null; groupName: string | null; }' is not assignable to type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }'.
+    Types of property 'eventTime' are incompatible.
+      Type 'string' is not assignable to type 'Date'.
+server/db/backup.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/backup.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/backup.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/backup.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/backup.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/backup.ts(33,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/backup.ts(197,23): error TS2802: Type 'Set<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/batch-worker-operations.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/batch-worker-operations.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/batch-worker-operations.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/batch-worker-operations.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/batch-worker-operations.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/batch-worker-operations.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/batch-worker-operations.ts(61,5): error TS2769: No overload matches this call.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]'.
+server/db/batch-worker-operations.ts(99,5): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/batch-worker-operations.ts(199,5): error TS2769: No overload matches this call.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]'.
+server/db/batch-worker-operations.ts(211,5): error TS2769: No overload matches this call.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]'.
+server/db/connection.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/connection.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/connection.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/connection.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/connection.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/connection.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/connection.ts(175,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/connection.ts(176,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/cost-center-report.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/cost-center-report.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/cost-center-report.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/cost-center-report.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/cost-center-report.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/cost-center-report.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/cost-centers.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/cost-centers.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/cost-centers.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/cost-centers.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/cost-centers.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/cost-centers.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/cost-centers.ts(55,49): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { name: string | SQL<unknown> | Placeholder<string, any>; code: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<string, any> | undefined; description?: string | ... 3 more ... | undefined; isActive?: number | ... 3 more ... | undefined; createdAt?: string | ... 2 more ... | undefined; updatedAt?: string | ... 2 more ... | undefined; }): MySqlInsertBase<...>', gave the following error.
+    Type 'true' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any> | null | undefined'.
+  Overload 2 of 2, '(values: { name: string | SQL<unknown> | Placeholder<string, any>; code: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<string, any> | undefined; description?: string | ... 3 more ... | undefined; isActive?: number | ... 3 more ... | undefined; createdAt?: string | ... 2 more ... | undefined; updatedAt?: string | ... 2 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'code' does not exist in type '{ name: string | SQL<unknown> | Placeholder<string, any>; code: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<string, any> | undefined; description?: string | ... 3 more ... | undefined; isActive?: number | ... 3 more ... | undefined; createdAt?: string | ... 2 more ... |...'.
+server/db/cost-centers.ts(75,10): error TS2345: Argument of type '{ code?: string | undefined; name?: string | undefined; description?: string | undefined; isActive?: boolean | undefined; }' is not assignable to parameter of type '{ name?: string | SQL<unknown> | undefined; code?: string | SQL<unknown> | undefined; id?: number | SQL<unknown> | undefined; description?: string | SQL<unknown> | null | undefined; isActive?: number | ... 2 more ... | undefined; createdAt?: string | ... 1 more ... | undefined; updatedAt?: string | ... 1 more ... | ...'.
+  Types of property 'isActive' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'number | SQL<unknown> | null | undefined'.
+      Type 'false' is not assignable to type 'number | SQL<unknown> | null | undefined'.
+server/db/daily-finance-entries.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/daily-finance-entries.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/daily-finance-entries.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/daily-finance-entries.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/daily-finance-entries.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/daily-finance-entries.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/daily-finance-entries.ts(124,56): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { workerId: number | SQL<unknown> | Placeholder<string, any>; workDate: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 18 more ...; effectiveGroupId?: number | ... 3 more ... | undefined; }): MySqlInsertBase<...>', gave the following error.
+    Argument of type '{ workerId: number; workDate: Date; baseAmount: string; deductions: string; bonuses: string; netAmount: string; notes: string | undefined; }[]' is not assignable to parameter of type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; workDate: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 18 more ...; effectiveGroupId?: number | ... 3 more ... | undefined; }'.
+      Type '{ workerId: number; workDate: Date; baseAmount: string; deductions: string; bonuses: string; netAmount: string; notes: string | undefined; }[]' is missing the following properties from type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; workDate: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 18 more ...; effectiveGroupId?: number | ... 3 more ... | undefined; }': workerId, workDate
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; workDate: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 18 more ...; effectiveGroupId?: number | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Type 'Date' is not assignable to type 'string | SQL<unknown> | Placeholder<string, any>'.
+server/db/daily-finance.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/daily-finance.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/daily-finance.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/daily-finance.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/daily-finance.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/daily-finance.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/daily-finance.ts(93,7): error TS2322: Type 'string | Date | null' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+  Type 'Date' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+server/db/daily-finance.ts(94,7): error TS2322: Type 'string | Date | null' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+  Type 'Date' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+server/db/daily-finance.ts(97,7): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/daily-finance.ts(102,7): error TS2769: No overload matches this call.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; workDate: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 18 more ...; effectiveGroupId?: number | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; workDate: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 18 more ...; effectiveGroupId?: number | ... 3 more ... | undefined; }[]'.
+server/db/daily-finance.ts(165,7): error TS2322: Type 'number | false' is not assignable to type 'boolean'.
+  Type 'number' is not assignable to type 'boolean'.
+server/db/daily-finance.ts(180,13): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: number | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'boolean' is not assignable to parameter of type 'number | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<boolean>, right: boolean | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<boolean>'.
+      Type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<boolean>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/daily-management.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/daily-management.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/daily-management.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/daily-management.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/daily-management.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/daily-management.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/db.ts(7,15): error TS2307: Cannot find module './db/audit' or its corresponding type declarations.
+server/db/db.ts(8,15): error TS2307: Cannot find module './db/connection' or its corresponding type declarations.
+server/db/db.ts(9,15): error TS2307: Cannot find module './db/users' or its corresponding type declarations.
+server/db/db.ts(10,15): error TS2307: Cannot find module './db/roles' or its corresponding type declarations.
+server/db/db.ts(11,15): error TS2307: Cannot find module './db/statistics' or its corresponding type declarations.
+server/db/db.ts(12,15): error TS2307: Cannot find module './db/groups' or its corresponding type declarations.
+server/db/db.ts(13,15): error TS2307: Cannot find module './db/workers' or its corresponding type declarations.
+server/db/db.ts(14,15): error TS2307: Cannot find module './db/cost-centers' or its corresponding type declarations.
+server/db/db.ts(15,15): error TS2307: Cannot find module './db/auth-local' or its corresponding type declarations.
+server/db/db.ts(16,15): error TS2307: Cannot find module './db/attendance' or its corresponding type declarations.
+server/db/db.ts(17,15): error TS2307: Cannot find module './db/daily-finance' or its corresponding type declarations.
+server/db/db.ts(18,15): error TS2307: Cannot find module './db/attendance-adjustments' or its corresponding type declarations.
+server/db/db.ts(19,15): error TS2307: Cannot find module './db/pay-overrides' or its corresponding type declarations.
+server/db/db.ts(20,15): error TS2307: Cannot find module './db/finance-entries' or its corresponding type declarations.
+server/db/db.ts(21,15): error TS2307: Cannot find module './db/financial-reports' or its corresponding type declarations.
+server/db/db.ts(22,15): error TS2307: Cannot find module './db/payroll-batches' or its corresponding type declarations.
+server/db/db.ts(23,15): error TS2307: Cannot find module './db/deductions' or its corresponding type declarations.
+server/db/db.ts(24,15): error TS2307: Cannot find module './db/full-day-overrides' or its corresponding type declarations.
+server/db/db.ts(25,15): error TS2307: Cannot find module './db/payroll-locks' or its corresponding type declarations.
+server/db/db.ts(26,15): error TS2307: Cannot find module './db/payroll-workflow' or its corresponding type declarations.
+server/db/db.ts(27,15): error TS2307: Cannot find module './db/work-group-settings' or its corresponding type declarations.
+server/db/db.ts(28,15): error TS2307: Cannot find module './db/operational-flags' or its corresponding type declarations.
+server/db/db.ts(29,15): error TS2307: Cannot find module './db/daily-management' or its corresponding type declarations.
+server/db/db.ts(30,15): error TS2307: Cannot find module './db/daily-finance-entries' or its corresponding type declarations.
+server/db/db.ts(31,15): error TS2307: Cannot find module './db/test-helpers' or its corresponding type declarations.
+server/db/db.ts(32,15): error TS2307: Cannot find module './db/attendance-export' or its corresponding type declarations.
+server/db/db.ts(33,15): error TS2307: Cannot find module './db/advanced-payroll' or its corresponding type declarations.
+server/db/db.ts(34,15): error TS2307: Cannot find module './db/pagination' or its corresponding type declarations.
+server/db/db.ts(35,15): error TS2307: Cannot find module './db/group-schedules' or its corresponding type declarations.
+server/db/db.ts(36,15): error TS2307: Cannot find module './db/auto-finance' or its corresponding type declarations.
+server/db/db.ts(37,15): error TS2307: Cannot find module './db/executive-dashboard' or its corresponding type declarations.
+server/db/db.ts(38,15): error TS2307: Cannot find module './db/operational-dashboard' or its corresponding type declarations.
+server/db/db.ts(39,15): error TS2307: Cannot find module './db/user-cost-centers' or its corresponding type declarations.
+server/db/db.ts(40,15): error TS2307: Cannot find module './db/temporary-assignments' or its corresponding type declarations.
+server/db/db.ts(41,15): error TS2307: Cannot find module './db/backup' or its corresponding type declarations.
+server/db/db.ts(42,15): error TS2307: Cannot find module './db/cost-center-report' or its corresponding type declarations.
+server/db/db.ts(43,15): error TS2307: Cannot find module './db/recalculation' or its corresponding type declarations.
+server/db/db.ts(44,15): error TS2307: Cannot find module './db/assignment-settlements' or its corresponding type declarations.
+server/db/db.ts(45,15): error TS2307: Cannot find module './db/batch-worker-operations' or its corresponding type declarations.
+server/db/db.ts(46,15): error TS2307: Cannot find module './db/restaurants' or its corresponding type declarations.
+server/db/db.ts(47,15): error TS2307: Cannot find module './db/group-coverage' or its corresponding type declarations.
+server/db/db.ts(48,15): error TS2307: Cannot find module './db/daily-work-assignments' or its corresponding type declarations.
+server/db/db.ts(49,15): error TS2307: Cannot find module './db/restaurant-costs' or its corresponding type declarations.
+server/db/db.ts(50,15): error TS2307: Cannot find module './db/notifications-db' or its corresponding type declarations.
+server/db/executive-dashboard.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/executive-dashboard.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/executive-dashboard.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/executive-dashboard.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/executive-dashboard.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/executive-dashboard.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/finance-entries.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/finance-entries.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/finance-entries.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/finance-entries.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/finance-entries.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/finance-entries.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/finance-entries.ts(95,7): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/financial-reports.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/financial-reports.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/financial-reports.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/financial-reports.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/financial-reports.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/financial-reports.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/full-day-overrides.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/full-day-overrides.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/full-day-overrides.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/full-day-overrides.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/full-day-overrides.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/full-day-overrides.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/full-day-overrides.ts(80,5): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/full-day-overrides.ts(121,5): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/full-day-overrides.ts(181,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/full-day-overrides.ts(182,7): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/full-day-overrides.ts(187,41): error TS2345: Argument of type '{ workerId: number; id: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }[]' is not assignable to parameter of type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }[]'.
+  Type '{ workerId: number; id: number; eventType: "check_in" | "check_out"; eventTime: string; deviceId: number | null; verifiedBy: number | null; method: string | null; note: string | null; ... 4 more ...; deviceInfo: string | null; }' is not assignable to type '{ [key: string]: any; workerId: number; eventType: string; eventTime: Date; id?: number | undefined; }'.
+    Types of property 'eventTime' are incompatible.
+      Type 'string' is not assignable to type 'Date'.
+server/db/group-coverage.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/group-coverage.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/group-coverage.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/group-coverage.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/group-coverage.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/group-coverage.ts(33,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/group-schedules.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/group-schedules.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/group-schedules.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/group-schedules.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/group-schedules.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/group-schedules.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/groups.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/groups.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/groups.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/groups.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/groups.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/groups.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/notifications-db.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/notifications-db.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/notifications-db.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/notifications-db.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/notifications-db.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/notifications-db.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/operational-dashboard.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/operational-dashboard.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/operational-dashboard.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/operational-dashboard.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/operational-dashboard.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/operational-dashboard.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/operational-dashboard.ts(96,44): error TS2322: Type 'string' is not assignable to type 'Date'.
+server/db/operational-dashboard.ts(100,36): error TS2802: Type 'MapIterator<[number, { eventTime: Date; eventType: string; }[]]>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/operational-dashboard.ts(164,43): error TS2365: Operator '<' cannot be applied to types 'string' and 'Date'.
+server/db/operational-dashboard.ts(165,37): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Date'.
+server/db/operational-dashboard.ts(204,9): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: number | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'boolean' is not assignable to parameter of type 'number | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<boolean>, right: boolean | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<boolean>'.
+      Type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<boolean>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "is_active"; tableName: "group_schedules"; dataType: "number"; columnType: "MySqlTinyInt"; data: number; driverParam: string | number; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/operational-flags.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/operational-flags.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/operational-flags.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/operational-flags.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/operational-flags.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/operational-flags.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/operational-flags.ts(199,9): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+server/db/operational-flags.ts(225,9): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+server/db/operational-flags.ts(315,54): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { workerId: number | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; createdBy: number | SQL<...> | Placeholder<...>; ... 10 more ...; approvalNotes?: string | ... 3 more ... | undefined; }): MySqlInsertBase<...>', gave the following error.
+    Type 'Date' is not assignable to type 'string | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; createdBy: number | SQL<...> | Placeholder<...>; ... 10 more ...; approvalNotes?: string | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; createdBy: number | SQL<unknown> | Placeholder<...>; ... 10 more ...; approvalNotes?: string | ... 3 more ... | undefined; }[]'.
+server/db/pagination.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/pagination.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/pagination.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/pagination.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/pagination.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/pagination.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/pay-overrides.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/pay-overrides.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/pay-overrides.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/pay-overrides.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/pay-overrides.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/pay-overrides.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/pay-overrides.ts(102,48): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { workerId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; overrideDate: string | SQL<unknown> | Placeholder<...>; ... 9 more ...; reason?: string | ... 3 more ... | undefined; }): MySqlInsertBase<...>', gave the following error.
+    Type 'Date' is not assignable to type 'string | SQL<unknown> | Placeholder<string, any> | null | undefined'.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; overrideDate: string | SQL<unknown> | Placeholder<...>; ... 9 more ...; reason?: string | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; overrideDate: string | SQL<unknown> | Placeholder<...>; ... 9 more ...; reason?: string | ... 3 more ... | undefined; }[]'.
+server/db/pay-overrides.ts(244,5): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/pay-overrides.ts(340,5): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+server/db/pay-overrides.ts(341,5): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/pay-overrides.ts(375,7): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/pay-overrides.ts(404,5): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+server/db/pay-overrides.ts(405,5): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/payroll-batches.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/payroll-batches.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/payroll-batches.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/payroll-batches.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/payroll-batches.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/payroll-batches.ts(34,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/payroll-locks.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/payroll-locks.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/payroll-locks.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/payroll-locks.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/payroll-locks.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/payroll-locks.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/payroll-locks.ts(95,5): error TS2322: Type 'true' is not assignable to type 'number | SQL<unknown> | null | undefined'.
+server/db/payroll-locks.ts(98,5): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+server/db/payroll-locks.ts(127,5): error TS2322: Type 'false' is not assignable to type 'number | SQL<unknown> | null | undefined'.
+server/db/payroll-workflow.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/payroll-workflow.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/payroll-workflow.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/payroll-workflow.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/payroll-workflow.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/payroll-workflow.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/payroll-workflow.ts(53,7): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/payroll-workflow.ts(82,7): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/payroll-workflow.ts(116,7): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/payroll-workflow.ts(147,7): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | null | undefined'.
+server/db/payroll-workflow.ts(148,7): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/payroll-workflow.ts(155,34): error TS2802: Type 'Set<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/payroll-workflow.ts(208,7): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/payroll-workflow.ts(215,34): error TS2802: Type 'Set<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/payroll-workflow.ts(255,7): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | undefined'.
+server/db/recalculation.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/recalculation.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/recalculation.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/recalculation.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/recalculation.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/recalculation.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/recalculation.ts(58,12): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "status"; tableName: "payroll_batches"; dataType: "string"; columnType: "MySqlEnumColumn"; data: "draft" | "under_accountant_review" | "returned_from_accountant" | "under_financial_review" | ... 4 more ... | "paid"; ... 9 more ...; generated: undefined; }, {}, {}>, right: SQLWrapper | ... 8 more ... | "paid"): SQL<...>', gave the following error.
+    Argument of type '"closed"' is not assignable to parameter of type 'SQLWrapper | "draft" | "under_accountant_review" | "returned_from_accountant" | "under_financial_review" | "returned_from_financial_review" | "under_accounts_manager_review" | "approved" | "rejected_final" | "paid"'.
+  Overload 2 of 3, '(left: Aliased<string>, right: string | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "status"; tableName: "payroll_batches"; dataType: "string"; columnType: "MySqlEnumColumn"; data: "draft" | "under_accountant_review" | "returned_from_accountant" | "under_financial_review" | ... 4 more ... | "paid"; ... 9 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<string>'.
+      Type 'MySqlColumn<{ name: "status"; tableName: "payroll_batches"; dataType: "string"; columnType: "MySqlEnumColumn"; data: "draft" | "under_accountant_review" | "returned_from_accountant" | "under_financial_review" | ... 4 more ... | "paid"; ... 9 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<string>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "status"; tableName: "payroll_batches"; dataType: "string"; columnType: "MySqlEnumColumn"; data: "draft" | "under_accountant_review" | "returned_from_accountant" | "under_financial_review" | ... 4 more ... | "paid"; ... 9 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/db/restaurant-costs.ts(136,25): error TS2802: Type 'Set<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/restaurant-costs.ts(278,30): error TS2802: Type 'Set<string>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/restaurant-costs.ts(281,33): error TS2802: Type 'Set<string>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/restaurant-costs.ts(284,41): error TS2802: Type 'Set<string>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/restaurant-costs.ts(506,9): error TS2802: Type 'MapIterator<WorkerAgg>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/restaurant-costs.ts(508,27): error TS2802: Type 'Set<unknown>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/restaurant-costs.ts(525,21): error TS2802: Type 'MapIterator<SiteAgg>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/restaurant-costs.ts(552,27): error TS2802: Type 'MapIterator<WorkerAgg>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/db/restaurants.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/restaurants.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/restaurants.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/restaurants.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/restaurants.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/restaurants.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/roles.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/roles.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/roles.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/roles.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/roles.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/roles.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/statistics.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/statistics.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/statistics.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/statistics.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/statistics.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/statistics.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/temporary-assignments.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/temporary-assignments.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/temporary-assignments.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/temporary-assignments.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/temporary-assignments.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/temporary-assignments.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/temporary-assignments.ts(226,42): error TS2551: Property 'toISOString' does not exist on type 'string'. Did you mean 'toString'?
+server/db/temporary-assignments.ts(227,38): error TS2551: Property 'toISOString' does not exist on type 'string'. Did you mean 'toString'?
+server/db/temporary-assignments.ts(404,40): error TS2551: Property 'toISOString' does not exist on type 'string'. Did you mean 'toString'?
+server/db/temporary-assignments.ts(405,36): error TS2551: Property 'toISOString' does not exist on type 'string'. Did you mean 'toString'?
+server/db/test-helpers.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/test-helpers.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/test-helpers.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/test-helpers.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/test-helpers.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/test-helpers.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/user-cost-centers.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/user-cost-centers.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/user-cost-centers.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/user-cost-centers.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/user-cost-centers.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/user-cost-centers.ts(33,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/users.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/users.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/users.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/users.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/users.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/users.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/users_db.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/users_db.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/users_db.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/users_db.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/users_db.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/users_db.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/work-group-settings.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/work-group-settings.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/work-group-settings.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/work-group-settings.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/work-group-settings.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/work-group-settings.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/db/work-group-settings.ts(113,34): error TS2339: Property 'basePay' does not exist on type 'MySqlTableWithColumns<{ name: "payroll_batch_items"; schema: undefined; columns: { id: MySqlColumn<{ name: "id"; tableName: "payroll_batch_items"; dataType: "number"; columnType: "MySqlInt"; data: number; driverParam: string | number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 11 more ...; updatedAt: MySq...'.
+server/db/work-group-settings.ts(114,36): error TS2339: Property 'additions' does not exist on type 'MySqlTableWithColumns<{ name: "payroll_batch_items"; schema: undefined; columns: { id: MySqlColumn<{ name: "id"; tableName: "payroll_batch_items"; dataType: "number"; columnType: "MySqlInt"; data: number; driverParam: string | number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 11 more ...; updatedAt: MySq...'.
+server/db/work-group-settings.ts(115,37): error TS2339: Property 'deductions' does not exist on type 'MySqlTableWithColumns<{ name: "payroll_batch_items"; schema: undefined; columns: { id: MySqlColumn<{ name: "id"; tableName: "payroll_batch_items"; dataType: "number"; columnType: "MySqlInt"; data: number; driverParam: string | number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 11 more ...; updatedAt: MySq...'.
+server/db/work-group-settings.ts(116,36): error TS2339: Property 'netSalary' does not exist on type 'MySqlTableWithColumns<{ name: "payroll_batch_items"; schema: undefined; columns: { id: MySqlColumn<{ name: "id"; tableName: "payroll_batch_items"; dataType: "number"; columnType: "MySqlInt"; data: number; driverParam: string | number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 11 more ...; updatedAt: MySq...'.
+server/db/work-group-settings.ts(199,34): error TS2339: Property 'basePay' does not exist on type 'MySqlTableWithColumns<{ name: "payroll_batch_items"; schema: undefined; columns: { id: MySqlColumn<{ name: "id"; tableName: "payroll_batch_items"; dataType: "number"; columnType: "MySqlInt"; data: number; driverParam: string | number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 11 more ...; updatedAt: MySq...'.
+server/db/work-group-settings.ts(200,36): error TS2339: Property 'additions' does not exist on type 'MySqlTableWithColumns<{ name: "payroll_batch_items"; schema: undefined; columns: { id: MySqlColumn<{ name: "id"; tableName: "payroll_batch_items"; dataType: "number"; columnType: "MySqlInt"; data: number; driverParam: string | number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 11 more ...; updatedAt: MySq...'.
+server/db/work-group-settings.ts(201,37): error TS2339: Property 'deductions' does not exist on type 'MySqlTableWithColumns<{ name: "payroll_batch_items"; schema: undefined; columns: { id: MySqlColumn<{ name: "id"; tableName: "payroll_batch_items"; dataType: "number"; columnType: "MySqlInt"; data: number; driverParam: string | number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 11 more ...; updatedAt: MySq...'.
+server/db/work-group-settings.ts(202,36): error TS2339: Property 'netSalary' does not exist on type 'MySqlTableWithColumns<{ name: "payroll_batch_items"; schema: undefined; columns: { id: MySqlColumn<{ name: "id"; tableName: "payroll_batch_items"; dataType: "number"; columnType: "MySqlInt"; data: number; driverParam: string | number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 11 more ...; updatedAt: MySq...'.
+server/db/workers.ts(5,10): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertUser'.
+server/db/workers.ts(5,22): error TS2724: '"../../drizzle/schema"' has no exported member named 'User'. Did you mean 'users'?
+server/db/workers.ts(7,11): error TS2724: '"../../drizzle/schema"' has no exported member named 'Group'. Did you mean 'groups'?
+server/db/workers.ts(7,18): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertGroup'.
+server/db/workers.ts(9,12): error TS2305: Module '"../../drizzle/schema"' has no exported member 'InsertWorker'.
+server/db/workers.ts(32,15): error TS2724: '"../../drizzle/schema"' has no exported member named 'Worker'. Did you mean 'workers'?
+server/notifications.ts(1,21): error TS7016: Could not find a declaration file for module 'web-push'. 'C:/Users/mh/Desktop/FINGER/Fingerprint/finger/node_modules/web-push/src/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/web-push` if it exists or add a new declaration (.d.ts) file containing `declare module 'web-push';`
+server/notifications.ts(138,29): error TS2802: Type 'Set<string>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/notifications.ts(146,31): error TS2802: Type 'Set<number>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+server/permissions.ts(18,15): error TS2724: '"../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers-index.ts(5,41): error TS2307: Cannot find module '../_core/cookies' or its corresponding type declarations.
+server/routers-index.ts(6,30): error TS2307: Cannot find module '../_core/systemRouter' or its corresponding type declarations.
+server/routers-index.ts(7,113): error TS2307: Cannot find module '../_core/trpc' or its corresponding type declarations.
+server/routers-index.ts(8,21): error TS2307: Cannot find module '../db' or its corresponding type declarations.
+server/routers-index.ts(10,49): error TS2307: Cannot find module '../../drizzle/schema' or its corresponding type declarations.
+server/routers-index.ts(11,91): error TS2307: Cannot find module '../permissions' or its corresponding type declarations.
+server/routers-index.ts(12,112): error TS2307: Cannot find module '../excelExport' or its corresponding type declarations.
+server/routers-index.ts(13,175): error TS2307: Cannot find module '../excelImportExport' or its corresponding type declarations.
+server/routers-index.ts(14,28): error TS2307: Cannot find module '../analytics' or its corresponding type declarations.
+server/routers-index.ts(15,34): error TS2307: Cannot find module '../notifications' or its corresponding type declarations.
+server/routers-index.ts(21,28): error TS2307: Cannot find module './auth' or its corresponding type declarations.
+server/routers-index.ts(22,33): error TS2307: Cannot find module './dashboard' or its corresponding type declarations.
+server/routers-index.ts(23,10): error TS2724: '"./notifications"' has no exported member named 'notificationsRouter'. Did you mean 'NotificationType'?
+server/routers-index.ts(24,10): error TS2305: Module '"./analytics"' has no exported member 'analyticsRouter'.
+server/routers-index.ts(25,29): error TS2307: Cannot find module './users' or its corresponding type declarations.
+server/routers-index.ts(26,35): error TS2307: Cannot find module './restaurants' or its corresponding type declarations.
+server/routers-index.ts(27,30): error TS2307: Cannot find module './groups' or its corresponding type declarations.
+server/routers-index.ts(28,31): error TS2307: Cannot find module './workers' or its corresponding type declarations.
+server/routers-index.ts(29,35): error TS2307: Cannot find module './cost-centers' or its corresponding type declarations.
+server/routers-index.ts(30,31): error TS2307: Cannot find module './profile' or its corresponding type declarations.
+server/routers-index.ts(31,34): error TS2307: Cannot find module './attendance' or its corresponding type declarations.
+server/routers-index.ts(32,32): error TS2307: Cannot find module './work-days' or its corresponding type declarations.
+server/routers-index.ts(33,36): error TS2307: Cannot find module './daily-finance' or its corresponding type declarations.
+server/routers-index.ts(34,40): error TS2307: Cannot find module './attendance-adjust' or its corresponding type declarations.
+server/routers-index.ts(35,36): error TS2307: Cannot find module './pay-overrides' or its corresponding type declarations.
+server/routers-index.ts(36,30): error TS2307: Cannot find module './export' or its corresponding type declarations.
+server/routers-index.ts(37,40): error TS2307: Cannot find module './financial-reports' or its corresponding type declarations.
+server/routers-index.ts(38,31): error TS2307: Cannot find module './payroll' or its corresponding type declarations.
+server/routers-index.ts(39,34): error TS2307: Cannot find module './deductions' or its corresponding type declarations.
+server/routers-index.ts(40,40): error TS2307: Cannot find module './attendance-status' or its corresponding type declarations.
+server/routers-index.ts(41,40): error TS2307: Cannot find module './operational-flags' or its corresponding type declarations.
+server/routers-index.ts(42,40): error TS2307: Cannot find module './payroll-functions' or its corresponding type declarations.
+server/routers-index.ts(43,38): error TS2307: Cannot find module './group-schedules' or its corresponding type declarations.
+server/routers-index.ts(44,41): error TS2307: Cannot find module './excel-import-export' or its corresponding type declarations.
+server/routers-index.ts(45,29): error TS2307: Cannot find module './audit' or its corresponding type declarations.
+server/routers-index.ts(46,44): error TS2307: Cannot find module './temporary-assignments' or its corresponding type declarations.
+server/routers-index.ts(47,33): error TS2307: Cannot find module './executive' or its corresponding type declarations.
+server/routers-index.ts(48,44): error TS2307: Cannot find module './operational-dashboard' or its corresponding type declarations.
+server/routers-index.ts(49,40): error TS2307: Cannot find module './cost-center-report' or its corresponding type declarations.
+server/routers-index.ts(50,30): error TS2307: Cannot find module './backup' or its corresponding type declarations.
+server/routers-index.ts(51,33): error TS2307: Cannot find module './migration' or its corresponding type declarations.
+server/routers-index.ts(52,46): error TS2307: Cannot find module './financial-recalculation' or its corresponding type declarations.
+server/routers-index.ts(53,42): error TS2307: Cannot find module './daily-payroll-report' or its corresponding type declarations.
+server/routers-index.ts(171,24): error TS7031: Binding element 'input' implicitly has an 'any' type.
+server/routers/analytics.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/attendance-adjust.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/attendance-status.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/attendance.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/attendance.ts(88,15): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: string | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'Date' is not assignable to parameter of type 'string | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<Date>'.
+      Type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<Date>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'MySqlColumn<{ name: "event_time"; tableName: "attendance_events"; dataType: "custom"; columnType: "MySqlCustomColumn"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+server/routers/attendance.ts(127,24): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+server/routers/attendance.ts(250,13): error TS2769: No overload matches this call.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]'.
+server/routers/attendance.ts(310,13): error TS2769: No overload matches this call.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]'.
+server/routers/attendance.ts(377,47): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }): MySqlInsertBase<...>', gave the following error.
+    Type 'Date' is not assignable to type 'string | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]'.
+server/routers/attendance.ts(387,47): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }): MySqlInsertBase<...>', gave the following error.
+    Type 'Date' is not assignable to type 'string | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]): MySqlInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'workerId' does not exist in type '{ workerId: number | SQL<unknown> | Placeholder<string, any>; eventType: SQL<unknown> | "check_in" | "check_out" | Placeholder<string, any>; eventTime: string | ... 1 more ... | Placeholder<...>; ... 9 more ...; deviceInfo?: string | ... 3 more ... | undefined; }[]'.
+server/routers/audit.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/auth.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/backup.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/cost-center-report.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/cost-centers.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/daily-finance.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/daily-payroll-report.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/dashboard.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/excel-import-export.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/executive.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/export.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/export.ts(327,38): error TS2339: Property 'toLocaleDateString' does not exist on type 'string'.
+server/routers/export.ts(327,93): error TS2339: Property 'toLocaleDateString' does not exist on type 'string'.
+server/routers/financial-recalculation.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/financial-reports.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/group-schedules.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/groups.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/index.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/migration.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/notifications.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/operational-dashboard.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/operational-dashboard.ts(197,15): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+server/routers/operational-dashboard.ts(198,15): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+server/routers/operational-dashboard.ts(200,15): error TS2322: Type '"other"' is not assignable to type '"confirm_attendance" | "confirm_absence" | "transfer"'.
+server/routers/operational-flags.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/pay-overrides.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/payroll-functions.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/payroll.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/payroll.ts(440,29): error TS2339: Property 'toLocaleDateString' does not exist on type 'string'.
+server/routers/payroll.ts(441,27): error TS2339: Property 'toLocaleDateString' does not exist on type 'string'.
+server/routers/profile.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/restaurants.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/temporary-assignments.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/users.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/users_router.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/users_router.ts(198,41): error TS2554: Expected 1 arguments, but got 2.
+server/routers/work-days.ts(10,33): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/workers.ts(10,42): error TS2724: '"../../drizzle/schema"' has no exported member named 'UserRole'. Did you mean 'userRoles'?
+server/routers/workers.ts(124,19): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.

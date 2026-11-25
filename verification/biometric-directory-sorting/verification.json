@@ -1,0 +1,30 @@
+{
+  "dateRiyadh": "2026-11-25",
+  "localImplementationComplete": true,
+  "deployedByAgent": false,
+  "productionBuildPassed": true,
+  "buildCommand": "npm run build",
+  "focusedUnitTests": { "passed": 16, "failed": 0 },
+  "mysqlAcceptanceReport": "result.json",
+  "uiVerifiedWith": "CUA browser; synthetic loopback MySQL and real application stylesheet",
+  "uiChecks": [
+    "Default numeric ordering lists 2 before 10 and spans three pages",
+    "Switching from page two to A-Z sorting returns to page one and alphabetizes names",
+    "Typing RAD from page two finds MUAMEDRADMAN and returns to page one",
+    "Typing rad finds the same name",
+    "Editing search clears the previous selection and disables Save",
+    "Sort control, search input and result render correctly in the RTL dialog"
+  ],
+  "typescript": {
+    "fullProjectPassed": false,
+    "diagnostics": 582,
+    "previousRecordedDiagnostics": 582,
+    "diagnosticsInChangedFiles": 0,
+    "output": "typecheck-output.txt"
+  },
+  "schemaChangesRequired": false,
+  "newEnvironmentVariablesRequired": false,
+  "liveDatabaseChanges": false,
+  "fingerprintProducerChanges": false,
+  "existingPackageManifestOrLockfileChanges": false
+}

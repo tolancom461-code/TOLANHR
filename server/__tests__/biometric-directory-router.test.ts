@@ -56,7 +56,18 @@ describe('worker identity link authorization and API boundary', () => {
   it('reads local directory pages using the configured source identity and supplied worker context', async () => {
     const lab = fixture();
     await lab.caller.sourceBiometricUsers({ search: 'nnbb', roster: 'historical', currentWorkerId: 3210001, page: 2, limit: 20 });
-    expect(lab.store.listUsers).toHaveBeenCalledWith({ streamId, search: 'nnbb', roster: 'historical', currentWorkerId: 3210001, page: 2, limit: 20 });
+    expect(lab.store.listUsers).toHaveBeenCalledWith({ streamId, search: 'nnbb', roster: 'historical', sortBy: 'device_user_id', currentWorkerId: 3210001, page: 2, limit: 20 });
     expect(lab.store.setLink).not.toHaveBeenCalled();
+  });
+  it('forwards only the allowlisted global sort and rejects invalid modes before loading the store', async () => {
+    const lab = fixture();
+    await lab.caller.sourceBiometricUsers({ search: 'RAD', sortBy: 'name', page: 2, limit: 20 });
+    expect(lab.store.listUsers).toHaveBeenCalledWith({ streamId, search: 'RAD', sortBy: 'name', roster: 'current', page: 2, limit: 20 });
+    for (const sortBy of ['NAME', '', 'name DESC', null, ['name']]) {
+      await expect(lab.caller.sourceBiometricUsers({ sortBy } as any)).rejects.toMatchObject({ code: 'BAD_REQUEST' });
+    }
+    await expect(lab.caller.sourceBiometricUsers({ sortBy: 'name', orderBy: 'device_user_id' } as any)).rejects.toMatchObject({ code: 'BAD_REQUEST' });
+    expect(lab.load).toHaveBeenCalledTimes(1);
+    expect(lab.store.listUsers).toHaveBeenCalledTimes(1);
   });
 });

@@ -25,13 +25,38 @@ describe('manual biometric directory boundary', () => {
     const { service, store } = fixture();
     expect(Object.values(store).every(operation => operation.mock.calls.length === 0)).toBe(true);
     await service.listUsers({ streamId: streamId.toUpperCase() });
-    expect(store.listUsers).toHaveBeenCalledWith({ streamId, search: '', roster: 'current', page: 1, limit: 25 });
-    await service.listUsers({ streamId, roster: 'all', currentWorkerId: 1, search: '00017', page: 2, limit: 100 });
-    expect(store.listUsers).toHaveBeenLastCalledWith({ streamId, roster: 'all', currentWorkerId: 1, search: '00017', page: 2, limit: 100 });
+    expect(store.listUsers).toHaveBeenCalledWith({ streamId, search: '', roster: 'current', sortBy: 'device_user_id', page: 1, limit: 25 });
+    await service.listUsers({ streamId, roster: 'all', sortBy: 'name', currentWorkerId: 1, search: '00017', page: 2, limit: 100 });
+    expect(store.listUsers).toHaveBeenLastCalledWith({ streamId, roster: 'all', sortBy: 'name', currentWorkerId: 1, search: '00017', page: 2, limit: 100 });
     for (const value of [{ streamId, limit: 101 }, { streamId, page: 0 }, { streamId, roster: 'missing' }, { streamId, currentWorkerId: 0 }]) {
       expect(() => service.listUsers(value as never)).toThrow(BiometricDirectoryError);
     }
     expect(store.listUsers).toHaveBeenCalledTimes(2);
+  });
+
+  it('accepts only the two list sort modes and preserves exact text searches without numeric coercion', async () => {
+    const { service, store } = fixture();
+    for (const search of ['RAD', 'rad', 'literal!%_', '9'.repeat(128)]) {
+      await service.listUsers({ streamId, search, sortBy: 'device_user_id', page: 2, limit: 20 });
+      expect(store.listUsers).toHaveBeenLastCalledWith({ streamId, search, roster: 'current', sortBy: 'device_user_id', page: 2, limit: 20 });
+    }
+    for (const sortBy of ['NAME', '', 'name DESC; DROP TABLE workers', null, {}, ['name']]) {
+      expect(() => service.listUsers({ streamId, sortBy } as never)).toThrowError(new BiometricDirectoryError('BIOMETRIC_DIRECTORY_INVALID_INPUT'));
+    }
+    expect(store.listUsers).toHaveBeenCalledTimes(4);
+  });
+
+  it('rejects an untrusted sort at the SQL store boundary before acquiring any connection', () => {
+    const pool = { getConnection: vi.fn() };
+    const store = createMysqlBiometricDirectoryStore(pool as unknown as Pool, 'expected_database');
+    const getter = vi.fn(() => 'name');
+    const accessor = { streamId };
+    Object.defineProperty(accessor, 'sortBy', { enumerable: true, get: getter });
+    for (const input of [{ streamId, sortBy: 'device_user_id DESC' }, accessor]) {
+      expect(() => store.listUsers(input as never)).toThrowError(new BiometricDirectoryError('BIOMETRIC_DIRECTORY_INVALID_INPUT'));
+    }
+    expect(pool.getConnection).not.toHaveBeenCalled();
+    expect(getter).not.toHaveBeenCalled();
   });
 
   it('requires explicit identity version, worker, authenticated actor and optimistic link expectation', async () => {

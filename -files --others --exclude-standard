@@ -1,0 +1,75 @@
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'client/src/App.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'client/src/components/DashboardLayout.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'client/src/i18n/translations.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'client/src/pages/AttendanceScanner.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'client/src/pages/AuditLog.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'client/src/pages/Operations.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'client/src/pages/Users.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/APPLY_BIOMETRIC_UPDATE.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/BIOMETRIC_CHANGELOG_2026-08-09.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/BIOMETRIC_INTEGRATION.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'drizzle/schema.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package-lock.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/__tests__/daily-work-assignment-finance-recalc.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/attendance-logic.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/biometric-final-events-importer.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/biometric-web-bridge.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/db.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/db/auth-local.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/db/connection.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/db/cost-center-report.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/db/daily-work-assignments.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/db/operational-days.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/db/operational-flags.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/db/payroll-locks.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/db/recalculation.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/permissions.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/routers/attendance.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/routers/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/routers/restaurants.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/routers/users.ts', LF will be replaced by CRLF the next time Git touches it
+ .gitignore                                         |   3 [32m+[m
+ README.md                                          |   2 [32m+[m
+ client/src/App.tsx                                 |  21 [32m+[m[31m-[m
+ client/src/components/DashboardLayout.tsx          |  28 [32m+[m[31m-[m
+ client/src/i18n/translations.ts                    | 102 [32m+++[m
+ client/src/pages/AttendanceScanner.tsx             |   3 [32m+[m
+ client/src/pages/AuditLog.tsx                      |   1 [32m+[m
+ client/src/pages/BiometricDevices.tsx              | 503 [31m-----------[m
+ client/src/pages/Operations.tsx                    | 227 [32m++++[m[31m-[m
+ client/src/pages/Users.tsx                         |   1 [32m+[m
+ docs/APPLY_BIOMETRIC_UPDATE.md                     |   2 [32m+[m
+ docs/BIOMETRIC_CHANGELOG_2026-08-09.md             |   2 [32m+[m
+ docs/BIOMETRIC_INTEGRATION.md                      |   2 [32m+[m
+ drizzle/schema.ts                                  |  34 [32m+[m[31m-[m
+ package-lock.json                                  | 948 [32m++++++++++++++++++++[m[31m-[m
+ scripts/simulate-zkteco-push.ts                    |  29 [31m-[m
+ .../__tests__/biometric-attendance-rules.test.ts   |  36 [31m-[m
+ .../daily-work-assignment-finance-recalc.test.ts   |  66 [32m+[m[31m-[m
+ server/__tests__/zkteco-push-parser.test.ts        |  52 [31m--[m
+ server/attendance-logic.ts                         |   9 [32m+[m[31m-[m
+ server/biometric-final-events-importer.ts          | 122 [32m++[m[31m-[m
+ server/biometric-web-bridge.ts                     |   6 [32m+[m[31m-[m
+ server/biometric/biometric-attendance-rules.ts     |  53 [31m--[m
+ server/biometric/zkteco-adms-routes.ts             | 120 [31m---[m
+ server/biometric/zkteco-adms-service.ts            | 230 [31m-----[m
+ server/biometric/zkteco-push-parser.ts             | 126 [31m---[m
+ server/db.ts                                       |   1 [32m+[m
+ server/db/auth-local.ts                            |   2 [32m+[m[31m-[m
+ server/db/biometric.ts                             | 427 [31m----------[m
+ server/db/connection.ts                            |   2 [32m+[m
+ server/db/cost-center-report.ts                    |   4 [32m+[m[31m-[m
+ server/db/daily-work-assignments.ts                | 317 [32m++++[m[31m---[m
+ server/db/operational-days.ts                      | 237 [32m++++[m[31m--[m
+ server/db/operational-flags.ts                     |   2 [32m+[m[31m-[m
+ server/db/payroll-locks.ts                         |   6 [32m+[m[31m-[m
+ server/db/recalculation.ts                         |   7 [32m+[m[31m-[m
+ server/permissions.ts                              |  25 [32m+[m
+ server/routers/attendance.ts                       |  31 [32m+[m[31m-[m
+ server/routers/biometric.ts                        |  95 [31m---[m
+ server/routers/index.ts                            |   2 [32m+[m
+ server/routers/restaurants.ts                      |   2 [32m+[m[31m-[m
+ server/routers/users.ts                            |   2 [32m+[m[31m-[m
+ 42 files changed, 1938 insertions(+), 1952 deletions(-)

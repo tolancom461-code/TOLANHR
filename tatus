@@ -1,0 +1,21 @@
+[33mcommit 5dd45d08095831e002d1f6a584000265c3a08b51[m[33m ([m[1;31mtolanhr2/main[m[33m, [m[1;31mtolanhr2/HEAD[m[33m)[m
+Author: MH <mh@local.dev>
+Date:   Sun Oct 11 11:57:14 2026 +0300
+
+    Prepare TOLANHR2 initial deployment
+
+ .dockerignore                                   | 14 [32m+++++++++[m
+ Dockerfile                                      | 38 [32m+++++++++++++++++++++++++[m
+ client/src/App.tsx                              | 21 [32m++++++++++++[m[31m--[m
+ client/src/components/DashboardLayout.tsx       | 28 [32m+++++++++++[m[31m-------[m
+ client/src/pages/AuditLog.tsx                   |  1 [32m+[m
+ client/src/pages/Users.tsx                      |  1 [32m+[m
+ drizzle/add_operations_cost_accountant_role.sql | 17 [32m+++++++++++[m
+ drizzle/schema.ts                               |  2 [32m+[m[31m-[m
+ server/db/auth-local.ts                         |  2 [32m+[m[31m-[m
+ server/db/cost-center-report.ts                 |  4 [32m+[m[31m--[m
+ server/db/operational-flags.ts                  |  2 [32m+[m[31m-[m
+ server/permissions.ts                           | 25 [32m++++++++++++++++[m
+ server/routers/restaurants.ts                   |  2 [32m+[m[31m-[m
+ server/routers/users.ts                         |  2 [32m+[m[31m-[m
+ 14 files changed, 140 insertions(+), 19 deletions(-)
