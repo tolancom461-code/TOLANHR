@@ -34,6 +34,7 @@ import { inArray, isNull, isNotNull, between } from "drizzle-orm";
 import type { Worker as DbWorker } from "../../drizzle/schema";
 import { ENV } from '../_core/env';
 import { getDb } from './connection';
+import { runWithSourcePayrollGate, shouldUseSourcePayrollGate } from '../attendance-source-promotion/payroll-gate';
 import { processAttendanceToFinance } from './daily-finance';
 import { getApprovedUnpostedDeductionsForPeriod, markDeductionsAsPosted, addDeductionReasonNotes } from './deductions';
 import { getDailyFinanceRecords } from './finance-entries';
@@ -86,7 +87,8 @@ export async function createPayrollBatch(params: {
     daysWorked?: number;
     notes?: string;
   }>;
-}) {
+}): Promise<{ batchId: number; batchCode: string }> {
+  if (shouldUseSourcePayrollGate()) return runWithSourcePayrollGate(() => createPayrollBatch(params));
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 

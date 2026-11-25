@@ -32,6 +32,7 @@ import { inArray, isNull, isNotNull, between } from "drizzle-orm";
 import type { Worker as DbWorker } from "../../drizzle/schema";
 import { ENV } from '../_core/env';
 import { getDb } from './connection';
+import { runWithSourcePayrollGate, shouldUseSourcePayrollGate } from '../attendance-source-promotion/payroll-gate';
 import { calculateDailyFinanceFromAttendance, createOrUpdateDailyFinance } from './daily-finance';
 
 // ============================================
@@ -141,7 +142,10 @@ export async function lockDailyFinancesForBatch(
   workerIds: number[],
   periodStart: string,
   periodEnd: string
-) {
+): Promise<{ success: boolean }> {
+  if (shouldUseSourcePayrollGate()) {
+    return runWithSourcePayrollGate(() => lockDailyFinancesForBatch(batchId, workerIds, periodStart, periodEnd));
+  }
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 

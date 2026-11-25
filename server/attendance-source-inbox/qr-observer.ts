@@ -5,6 +5,7 @@ import { createMysqlAttendanceSourceInboxStore } from './mysql-store';
 import { createAttendanceSourceInbox } from './service';
 import { SourceInboxError, type SourceEventRecord, type SourceInboxLookupStore } from './types';
 import { positiveId, validateId } from './validation';
+import type { AttendanceSourceExecution } from '../attendance-logic';
 
 export interface QrAttendanceResult {
   success: boolean;
@@ -30,7 +31,7 @@ interface QrRequest {
 
 interface QrDependencies {
   getPool(): Promise<Pool>;
-  execute(observation?: QrAttendanceObservation): Promise<QrAttendanceResult>;
+  execute(observation?: QrAttendanceObservation, sourceExecution?: AttendanceSourceExecution): Promise<QrAttendanceResult>;
   /** Injection for isolated tests. Production uses the supplied existing application pool. */
   createStore?: (pool: Pool, database: string) => SourceInboxLookupStore;
   diagnostic?: (code: string) => void;
@@ -38,6 +39,9 @@ interface QrDependencies {
 
 class ExistingAttempt extends Error {
   constructor(readonly receipt: SourceEventRecord) { super('QR_EXISTING_ATTEMPT'); }
+}
+class CoordinatedQrResult extends Error {
+  constructor(readonly result: QrAttendanceResult) { super('QR_SOURCE_COORDINATED'); }
 }
 
 /** No environment file loading, pool creation, DDL, timers, or biometric connector. */
@@ -105,12 +109,28 @@ export async function recordQrWithSourceInbox(request: QrRequest, dependencies: 
   let previous: SourceEventRecord | null;
   try { previous = await store.getBySourceEventId('qr', key); }
   catch { throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'تعذر التحقق من محاولة QR. لم يبدأ التسجيل.' }); }
-  if (previous) return replay(previous);
+  if (previous?.status === 'accepted') return replay(previous);
+  const promotion = process.env.BIOMETRIC_SOURCE_PROMOTION_ENABLED === 'true'
+    ? (await import('../attendance-source-promotion/application')).getSourceAttendancePromotion(pool) : null;
+  if (previous) {
+    checkIntent(previous);
+    if (promotion) {
+      const coordinated = await promotion.resumeQr(workerId,previous.id,execution => dependencies.execute(undefined,execution));
+      if (coordinated) return coordinated;
+    }
+    return replay(previous);
+  }
 
   let receipt: SourceEventRecord | undefined;
   let attendanceId: number | undefined;
   const observation: QrAttendanceObservation = {
     async beforeValidation(context) {
+      if (promotion) {
+        const coordinated = await promotion.recordQr({ source: 'qr',sourceEventId: key,workerId,eventType,
+          eventTimeUtc: context.eventTime.toISOString(),sourceUserName: context.workerName,sourcePersonCode: context.personCode },
+        execution => dependencies.execute(undefined,execution));
+        if (coordinated) throw new CoordinatedQrResult(coordinated);
+      }
       try {
         const captured = await inbox.capture({ source: 'qr', sourceEventId: key, workerId, eventType,
           eventTimeUtc: context.eventTime.toISOString(), sourceUserName: context.workerName,
@@ -133,6 +153,7 @@ export async function recordQrWithSourceInbox(request: QrRequest, dependencies: 
   try {
     result = await dependencies.execute(observation);
   } catch (error) {
+    if (error instanceof CoordinatedQrResult) return error.result;
     if (error instanceof ExistingAttempt) return replay(error.receipt);
     if (receipt) {
       const cooldown = attendanceId === undefined && error instanceof TRPCError && error.code === 'BAD_REQUEST'

@@ -560,7 +560,7 @@ addFullSession: protectedProcedure
             if (!database) throw new Error('Database not available');
             return database.$client.promise();
           },
-          execute: observation => db.recordAttendanceWithAdministrativeDay(
+          execute: (observation, sourceExecution) => db.recordAttendanceWithAdministrativeDay(
             input.workerId,
             'qr',
             undefined,
@@ -568,7 +568,8 @@ addFullSession: protectedProcedure
             serverIp || undefined,
             input.deviceInfo,
             input.eventType,
-            observation
+            observation,
+            sourceExecution
           ),
         });
         

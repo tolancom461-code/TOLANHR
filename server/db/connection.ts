@@ -32,6 +32,7 @@ import { inArray, isNull, isNotNull, between } from "drizzle-orm";
 import type { Worker as DbWorker } from "../../drizzle/schema";
 import { ENV } from '../_core/env';
 import { configureAttendanceTimeSession } from './attendance-time-session';
+import { currentSourceAttendanceDatabase } from './source-execution-context';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 let _rawConnection: any = null;
@@ -206,6 +207,8 @@ export function getExpandedDateRange(dateStr: string): { startOfDay: Date; endOf
 }
 
 export async function getDb() {
+  const sourceDatabase = currentSourceAttendanceDatabase();
+  if (sourceDatabase) return sourceDatabase as unknown as NonNullable<typeof _db>;
   if (!_db && process.env.DATABASE_URL) {
     try {
       // Configure connection pool with limits to prevent resource exhaustion

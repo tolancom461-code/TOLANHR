@@ -53,7 +53,7 @@ export default function BiometricSourceLinkPicker({ workerId, workerName, legacy
     try {
       await save.mutateAsync({ workerId, identityId: selection.identityId, expectedLinkId: selection.linkId, confirmHistorical });
       setSelection(null); setConfirmHistorical(false); setOpen(false);
-      await refresh(); toast.success('تم حفظ ربط المستخدم بالعامل. اعتماد الحركات ما زال متوقفًا.');
+      await refresh(); toast.success('تم حفظ ربط المستخدم بالعامل.');
     } catch (error: any) { clearSelection(); toast.error(error?.message || 'تعذر حفظ الربط'); await refresh(); }
   };
   const revokeLink = async () => {
@@ -66,7 +66,7 @@ export default function BiometricSourceLinkPicker({ workerId, workerName, legacy
   return <div className="space-y-3 rounded-lg border bg-muted/20 p-4" dir="rtl">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div><Label className="flex items-center gap-2 font-semibold"><Fingerprint className="h-4 w-4" />الربط مع نظام البصمة</Label>
-        <p className="mt-1 text-xs text-muted-foreground">اختر المستخدم من دليل الجهاز المتزامن. يُحفظ الربط بزر مستقل، واعتماد الحركات خطوة لاحقة.</p></div>
+        <p className="mt-1 text-xs text-muted-foreground">اختر المستخدم من دليل الجهاز المتزامن، ثم احفظ الربط بالزر المخصص.</p></div>
       <Button type="button" variant="outline" size="sm" disabled={!workerId || busy} onClick={() => { setSelection(null); setConfirmHistorical(false); setOpen(true); }}>
         <Link2 className="ml-1 h-4 w-4" />ربط بالبصمة</Button>
     </div>

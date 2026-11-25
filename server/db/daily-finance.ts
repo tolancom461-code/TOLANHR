@@ -33,6 +33,7 @@ import type { Worker as DbWorker } from "../../drizzle/schema";
 import { ENV } from '../_core/env';
 import { getDb, safeParseDecimal, safeParseInt } from './connection';
 import { getEffectiveGroupForWorkerOnDate } from './recalculation';
+import { currentSourceAttendanceDatabase } from './source-execution-context';
 
 // ============================================
 // Daily Finance Functions (Phase 4 Completion)
@@ -58,9 +59,10 @@ export async function createOrUpdateDailyFinance(
   if (!db) throw new Error("Database not available");
 
   const { workerDailyFinance } = await import('../../drizzle/schema');
+  const sourceExecution = currentSourceAttendanceDatabase() !== undefined;
   
   // Check if exists
-  const [existing] = await db
+  const existingQuery = db
     .select()
     .from(workerDailyFinance)
     .where(and(
@@ -68,6 +70,10 @@ export async function createOrUpdateDailyFinance(
       eq(workerDailyFinance.workDate, sql`${workDate}`)
     ))
     .limit(1);
+  const [existing] = await (sourceExecution ? existingQuery.for('update') : existingQuery);
+  if (sourceExecution && existing && existing.lockedBatchId !== null) {
+    throw new Error('SOURCE_PERIOD_LOCKED');
+  }
   
   const baseAmount = data.baseAmount || 0;
   const deductions = data.deductions || 0;
@@ -78,7 +84,7 @@ export async function createOrUpdateDailyFinance(
   const financialMinutes = workedMinutes;
   
   if (existing) {
-    await db.update(workerDailyFinance).set({
+    const result = await db.update(workerDailyFinance).set({
       baseAmount: sql`${baseAmount}`,
       deductions: sql`${deductions}`,
       bonuses: sql`${bonuses}`,
@@ -95,7 +101,12 @@ export async function createOrUpdateDailyFinance(
       notes: data.notes,
       effectiveGroupId: data.effectiveGroupId ?? existing.effectiveGroupId, // ✅ حفظ المجموعة الفعالة
       updatedAt: new Date(),
-    }).where(eq(workerDailyFinance.id, existing.id));
+    }).where(sourceExecution
+      ? and(eq(workerDailyFinance.id, existing.id), isNull(workerDailyFinance.lockedBatchId))
+      : eq(workerDailyFinance.id, existing.id));
+    if (sourceExecution && Number(result[0]?.affectedRows ?? 0) !== 1) {
+      throw new Error('SOURCE_PERIOD_LOCKED');
+    }
     return { id: existing.id, created: false };
   } else {
     const result = await db.insert(workerDailyFinance).values({

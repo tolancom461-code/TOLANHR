@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "completedAtUtc": "2026-11-25T12:00:26.152Z",
+  "fixture": "Synthetic records in a process-owned random loopback MySQL schema; no env file or live database",
+  "checks": [
+    "Fresh owned schema, random loopback port and datadir verified; no env file, app startup or live connection",
+    "Only the five reviewed new CREATE definitions were retargeted; synthetic current identities and versioned links seeded independently of legacy person codes",
+    "An armed but empty activation table remains archive-only; pre-activation receipts stay untouched even when their event/received times are after the fixture cutoff",
+    "Both original event time and database receipt time must meet the fixed cutoff; the inclusive boundary uses the existing Riyadh administrative day",
+    "Only an exact stream, registration identity, device and PIN link resolves a worker; a reused PIN, missing identity or different device cannot borrow the current registration",
+    "A committed biometric receipt is drained before a later QR request; the device timestamp and immutable raw null-worker payload survive, with binding evidence recorded separately in the outcome note",
+    "QR wins when received first, including outside the old three-minute window; accepted QR receipt replay returns its original attendance ID without executing the workflow again",
+    "All four auxiliary movement states remain archived and never invoke attendance or finance",
+    "The original any-type 180-second cooldown and same-source repeats after it are preserved; multiple cycles work and an opposite movement permits the next source phase",
+    "Real finance helpers see the uncommitted checkout through the same AsyncLocalStorage-bound transaction and retain the existing 175-minute two-cycle result and Riyadh storage codec",
+    "Inactive workers and locked periods receive review outcomes; a revoked exact identity link remains unmapped and none creates attendance",
+    "A future device clock is retained for review without attendance or raw-time correction, and a subsequent valid QR is admitted normally",
+    "A fresh coordinator rejects an extra index on either the inbox or directory table before attendance, finance, worker or pending-receipt mutation",
+    "A post-commit QR result-query failure becomes a safe conflict while the accepted receipt/attendance remain durable; resuming returns the same result without repeating finance or attendance",
+    "Concurrent biometric ingress and QR admission serialize on the database activation gate and produce exactly one accepted movement",
+    "Technical source replay is idempotent, changed payload conflicts, and promotion never rewrites the original hash or worker/device identity payload",
+    "An unexpected failure after the actual attendance INSERT rolls back attendance, last-attendance update and outcome; retry later inserts once",
+    "Failure after real finance writes rolls back the entire admission, preserving its committed pending receipt; retry produces one checkout and one correct 120-minute finance result",
+    "Historical attendance, finance, settings, old import records, pre-activation receipts and the durable activation timestamp remain byte-for-byte unchanged"
+  ],
+  "financeCalls": 7,
+  "uncommittedFinanceReads": 7,
+  "cleanup": {
+    "localConnectionsClosed": true,
+    "mysqlStopped": true,
+    "bootstrapRemoved": true,
+    "graceful": true,
+    "syntheticFixtureRetained": true
+  }
+}

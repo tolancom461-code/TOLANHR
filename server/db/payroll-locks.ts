@@ -32,6 +32,7 @@ import { inArray, isNull, isNotNull, between } from "drizzle-orm";
 import type { Worker as DbWorker } from "../../drizzle/schema";
 import { ENV } from '../_core/env';
 import { getDb, type DatabaseReadExecutor } from './connection';
+import { runWithSourcePayrollGate, shouldUseSourcePayrollGate } from '../attendance-source-promotion/payroll-gate';
 
 // ============================================
 // Payroll Lock Functions
@@ -112,7 +113,8 @@ export async function forceUnlockPayroll(batchId: number, reason: string, userId
 }
 
 // Re-lock payroll batch
-export async function relockPayroll(batchId: number, userId: number) {
+export async function relockPayroll(batchId: number, userId: number): Promise<{ success: boolean; message: string }> {
+  if (shouldUseSourcePayrollGate()) return runWithSourcePayrollGate(() => relockPayroll(batchId, userId));
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 

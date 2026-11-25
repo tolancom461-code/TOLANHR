@@ -243,6 +243,17 @@ export function analyzeTimestampForEventType(
   return null;
 }
 
+export type AttendanceExecutionDatabase = Pick<
+  NonNullable<Awaited<ReturnType<typeof getDb>>>,
+  'select' | 'insert' | 'update'
+>;
+
+export interface AttendanceSourceExecution {
+  database?: AttendanceExecutionDatabase;
+  eventTime?: Date;
+  deferFinance?: boolean;
+}
+
 /**
  * تسجيل حضور/انصراف مع المنطق الهجين المتطور
  * 
@@ -261,9 +272,17 @@ export async function recordAttendanceWithAdministrativeDay(
   ipAddress?: string,
   deviceInfo?: string,
   forcedEventType?: 'check_in' | 'check_out',  // ✅ التعديل: اختيار الحارس
-  sourceObservation?: QrAttendanceObservation
+  sourceObservation?: QrAttendanceObservation,
+  sourceExecution?: AttendanceSourceExecution
 ) {
-  const db = await getDb();
+  const suppliedEventTime = sourceExecution?.eventTime;
+  if (suppliedEventTime !== undefined && (
+    !(suppliedEventTime instanceof Date) || !Number.isFinite(suppliedEventTime.getTime())
+  )) {
+    throw new TRPCError({ code: 'BAD_REQUEST', message: 'وقت حركة الحضور غير صالح.' });
+  }
+  const sourceEventTime = suppliedEventTime === undefined ? undefined : new Date(suppliedEventTime.getTime());
+  const db = sourceExecution?.database ?? await getDb();
   if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: "Database not available" });
 
   const { attendanceEvents, workers } = await import('../drizzle/schema');
@@ -272,7 +291,7 @@ export async function recordAttendanceWithAdministrativeDay(
   const [worker] = await db.select().from(workers).where(eq(workers.id, workerId)).limit(1);
   if (!worker) throw new TRPCError({ code: 'NOT_FOUND', message: "العامل غير موجود" });
   
-  const eventTime = new Date();
+  const eventTime = sourceEventTime ?? new Date();
   const workDate = getAdministrativeWorkDate(eventTime);
   if (method === 'qr' && forcedEventType) {
     await sourceObservation?.beforeValidation({ eventTime,
@@ -387,7 +406,7 @@ export async function recordAttendanceWithAdministrativeDay(
   await db.update(workers).set({ lastAttendanceAt: eventTime }).where(eq(workers.id, workerId));
   
   // 🔥 حساب المالية التلقائي عند الانصراف
-  if (eventType === 'check_out') {
+  if (eventType === 'check_out' && sourceExecution?.deferFinance !== true) {
     try {
       const { processAttendanceToFinance } = await import('./db');
       await processAttendanceToFinance(workerId, workDate);

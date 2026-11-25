@@ -11,6 +11,7 @@ import { createBiometricDirectoryHttpClient, BiometricDirectorySyncError } from 
 import { createBiometricDirectorySync } from '../biometric-directory/sync';
 import { createMysqlBiometricDirectoryStore } from '../biometric-directory/mysql-store';
 import { BiometricDirectoryError } from '../biometric-directory/types';
+import { getSourceAttendancePromotion } from '../attendance-source-promotion/application';
 
 async function applicationPool(): Promise<Pool> {
   const { getDb } = await import('../db/connection');
@@ -39,6 +40,8 @@ export function startBiometricSourceImporter({ env = process.env, getPool = appl
   let importer: ReturnType<typeof createBiometricSourceImporter> | undefined;
   let directoryTimer: ReturnType<typeof setTimeout> | undefined;
   let directorySync: ReturnType<typeof createBiometricDirectorySync> | undefined;
+  let promotion: ReturnType<typeof getSourceAttendancePromotion>;
+  let promotionTimer: ReturnType<typeof setTimeout> | undefined;
   let poolPromise: Promise<Pool> | undefined;
   const sharedPool = () => {
     if (poolPromise) return poolPromise;
@@ -52,8 +55,10 @@ export function startBiometricSourceImporter({ env = process.env, getPool = appl
       if (!importer) {
         const pool = await sharedPool();
         if (stopped) return;
+        promotion = getSourceAttendancePromotion(pool,env);
+        const archive = createAttendanceSourceInbox(createMysqlAttendanceSourceInboxStore(pool, settings.expectedDatabase));
         importer = createBiometricSourceImporter({ source: createSourcePunchHttpClient(settings),
-          inbox: createAttendanceSourceInbox(createMysqlAttendanceSourceInboxStore(pool, settings.expectedDatabase)),
+          inbox: promotion ? { assertReady: archive.assertReady, capture: event => promotion!.captureBiometric(event) } : archive,
           progress: createMysqlSourceImportProgressStore(pool, settings.expectedDatabase, settings.streamId),
           streamId: settings.streamId, pageSize: settings.pageSize, maxPages: settings.maxPages });
       }
@@ -87,13 +92,29 @@ export function startBiometricSourceImporter({ env = process.env, getPool = appl
       if (!stopped) { directoryTimer = setTimeout(() => { void runDirectory(); }, 60_000); directoryTimer.unref?.(); }
     }
   };
-  report('enabled archive-only; attendance promotion disabled');
+  const runPromotion = async () => {
+    try {
+      const pool = await sharedPool();
+      if (stopped) return;
+      promotion ??= getSourceAttendancePromotion(pool,env);
+      if (promotion) {
+        const result = await promotion.runOnce();
+        if (result.processed) report(`promotion completed processed=${result.processed}`);
+      }
+    } catch { report('SOURCE_PROMOTION_RETRY_PENDING'); }
+    finally { if (!stopped) { promotionTimer = setTimeout(() => { void runPromotion(); },2000); promotionTimer.unref?.(); } }
+  };
+  report(env.BIOMETRIC_SOURCE_PROMOTION_ENABLED === 'true'
+    ? 'enabled; biometric promotion armed; durable activation required'
+    : 'enabled archive-only; attendance promotion disabled');
   void run();
   if (env.BIOMETRIC_SOURCE_DIRECTORY_ENABLED === 'true') void runDirectory();
+  if (env.BIOMETRIC_SOURCE_PROMOTION_ENABLED === 'true') void runPromotion();
   return () => {
     stopped = true;
     if (timer) clearTimeout(timer);
     if (directoryTimer) clearTimeout(directoryTimer);
+    if (promotionTimer) clearTimeout(promotionTimer);
     directorySync?.stop();
   };
 }

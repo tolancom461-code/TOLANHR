@@ -1,0 +1,31 @@
+{
+  "dateRiyadh": "2026-11-25",
+  "localImplementationComplete": true,
+  "livePromotionActivated": false,
+  "deployedByAgent": false,
+  "productionBuild": { "passed": true, "command": "npm run build", "output": "build-output.txt" },
+  "unitTests": { "passed": 97, "failed": 0, "files": 12, "report": "unit-result.json" },
+  "ownedMysqlAcceptance": { "passed": true, "checks": 19, "report": "result.json" },
+  "typescript": {
+    "fullProjectPassed": false,
+    "diagnostics": 582,
+    "previousRecordedDiagnostics": 582,
+    "diagnosticsInNewPromotionAndContextModules": 0,
+    "output": "typecheck-output.txt"
+  },
+  "liveReadOnlyPreflight": {
+    "database": "TESTCOPY2",
+    "server": "8.0.11-TiDB-v8.5.3-serverless",
+    "transactionMode": "pessimistic",
+    "inplaceConstraintCheck": true,
+    "sourceStreamMatches": true,
+    "activationTableExists": false
+  },
+  "liveSchemaOrRecordMutationsByAgent": false,
+  "newManualTable": "attendance_source_promotion_state",
+  "newFlag": "BIOMETRIC_SOURCE_PROMOTION_ENABLED",
+  "cutover": "One-time database UTC_TIMESTAMP(6), executed manually only after deployment and readiness verification",
+  "sourceHistoryBackfill": false,
+  "fingerprintProducerChanges": false,
+  "runbook": "docs/ATTENDANCE_SOURCE_PROMOTION_2026-11-25.txt"
+}
