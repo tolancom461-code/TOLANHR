@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import mysql from 'mysql2/promise';
 import { startTolanHrMysql, osEnvironmentKeys } from '../tolanhr-pilot-mysql.mjs';
 import type { CaptureSourceEvent, SourceEventRecord } from '../../server/attendance-source-inbox/types';
@@ -159,7 +160,7 @@ try {
   stage = 'biometric-arrival-before-qr-drains-in-original-order';
   const bioFirst = await promotion.captureBiometric(bio('bio-first', 1, 'check_in', '08:00:00'));
   const immutableBefore = immutable(await raw(bioFirst.event.id));
-  await rejects(() => promotion.recordQr(qr('qr-after-bio', 1, 'check_in', '08:10:00'), executeQr(1, 'check_in')), 'BAD_REQUEST');
+  const confirmedBio = await promotion.recordQr(qr('qr-after-bio', 1, 'check_in', '08:10:00'), executeQr(1, 'check_in'));
   assert.equal((await attendance(1)).filter(row => row.work_date === '2026-11-25').length, 1);
   const acceptedBio = await raw(bioFirst.event.id);
   assert.equal(acceptedBio.status, 'accepted');
@@ -168,11 +169,16 @@ try {
   const bioFirstAttendance = (await attendance(1)).find(row => row.work_date === '2026-11-25');
   assert.equal(bioFirstAttendance.method, 'biometric');
   assert.equal(bioFirstAttendance.event_time, '2026-11-25 11:00:00');
+  assert.equal(confirmedBio?.alreadyRecorded, true);
+  assert.equal(confirmedBio?.source, 'biometric');
+  assert.equal(confirmedBio?.eventId, bioFirstAttendance.id);
+  assert.equal(confirmedBio?.timestamp.toISOString(), '2026-11-25T08:00:00.000Z');
+  assert.equal(confirmedBio?.workDate, '2026-11-25');
   const rejectedQr = await receipt('qr', 'qr-after-bio');
   assert.equal(rejectedQr.decision_code, 'SOURCE_FIRST_ARRIVAL');
   assert.equal(JSON.parse(acceptedBio.decision_note).w, 1);
   assert.ok(JSON.parse(acceptedBio.decision_note).l);
-  checks.push('A committed biometric receipt is drained before a later QR request; the device timestamp and immutable raw null-worker payload survive, with binding evidence recorded separately in the outcome note');
+  checks.push('A committed biometric receipt is drained before later QR; QR confirms the exact existing winner and original timestamp while its rejected source receipt, immutable raw payload and one attendance row remain intact');
 
   stage = 'qr-arrival-first-and-accepted-replay';
   const firstQr = await promotion.recordQr(qr('qr-first', 2, 'check_in', '08:00:00'), executeQr(2, 'check_in'));
@@ -218,7 +224,8 @@ try {
   assert.equal((await attendance(3)).length, 5);
   await promotion.captureBiometric(bio('phase-open-in', 20, 'check_in', '08:00:00'));
   await promotion.runOnce();
-  await rejects(() => promotion.recordQr(qr('phase-duplicate-in', 20, 'check_in', '08:10:00'), executeQr(20, 'check_in')), 'BAD_REQUEST');
+  const confirmedPhase = await promotion.recordQr(qr('phase-duplicate-in', 20, 'check_in', '08:10:00'), executeQr(20, 'check_in'));
+  assert.equal(confirmedPhase?.alreadyRecorded, true);
   await promotion.recordQr(qr('phase-out', 20, 'check_out', '08:15:00'), executeQr(20, 'check_out'));
   await promotion.captureBiometric(bio('phase-next-in', 20, 'check_in', '08:20:00'));
   await promotion.runOnce();
@@ -339,6 +346,34 @@ try {
   assert.deepEqual(await raw(bioFirst.event.id), beforeReplay);
   checks.push('Technical source replay is idempotent, changed payload conflicts, and promotion never rewrites the original hash or worker/device identity payload');
 
+  stage = 'duplicate-qr-replay-keeps-frozen-winner-after-new-phase-and-rebinding';
+  await promotion.captureBiometric(bio('winner-later-checkout', 1, 'check_out', '08:20:00'));
+  await promotion.runOnce();
+  await fixture.execute("UPDATE attendance_biometric_worker_links SET status='revoked',revoked_by=1,revoked_at_utc=UTC_TIMESTAMP(6) WHERE worker_id=1");
+  await fixture.execute(`INSERT INTO attendance_biometric_worker_links
+    (id,stream_id,source_identity_id,worker_id,status,device_id_snapshot,device_user_id_snapshot,
+     display_name_snapshot,device_name_snapshot,serial_number_snapshot,worker_name_snapshot,created_by,created_at_utc)
+    VALUES ('00000000-0000-4000-8000-000000000099',?,'101',11,'active','9001','00001',
+     'Synthetic reassigned identity','Synthetic SpeedFace','SYNTHETIC-DEVICE','Synthetic other worker',1,UTC_TIMESTAMP(6))`, [streamId]);
+  const afterRebinding = await workerLedger(1);
+  const unchangedRejected = await raw(rejectedQr.id);
+  const replayedConfirmation = await promotion.resumeQr(1, rejectedQr.id, async () => { throw new Error('UNEXPECTED_DUPLICATE_WORKFLOW'); });
+  assert.deepEqual(replayedConfirmation, confirmedBio);
+  assert.deepEqual(await workerLedger(1), afterRebinding);
+  assert.deepEqual(await raw(rejectedQr.id), unchangedRejected);
+  await fixture.execute('UPDATE attendance_events SET worker_id=11 WHERE id=?', [confirmedBio!.eventId]);
+  try {
+    await rejects(() => promotion.resumeQr(1, rejectedQr.id, executeQr(1, 'check_in')), 'CONFLICT');
+  } finally { await fixture.execute('UPDATE attendance_events SET worker_id=1 WHERE id=?', [confirmedBio!.eventId]); }
+  assert.deepEqual(await workerLedger(1), afterRebinding);
+  await fixture.execute('UPDATE attendance_biometric_worker_links SET device_user_id_snapshot=? WHERE id=?', ['OWNED-WRONG-PIN', linkId(1)]);
+  try {
+    await rejects(() => promotion.resumeQr(1, rejectedQr.id, executeQr(1, 'check_in')), 'CONFLICT');
+  } finally {
+    await fixture.execute('UPDATE attendance_biometric_worker_links SET device_user_id_snapshot=? WHERE id=?', ['00001', linkId(1)]);
+  }
+  checks.push('The same rejected QR attempt keeps confirming its frozen original winner after a later checkout and identity rebind; a mismatched winning attendance fails safely without writes');
+
   stage = 'post-insert-workflow-failure-rolls-back';
   const failingWorkflow = await promotion.captureBiometric(bio('workflow-failure', 17, 'check_in', '08:00:00'));
   const beforeWorkflow = await workerLedger(17);
@@ -413,7 +448,7 @@ try {
   }
 
   async function receipt(source: string, key: string) {
-    const [rows] = await fixture!.query<any[]>('SELECT * FROM attendance_source_events WHERE source=? AND source_event_id=?', [source, key]);
+    const [rows] = await fixture!.query<any[]>('SELECT * FROM attendance_source_events WHERE source=? AND source_event_id=?', [source, source === 'biometric' ? biometricKey(key) : key]);
     assert.equal(rows.length, 1);
     return rows[0];
   }
@@ -460,7 +495,7 @@ process.stdout.write(JSON.stringify(report) + '\n');
 if (failure) process.exitCode = 1;
 
 function bio(sourceEventId: string, workerId: number, eventType: 'check_in' | 'check_out', time: string): CaptureSourceEvent {
-  return { source: 'biometric', sourceEventId, eventType, rawState: eventType === 'check_in' ? '0' : '1',
+  return { source: 'biometric', sourceEventId: biometricKey(sourceEventId), eventType, rawState: eventType === 'check_in' ? '0' : '1',
     eventTimeUtc: `2026-11-25T${time}.000000Z`, workerId: null, sourcePersonCode: null, sourceUserName: null,
     sourceDeviceId: '9001', sourceDeviceUserId: String(workerId).padStart(5, '0'), sourceIdentityId: String(100 + workerId) };
 }
@@ -470,6 +505,7 @@ function qr(sourceEventId: string, workerId: number, eventType: 'check_in' | 'ch
 }
 
 function sql(value: string) { return value.slice(0, -1).replace('T', ' '); }
+function biometricKey(value: string) { return `bio:${createHash('sha256').update(JSON.stringify([streamId, value])).digest('hex')}`; }
 function linkId(workerId: number) { return `00000000-0000-4000-8000-${String(workerId).padStart(12, '0')}`; }
 function immutable(row: any) {
   return Object.fromEntries(['id', 'source', 'source_event_id', 'content_sha256', 'worker_id', 'source_person_code',

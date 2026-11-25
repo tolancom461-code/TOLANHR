@@ -14,6 +14,8 @@ export interface QrAttendanceResult {
   eventId: number;
   timestamp: Date;
   workDate: string;
+  alreadyRecorded?: boolean;
+  source?: 'qr' | 'biometric';
 }
 
 /** Observes the existing workflow; never replaces its admission or finance rules. */

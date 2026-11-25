@@ -206,10 +206,57 @@ export function createSourceAttendancePromotion({ pool, config, applyAttendance 
       return { success: true, workerId, eventType: event.eventType as 'check_in' | 'check_out', eventId: event.attendanceEventId,
         timestamp: new Date(event.eventTimeUtc), workDate: rows[0].work_date };
     }
-    if (event.decisionCode === 'SOURCE_FIRST_ARRIVAL') throw new TRPCError({ code: 'BAD_REQUEST', message: 'سبق اعتماد هذه الحركة من المصدر الآخر. حُفظت محاولة QR للمراجعة دون تكرار الحضور.' });
+    if (event.decisionCode === 'SOURCE_FIRST_ARRIVAL') return confirmExistingBiometric(event, workerId);
     if (event.decisionCode === 'QR_COOLDOWN') throw new TRPCError({ code: 'BAD_REQUEST', message: 'عذراً، لا يمكن تسجيل حركتين متتاليتين خلال أقل من 3 دقائق، يرجى الانتظار.' });
     if (event.decisionCode === 'SOURCE_PERIOD_LOCKED') throw new TRPCError({ code: 'BAD_REQUEST', message: 'الفترة مقفلة للرواتب. حُفظت المحاولة للمراجعة.' });
     throw new TRPCError({ code: 'CONFLICT', message: 'حُفظت المحاولة وتنتظر المعالجة أو المراجعة. لم يُنشأ حضور مكرر.' });
+  }
+
+  async function confirmExistingBiometric(event: SourceEventRecord, workerId: number): Promise<QrAttendanceResult> {
+    const state = await activation.read();
+    if (!state || event.source !== 'qr' || event.workerId !== workerId || event.status !== 'rejected'
+      || event.attendanceEventId !== null || !belongs(event, state)) throw conflict();
+    verifyContent(event);
+    const decision = decisionEvidence(event, state, workerId);
+    if (decision.l !== null) throw conflict();
+    // One statement verifies the saved winner and its accepted source evidence together.
+    // Current worker bindings and newer movements do not redefine a prior attempt's winner.
+    const [rows] = await pool.execute<RowDataPacket[]>(`SELECT ${FIELDS},h.id AS winner_link_id,
+      a.id AS winner_id,a.worker_id AS winner_worker_id,a.event_type AS winner_event_type,a.method AS winner_method,
+      DATE_FORMAT(a.event_time,'%Y-%m-%d %H:%i:%s') AS winner_time_riyadh,
+      DATE_FORMAT(a.work_date,'%Y-%m-%d') AS winner_work_date
+      FROM attendance_events a INNER JOIN ${EVENTS} s ON s.attendance_event_id=a.id
+      AND s.source='biometric' AND s.status='accepted'
+      INNER JOIN ${LINKS} h ON h.id=CASE WHEN JSON_VALID(s.decision_note)
+        THEN JSON_UNQUOTE(JSON_EXTRACT(s.decision_note,'$.l')) ELSE NULL END
+      AND h.stream_id=? AND h.worker_id=a.worker_id AND h.source_identity_id=s.source_identity_id
+      AND h.device_id_snapshot=s.source_device_id AND h.device_user_id_snapshot=s.source_device_user_id
+      AND h.status IN ('active','revoked')
+      WHERE a.id=? LIMIT 2`, [state.streamId, decision.p]);
+    if (rows.length !== 1) throw conflict();
+    const row = rows[0];
+    const winner = decode(row);
+    if (Number(row.winner_id) !== decision.p || Number(row.winner_worker_id) !== workerId
+      || row.winner_event_type !== event.eventType || row.winner_method !== 'biometric'
+      || winner.source !== 'biometric' || winner.status !== 'accepted' || winner.workerId !== null || winner.eventType !== event.eventType
+      || winner.attendanceEventId !== decision.p || winner.decisionCode !== 'SOURCE_ACCEPTED'
+      || winner.sourcePersonCode !== null || winner.sourceUserName !== null
+      || !/^bio:[a-f0-9]{64}$/.test(winner.sourceEventId)
+      || !winner.sourceDeviceId || !winner.sourceDeviceUserId || !winner.sourceIdentityId
+      || !belongs(winner, state) || winner.receivedAtUtc > event.receivedAtUtc) throw conflict();
+    verifyContent(winner);
+    const binding = decisionEvidence(winner, state, workerId);
+    if (binding.l === null || binding.l !== row.winner_link_id) throw conflict();
+    const timestamp = storedRiyadhTimestamp(row.winner_time_riyadh);
+    const attemptedTime = new Date(event.eventTimeUtc).getTime();
+    if (attemptedTime < timestamp.getTime() || attemptedTime - timestamp.getTime() > 15 * 60 * 60 * 1000) throw conflict();
+    const sourceTime = new Date(winner.eventTimeUtc);
+    // Existing TIMESTAMP(0) storage can truncate or round a source's fractional second.
+    if (![Math.floor(sourceTime.getTime() / 1000), Math.round(sourceTime.getTime() / 1000)]
+      .some(second => second * 1000 === timestamp.getTime())
+      || row.winner_work_date !== getAdministrativeWorkDate(sourceTime)) throw conflict();
+    return { success: true, workerId, eventType: event.eventType as 'check_in' | 'check_out',
+      eventId: decision.p, timestamp, workDate: row.winner_work_date, alreadyRecorded: true, source: 'biometric' };
   }
 
   async function recordQr(input: CaptureSourceEvent, execute: ExecuteQr) {
@@ -233,7 +280,11 @@ export function createSourceAttendancePromotion({ pool, config, applyAttendance 
     const state = await activation.read();
     if (!state) return null;
     const event = await archive.get(id);
-    if (!event || event.workerId !== workerId || event.source !== 'qr' || !belongs(event, state)) return null;
+    if (!event || event.workerId !== workerId || event.source !== 'qr') return null;
+    if (!belongs(event, state)) {
+      if (event.decisionCode === 'SOURCE_FIRST_ARRIVAL') throw conflict();
+      return null;
+    }
     if (['pending','unmapped'].includes(event.status)) await processWorker(workerId, { id, execute });
     return qrResult(workerId, id);
   }
@@ -265,6 +316,24 @@ function conflict() { return new TRPCError({ code: 'CONFLICT', message: 'الح�
 function belongs(event: SourceEventRecord, state: SourcePromotionActivation) {
   try { const note = JSON.parse(event.decisionNote ?? 'null'); return note?.v === 1 && note.s === state.streamId && note.a === state.startedAtUtc
     && event.eventTimeUtc >= state.startedAtUtc && event.receivedAtUtc >= state.startedAtUtc; } catch { return false; }
+}
+function decisionEvidence(event: SourceEventRecord, state: SourcePromotionActivation, workerId: number) {
+  const note = JSON.parse(event.decisionNote ?? 'null');
+  const keys = ['v','s','a','w','l','p'];
+  if (!note || typeof note !== 'object' || Array.isArray(note) || Object.keys(note).length !== keys.length
+    || Object.keys(note).some(key => !keys.includes(key)) || note.v !== 1 || note.s !== state.streamId
+    || note.a !== state.startedAtUtc || note.w !== workerId || !Number.isSafeInteger(note.w) || note.w < 1
+    || !Number.isSafeInteger(note.p) || note.p < 1
+    || (note.l !== null && (typeof note.l !== 'string'
+      || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(note.l)))) throw conflict();
+  return note as { v: 1; s: string; a: string; w: number; l: string | null; p: number };
+}
+function storedRiyadhTimestamp(value: unknown) {
+  if (typeof value !== 'string' || !/^[1-9]\d{3}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value)) throw conflict();
+  const date = new Date(`${value.replace(' ', 'T')}+03:00`);
+  if (!Number.isFinite(date.getTime())
+    || new Date(date.getTime() + 3 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ') !== value) throw conflict();
+  return date;
 }
 function decode(row: RowDataPacket): SourceEventRecord {
   return { id: row.id,source: row.source,sourceEventId: row.source_event_id,contentSha256: row.content_sha256,

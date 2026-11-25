@@ -54,6 +54,7 @@ import { dailyPayrollReportRouter } from './daily-payroll-report';
 import { ceoReportsRouter } from './ceo-reports';
 import { dailyAttendanceReportsRouter } from './daily-attendance-reports';
 import { operationalTransfersRouter } from './operational-transfers';
+import { sourceEventsReviewProcedures } from '../attendance-source-review/router';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -95,6 +96,7 @@ export const appRouter = router({
 
   // Attendance System (Phase 4)
   attendance: attendanceRouter,
+  attendanceSources: router(sourceEventsReviewProcedures),
 
   // Work Days Management
   workDays: workDaysRouter,

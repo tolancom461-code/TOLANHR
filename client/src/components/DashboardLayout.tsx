@@ -99,7 +99,7 @@ const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
   // الشؤون الإدارية: بدون صفحة المستخدمين
   admin_affairs: [
     '/dashboard', '/executive', '/workers', '/groups',
-    '/attendance', '/attendance/log', '/attendance/reports', '/work-days',
+    '/attendance', '/attendance/log', '/attendance/sources', '/attendance/reports', '/work-days',
     '/payroll/dashboard', '/deductions', '/payroll/batches', '/payroll/batches/coverage', '/payroll/batches/create',
     '/financial-recalculation',
     '/finance/payroll/history', '/finance/overrides', '/payroll-report', '/finance/reports', '/finance/daily-payroll-report',
@@ -115,7 +115,7 @@ const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
   // المحاسب: بدون لوحة التحكم، بدون المستخدمين، مع سجل الحضور وتقارير الحضور (استعراض فقط)
   accountant: [
     '/workers', '/groups',
-    '/attendance/log', '/attendance/reports',
+    '/attendance/log', '/attendance/sources', '/attendance/reports',
     '/payroll/dashboard', '/payroll/batches', '/payroll/batches/coverage',
     '/finance/payroll/history', '/finance/overrides', '/payroll-report', '/finance/reports', '/finance/daily-payroll-report',
     '/finance/ceo-reports', '/finance/daily-attendance-reports',
@@ -132,7 +132,7 @@ const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
     '/payroll/dashboard', '/payroll/batches', '/payroll/batches/coverage',
     '/finance/payroll/history', '/payroll-report', '/finance/reports', '/finance/daily-payroll-report',
     '/finance/ceo-reports', '/finance/daily-attendance-reports',
-    '/attendance/log', '/attendance/reports',
+    '/attendance/log', '/attendance/sources', '/attendance/reports',
     '/audit-log',
     '/profile',
   ],
@@ -142,7 +142,7 @@ const ROLE_ALLOWED_PATHS: Record<UserRoleType, string[] | 'all'> = {
     '/finance/payroll/history', '/payroll-report', '/finance/reports', '/finance/daily-payroll-report',
     '/finance/ceo-reports', '/finance/daily-attendance-reports',
     '/finance/cost-center-report',
-    '/attendance/log', '/attendance/reports',
+    '/attendance/log', '/attendance/sources', '/attendance/reports',
     '/audit-log',
     '/backup',
     '/profile',
@@ -199,6 +199,7 @@ function getMenuSections(t: any) {
       { icon: QrCode, label: t.navItems.attendanceScanner, path: "/attendance" },
       { icon: Fingerprint, label: t.navItems.biometricUnit, path: "/biometric-service", externalHref: "http://127.0.0.1:9096", color: "text-cyan-600" },
       { icon: ClipboardList, label: t.navItems.attendanceLog, path: "/attendance/log" },
+      { icon: ClipboardList, label: "الحركات الواردة — QR والبصمة", path: "/attendance/sources" },
       { icon: FileText, label: t.navItems.attendanceReports, path: "/attendance/reports" },
       { icon: Clock, label: t.navItems.workDays, path: "/work-days" },
     ]

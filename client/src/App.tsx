@@ -79,6 +79,7 @@ const LazyGroups = lazy(() => import("./pages/Groups"));
 const LazyPayrollBatches = lazy(() => import("./pages/PayrollBatches"));
 const LazyUsers = lazy(() => import("./pages/Users"));
 const LazyDashboard = lazy(() => import("./pages/Dashboard"));
+const LazyAttendanceSourceEvents = lazy(() => import("./pages/AttendanceSourceEvents"));
 const LazyPayrollBatchList = lazy(() => import("./pages/payroll/PayrollBatchList"));
 const LazyGroupCoverageReport = lazy(() => import("./pages/payroll/GroupCoverageReport"));
 const LazyPayrollBatchCreateSimple = lazy(() => import("./pages/payroll/PayrollBatchCreateSimple"));
@@ -156,6 +157,11 @@ function Router() {
       <Route path="/attendance/log">
         <ProtectedRoute>
           <AttendanceLog />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/attendance/sources">
+        <ProtectedRoute allowedRoles={FINANCIAL_REPORT_ROLES}>
+          <LazyPage><LazyAttendanceSourceEvents /></LazyPage>
         </ProtectedRoute>
       </Route>
       <Route path="/audit-log">

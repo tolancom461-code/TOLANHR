@@ -164,14 +164,18 @@ export default function AttendanceScanner() {
         success: true,
         worker: workerData.worker,
         eventType: result.eventType,
-        timestamp: new Date(),
+        timestamp: result.timestamp,
+        alreadyRecorded: result.alreadyRecorded,
+        source: result.source,
       });
       
       setShowConfirmDialog(false);
       setShowSuccessDialog(true);
       refetchStats();
       
-      const eventText = result.eventType === 'check_in' ? 'تسجيل حضور' : 'تسجيل انصراف';
+      const eventText = result.alreadyRecorded
+        ? result.eventType === 'check_in' ? 'تم تأكيد الحضور بنجاح' : 'تم تأكيد الانصراف بنجاح'
+        : result.eventType === 'check_in' ? 'تسجيل حضور' : 'تسجيل انصراف';
       toast.success(`${eventText} - ${workerData.worker.fullName}`);
       
       // Play success beep
@@ -667,7 +671,9 @@ export default function AttendanceScanner() {
             </div>
             <div>
               <h3 className="text-2xl font-bold text-green-600 mb-2">
-                تم التسجيل بنجاح!
+                {lastResult?.alreadyRecorded
+                  ? lastResult.eventType === 'check_in' ? 'تم تأكيد الحضور بنجاح' : 'تم تأكيد الانصراف بنجاح'
+                  : 'تم التسجيل بنجاح!'}
               </h3>
               {lastResult && (
                 <>
@@ -676,8 +682,11 @@ export default function AttendanceScanner() {
                     {lastResult.eventType === 'check_in' ? 'تسجيل حضور' : 'تسجيل انصراف'}
                   </p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    {formatRiyadhAttendanceTime(new Date(), { second: '2-digit' })}
+                    {formatRiyadhAttendanceTime(lastResult.timestamp, { second: '2-digit' })}
                   </p>
+                  {lastResult.alreadyRecorded && lastResult.source === 'biometric' && (
+                    <p className="text-sm text-muted-foreground">مسجّل بجهاز البصمة</p>
+                  )}
                 </>
               )}
             </div>

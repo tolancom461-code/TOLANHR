@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "completedAtUtc": "2026-11-25T13:08:54.147Z",
+  "fixture": "Synthetic records on a process-owned random loopback MySQL schema; no env file, live database or application startup",
+  "sourceCount": 87,
+  "checks": [
+    "Process-owned random loopback MySQL server, schema and data directory verified before fixture DDL; no env file or application startup",
+    "Eighty-seven synthetic receipts include QR/biometric approvals, frozen historic identities, reused PINs, dangling references, auxiliary states, wildcard text and a sixty-row timestamp tie",
+    "Actual tRPC middleware permits an auditor, rejects anonymous users and guards before database loading, and exposes only list/detail read procedures",
+    "The real CTE projects stored Riyadh attendance as UTC and shows duplicate QR against its original biometric winner without confusing its rejected raw status",
+    "Acted biometric history keeps the original worker/name/link snapshot despite PIN reuse and reassignment; unmapped identities never guess by PIN, while deleted worker history remains identifiable",
+    "Deleted or worker-edited attendance references, including duplicate winner pointers, become review issues instead of falsely appearing approved",
+    "Currently linked pre-cutoff receipts remain before activation, post-cutoff untagged receipts remain archival review, and all four auxiliary states stay review-only with accurate fixed reasons",
+    "Case-insensitive infix search applies to the entire result set and preserves literal percent, underscore and escape characters rather than treating them as wildcards",
+    "Riyadh midnight bounds are inclusive/exclusive at UTC21:00 with microseconds preserved, and original-event versus arrival-date filtering remains distinct",
+    "Five pages and reverse sort cover all eighty-seven receipts exactly once, including sixty timestamp ties; summary cards ignore only the selected status while retaining other filters",
+    "Group options retain inactive groups for historical reporting, filtering uses explicitly labelled current groups without rewriting historical worker names, and invalid dates/missing IDs return safe public errors",
+    "The same read-only SQL remains usable when optional directory and activation tables are absent, preserving QR evidence without inventing biometric bindings",
+    "Every existing/new table row remains unchanged after all real list/detail and permission checks; public DTOs omit internal journal/hash and configuration fields"
+  ],
+  "cleanup": {
+    "localConnectionsClosed": true,
+    "mysqlStopped": true,
+    "bootstrapRemoved": true,
+    "graceful": true,
+    "syntheticFixtureRetained": true
+  }
+}

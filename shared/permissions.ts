@@ -207,6 +207,7 @@ export const PAGE_PERMISSIONS: Record<string, Permission[]> = {
   // الحضور والانصراف
   '/attendance': [PERMISSIONS.ATTENDANCE_RECORD], // تسجيل الحضور (الحارس)
   '/attendance/log': [PERMISSIONS.ATTENDANCE_VIEW], // سجل الحضور
+  '/attendance/sources': [PERMISSIONS.ATTENDANCE_VIEW], // مراجعة الحركات الواردة من QR والبصمة
   
   // العمال والمجموعات
   '/workers': [PERMISSIONS.WORKER_VIEW], // قائمة العمال
