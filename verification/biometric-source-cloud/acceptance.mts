@@ -57,19 +57,36 @@ try {
     '`fingerprint`.`biometric_svc_program_connections`');
   await applyReviewedCreate(new URL('../../docs/sql/attendance-biometric-import-progress-2026-11-19.sql', import.meta.url),
     '`test`.`attendance_biometric_import_progress`');
+  await applyReviewedCreate(new URL('../../docs/sql/attendance-biometric-directory-2026-11-19.test.sql', import.meta.url),
+    '`test`.`attendance_biometric_users`');
+  await applyReviewedCreate(new URL('../../docs/sql/attendance-biometric-directory-2026-11-19.test.sql', import.meta.url),
+    '`test`.`attendance_biometric_worker_links`');
   await fixture.query(`CREATE TABLE biometric_svc_punches (
     id BIGINT UNSIGNED PRIMARY KEY, event_key CHAR(64) NOT NULL, device_id BIGINT UNSIGNED NOT NULL,
     device_user_id VARCHAR(128) NOT NULL, device_user_row_id BIGINT UNSIGNED NULL,
     vendor VARCHAR(64) NOT NULL, serial_number VARCHAR(128) NOT NULL,
     punch_state VARCHAR(64) NULL, raw_status VARCHAR(32) NULL, device_event_time_utc DATETIME(6) NULL
   ) ENGINE=InnoDB`);
-  await fixture.query('CREATE TABLE biometric_svc_device_users (id BIGINT UNSIGNED PRIMARY KEY, device_user_id VARCHAR(128), status VARCHAR(32)) ENGINE=InnoDB');
+  await fixture.query(`CREATE TABLE biometric_svc_devices (id BIGINT UNSIGNED PRIMARY KEY, display_name VARCHAR(255), serial_number VARCHAR(128)) ENGINE=InnoDB`);
+  await fixture.query(`CREATE TABLE biometric_svc_device_users (
+    id BIGINT UNSIGNED PRIMARY KEY, device_id BIGINT UNSIGNED NOT NULL, device_user_id VARCHAR(128), display_name VARCHAR(255), status VARCHAR(32),
+    first_seen_at DATETIME(6), last_seen_at DATETIME(6), identity_started_at DATETIME(6), identity_ended_at DATETIME(6)
+  ) ENGINE=InnoDB`);
   await fixture.query('CREATE TABLE biometric_svc_final_events (id BIGINT UNSIGNED PRIMARY KEY, status VARCHAR(32)) ENGINE=InnoDB');
-  await fixture.execute("INSERT INTO biometric_svc_device_users VALUES (73, '00017', 'absent_from_device'), (74, '00017', 'seen')");
-  checks.push('Only the three reviewed CREATE definitions were retargeted exactly to the owned schema; production GRANT was never executed');
+  await fixture.execute("INSERT INTO biometric_svc_devices VALUES (9007199254740999, 'Synthetic first device', 'AJE1261900133'), (9007199254740998, 'Synthetic other device', 'SYNTHETIC-DEVICE-2')");
+  await fixture.execute(`INSERT INTO biometric_svc_device_users VALUES
+    (73,9007199254740999,'00017','Synthetic historical enrollment','absent_from_device','2026-11-01 01:00:00.123456','2026-11-02 02:00:00.123456',NULL,'2026-11-02 02:00:00.123456'),
+    (74,9007199254740999,'00017','Synthetic current enrollment','seen','2026-11-03 01:00:00.123456','2026-11-19 07:00:00.123456','2026-11-03 01:00:00.123456',NULL),
+    (75,9007199254740998,'00017','Synthetic other-device enrollment','seen',NULL,NULL,NULL,NULL),
+    (76,9007199254740999,'00018','Synthetic contested enrollment','seen',NULL,NULL,NULL,NULL),
+    (77,9007199254740999,'00019','Synthetic inactive-worker target','seen',NULL,NULL,NULL,NULL)`);
+  checks.push('Five reviewed CREATE definitions were retargeted exactly to the owned schema; production GRANT was never executed');
 
   stage = 'seed-independent-existing-ledger-and-source-backlog';
-  await fixture.execute("INSERT INTO workers (id, code, full_name, status, last_attendance_at) VALUES (1, 'SOURCE-LAB-W1', 'Synthetic preserved worker', 'active', '2026-11-18 08:00:00')");
+  await fixture.execute(`INSERT INTO workers (id, code, full_name, status, last_attendance_at, biometric_person_code) VALUES
+    (1, 'SOURCE-LAB-W1', 'Synthetic preserved worker', 'active', '2026-11-18 08:00:00','LEGACY-WORKER-PERSON'),
+    (2, 'SOURCE-LAB-W2', 'Synthetic second worker', 'active', NULL,NULL),
+    (3, 'SOURCE-LAB-W3', 'Synthetic inactive worker', 'inactive', NULL,NULL)`);
   await fixture.execute("INSERT INTO attendance_events (id, worker_id, event_type, event_time, work_date, method) VALUES (1, 1, 'check_in', '2026-11-18 08:00:00', '2026-11-18', 'qr')");
   await fixture.execute("INSERT INTO worker_daily_finance (worker_id, work_date, worked_minutes, net_amount, notes) VALUES (1, '2026-11-18', 60, 25.00, 'Synthetic preserved finance')");
   await fixture.execute("INSERT INTO settings (`key`, value, description) VALUES ('source_lab_preserved_setting', 'unchanged', 'Synthetic unrelated setting')");
@@ -86,6 +103,8 @@ try {
   const { TiDbProgramConnectionsStore } = await import('../../../biometric-system/src/infrastructure/storage/tidb-program-connections-store.js');
   const { SourcePunchesService } = await import('../../../biometric-system/src/application/source-punches-service.js');
   const { TiDbSourcePunchesReadStore } = await import('../../../biometric-system/src/infrastructure/storage/tidb-source-punches-read-store.js');
+  const { DeviceIdentitiesService } = await import('../../../biometric-system/src/application/device-identities-service.js');
+  const { TiDbDeviceIdentitiesReadStore } = await import('../../../biometric-system/src/infrastructure/storage/tidb-device-identities-read-store.js');
   const { createSourcePunchesApiHandler } = await import('../../../biometric-system/src/infrastructure/integration/source-punches-api-server.js');
   const { createSourcePunchHttpClient, createMysqlSourceImportProgressStore, createBiometricSourceImporter,
     sourcePunchInboxKey } = await import('../../server/biometric-source-importer/index.ts');
@@ -96,7 +115,9 @@ try {
   const secondKey = await connections.create({ programName: 'Synthetic independent consumer', actor: 'fixture-admin' });
   const sourceService = new SourcePunchesService({ streamId,
     readStore: new TiDbSourcePunchesReadStore(producerPool, { deviceUserIdentityEnabled: true }) });
-  const handler = createSourcePunchesApiHandler({ service: sourceService, connections });
+  const directoryService = new DeviceIdentitiesService({ streamId,
+    readStore: new TiDbDeviceIdentitiesReadStore(producerPool, { deviceUserIdentityEnabled: true }) });
+  const handler = createSourcePunchesApiHandler({ service: sourceService, connections, directoryService });
   server = http.createServer((req, res) => {
     Promise.resolve(handler(req, res)).then(handled => {
       if (!handled && !res.writableEnded) { res.writeHead(404); res.end(); }
@@ -233,6 +254,147 @@ try {
     ['sourceEventId', 'sourceDeviceId', 'sourceDeviceUserId', 'sourceIdentityId', 'eventType', 'rawState', 'eventTimeUtc'].sort().join(',')));
   archiveCount = await receiptCount();
   checks.push('Only credential digests/prefixes persist, plaintext keys never enter punch exports/inbox/progress/list metadata, and unrelated attendance/finance/worker data stays identical');
+
+  stage = 'sync-real-producer-directory-http-into-local-cache';
+  const { createMysqlBiometricDirectoryStore } = await import('../../server/biometric-directory/mysql-store.ts');
+  const { createBiometricDirectoryService } = await import('../../server/biometric-directory/service.ts');
+  const { createBiometricDirectoryHttpClient } = await import('../../server/biometric-directory/http-source.ts');
+  const { createBiometricDirectorySync } = await import('../../server/biometric-directory/sync.ts');
+  const directoryCache = createMysqlBiometricDirectoryStore(consumerPool!, lab.schema);
+  const directoryLinks = createBiometricDirectoryService(directoryCache);
+  const directorySource = createBiometricDirectoryHttpClient({ apiUrl: origin, token: secondKey.token, streamId });
+  const directorySync = createBiometricDirectorySync({ source: directorySource, cache: directoryCache, streamId, pageSize: 2, maxPages: 20 });
+  const rawInboxBefore = (await fixture.query<any[]>('SELECT * FROM attendance_source_events ORDER BY id'))[0];
+  await directoryCache.assertReady();
+  const firstDirectory = await directorySync.runOnce();
+  assert.equal(firstDirectory.sweepCompleted, true);
+  assert.equal(firstDirectory.upserted, 5);
+  const allUsers = await directoryLinks.listUsers({ streamId, roster: 'all', currentWorkerId: 1, page: 1, limit: 100 });
+  assert.equal(allUsers.page.total, 5);
+  assert.equal(allUsers.items.filter(item => item.status === 'historical').length, 1);
+  assert.equal(allUsers.items.filter(item => item.deviceUserId === '00017').length, 3);
+  assert.ok(allUsers.items.every(item => item.linkState === 'available' && item.linkedWorker === null));
+  const paged = await directoryLinks.listUsers({ streamId, roster: 'all', page: 2, limit: 2 });
+  assert.deepEqual(paged.page, { number: 2, limit: 2, total: 5, totalPages: 3 });
+  const searched = await directoryLinks.listUsers({ streamId, roster: 'all', search: '00017' });
+  assert.equal(searched.items.length, 3);
+  checks.push('Real producer identity SQL -> protected HTTP -> consumer directory sync mirrors current and historical enrollments without matching repeated PINs or names to workers');
+
+  stage = 'manual-explicit-versioned-identity-assignment';
+  const assign = (workerId: number, identityId: string, expectedLinkId: string | null = null, confirmHistorical = false) =>
+    directoryLinks.setLink({ streamId, workerId, identityId, expectedLinkId, confirmHistorical, actor: 1 });
+  await assert.rejects(() => assign(2, '73'), (error: any) => error.code === 'BIOMETRIC_DIRECTORY_HISTORICAL_CONFIRMATION_REQUIRED');
+  const historicalLink = await assign(2, '73', null, true);
+  const currentLink = await assign(1, '74');
+  const otherDeviceLink = await assign(1, '75');
+  assert.equal((await directoryLinks.listWorkerLinks({ workerId: 1 })).items.length, 2);
+  assert.equal(historicalLink.link.status, 'historical');
+  assert.equal(currentLink.link.deviceUserId, '00017');
+  assert.notEqual(currentLink.link.identityId, historicalLink.link.identityId);
+  assert.equal((await assign(1, '74', currentLink.link.linkId)).unchanged, true);
+  await assert.rejects(() => assign(2, '74', currentLink.link.linkId), (error: any) => error.code === 'BIOMETRIC_DIRECTORY_LINK_CONFLICT');
+  await assert.rejects(() => assign(1, '74', null), (error: any) => error.code === 'BIOMETRIC_DIRECTORY_LINK_CONFLICT');
+  await assert.rejects(() => assign(3, '77'), (error: any) => error.code === 'BIOMETRIC_DIRECTORY_WORKER_INACTIVE');
+  await assert.rejects(() => assign(1, '999999'), (error: any) => error.code === 'BIOMETRIC_DIRECTORY_IDENTITY_NOT_FOUND');
+  const picker = await directoryLinks.listUsers({ streamId, roster: 'all', currentWorkerId: 1 });
+  assert.equal(picker.items.find(item => item.identityId === '74')?.linkState, 'linked_current');
+  assert.equal(picker.items.find(item => item.identityId === '73')?.linkState, 'linked_other');
+  assert.equal(picker.items.find(item => item.identityId === '74')?.linkedWorker?.fullName, 'Synthetic preserved worker');
+  assert.deepEqual(await ledger(), ledgerBefore);
+  checks.push('Explicit manual identity version assignment supports multiple devices/history, requires historical confirmation, rejects inactive/unknown targets, and never steals another worker link');
+
+  stage = 'source-renames-archive-and-same-pin-new-enrollment';
+  await fixture.execute("UPDATE biometric_svc_device_users SET display_name = '  Renamed source enrollment  ' WHERE id = 74");
+  await directorySync.runOnce();
+  assert.equal((await directoryLinks.listWorkerLinks({ workerId: 1 })).items.find(item => item.identityId === '74')?.displayName,
+    '  Renamed source enrollment  ');
+  await fixture.execute("UPDATE biometric_svc_device_users SET status = 'absent_from_device', identity_ended_at = '2026-11-19 10:01:00.123456', display_name = NULL WHERE id = 74");
+  await fixture.execute(`INSERT INTO biometric_svc_device_users VALUES
+    (78,9007199254740999,'00017','Synthetic newly reused PIN enrollment','seen',NULL,NULL,'2026-11-19 10:02:00.123456',NULL)`);
+  await directorySync.runOnce();
+  const afterReuse = await directoryLinks.listUsers({ streamId, roster: 'all', currentWorkerId: 1 });
+  assert.equal(afterReuse.items.find(item => item.identityId === '74')?.status, 'historical');
+  assert.equal(afterReuse.items.find(item => item.identityId === '74')?.linkId, currentLink.link.linkId);
+  assert.equal(afterReuse.items.find(item => item.identityId === '78')?.linkId, null);
+  assert.equal((await directoryLinks.listWorkerLinks({ workerId: 1 })).items.find(item => item.identityId === '74')?.displayName, null);
+  const [[originalSnapshot]] = await fixture.execute<any[]>('SELECT display_name_snapshot FROM attendance_biometric_worker_links WHERE id = ?', [currentLink.link.linkId]);
+  assert.equal(originalSnapshot.display_name_snapshot, 'Synthetic current enrollment');
+  assert.deepEqual((await fixture.query<any[]>('SELECT * FROM attendance_source_events ORDER BY id'))[0], rawInboxBefore);
+  checks.push('Padded/blank names refresh through real HTTP without changing workers; archiving an enrollment retains its link while a new same-PIN identity stays unlinked; original link snapshot and punch hashes remain unchanged');
+
+  stage = 'reject-coordinate-change-and-rollback-the-complete-page';
+  const [cachePageBefore] = await fixture.query<any[]>("SELECT * FROM attendance_biometric_users WHERE source_identity_id IN ('75','76') ORDER BY source_identity_id");
+  await fixture.execute("UPDATE biometric_svc_device_users SET display_name = 'SHOULD-ROLL-BACK' WHERE id = 75");
+  await fixture.execute('UPDATE biometric_svc_device_users SET device_id = ? WHERE id = 76', ['9007199254740998']);
+  await assert.rejects(() => directorySync.runOnce(), (error: any) => error.code === 'BIOMETRIC_DIRECTORY_IDENTITY_CONFLICT');
+  const [cachePageAfter] = await fixture.query<any[]>("SELECT * FROM attendance_biometric_users WHERE source_identity_id IN ('75','76') ORDER BY source_identity_id");
+  assert.deepEqual(cachePageAfter, cachePageBefore);
+  await fixture.execute("UPDATE biometric_svc_device_users SET display_name = 'Synthetic other-device enrollment' WHERE id = 75");
+  await fixture.execute('UPDATE biometric_svc_device_users SET device_id = ? WHERE id = 76', ['9007199254740999']);
+  await directorySync.runOnce();
+  await fixture.execute('DELETE FROM biometric_svc_device_users WHERE id = 77');
+  await directorySync.runOnce();
+  assert.ok((await directoryLinks.listUsers({ streamId, roster: 'all' })).items.some(item => item.identityId === '77'));
+  checks.push('Same-identity device/PIN coordinates cannot change: an earlier valid update in the same page rolls back on conflict; missing source rows do not delete cached identities');
+
+  stage = 'concurrent-binding-and-versioned-revocation';
+  const attempts = await Promise.allSettled([assign(1, '76'), assign(2, '76')]);
+  assert.equal(attempts.filter(result => result.status === 'fulfilled').length, 1);
+  const loser = attempts.find(result => result.status === 'rejected') as PromiseRejectedResult;
+  assert.equal(loser.reason.code, 'BIOMETRIC_DIRECTORY_LINK_CONFLICT');
+  const [[activeRace]] = await fixture.query<any[]>("SELECT COUNT(*) AS count FROM attendance_biometric_worker_links WHERE source_identity_id = '76' AND status = 'active'");
+  assert.equal(Number(activeRace.count), 1);
+  const revoke = (workerId: number, identityId: string, expectedLinkId: string, actor = 1) =>
+    directoryLinks.revokeLink({ streamId, workerId, identityId, expectedLinkId, actor });
+  await assert.rejects(() => revoke(2, '74', currentLink.link.linkId), (error: any) => error.code === 'BIOMETRIC_DIRECTORY_LINK_CONFLICT');
+  assert.equal((await revoke(1, '74', currentLink.link.linkId)).unchanged, false);
+  assert.equal((await revoke(1, '74', currentLink.link.linkId, 2)).unchanged, true);
+  const moved = await assign(2, '74', null, true);
+  assert.notEqual(moved.link.linkId, currentLink.link.linkId);
+  await assert.rejects(() => revoke(1, '74', currentLink.link.linkId), (error: any) => error.code === 'BIOMETRIC_DIRECTORY_LINK_CONFLICT');
+  const [history] = await fixture.execute<any[]>('SELECT worker_id,status,created_by,revoked_by,revoked_at_utc FROM attendance_biometric_worker_links WHERE stream_id = ? AND source_identity_id = ? ORDER BY created_at_utc,id', [streamId, '74']);
+  assert.equal(history.length, 2);
+  assert.equal(history.filter(row => row.status === 'active').length, 1);
+  const old = history.find(row => row.status === 'revoked');
+  assert.equal(old.worker_id, 1);
+  assert.equal(old.created_by, 1);
+  assert.equal(old.revoked_by, 1);
+  assert.ok(old.revoked_at_utc);
+  await assert.rejects(() => fixture!.execute(`INSERT INTO attendance_biometric_worker_links
+    (id,stream_id,source_identity_id,worker_id,status,device_id_snapshot,device_user_id_snapshot,display_name_snapshot,device_name_snapshot,
+      serial_number_snapshot,worker_name_snapshot,created_by,created_at_utc)
+    SELECT '123e4567-e89b-42d3-a456-426614174098',stream_id,source_identity_id,2,'active',device_id_snapshot,device_user_id_snapshot,
+      display_name_snapshot,device_name_snapshot,serial_number_snapshot,worker_name_snapshot,1,UTC_TIMESTAMP(6)
+    FROM attendance_biometric_worker_links WHERE id = ?`, [otherDeviceLink.link.linkId]), (error: any) => error.code === 'ER_DUP_ENTRY');
+  assert.deepEqual(await ledger(), ledgerBefore);
+  assert.deepEqual((await fixture.query<any[]>('SELECT * FROM attendance_source_events ORDER BY id'))[0], rawInboxBefore);
+  assert.equal(await receiptCount(), archiveCount);
+  checks.push('Concurrent different-worker assignment produces exactly one active link; generated unique key enforces it in SQL, explicit revoke/relink retains immutable history and stale requests cannot remove the newer assignment');
+
+  stage = 'release-orphan-binding-without-recreating-a-deleted-worker';
+  await fixture.execute("INSERT INTO workers (id,code,full_name,status) VALUES (99,'SOURCE-LAB-TEMP','Synthetic deleted worker snapshot','active')");
+  const orphan = await assign(99, '77');
+  await fixture.execute('DELETE FROM workers WHERE id = ?', [99]);
+  const orphanPicker = (await directoryLinks.listUsers({ streamId, roster: 'all', currentWorkerId: 1 })).items.find(item => item.identityId === '77');
+  assert.equal(orphanPicker?.linkedWorkerExists, false);
+  assert.equal(orphanPicker?.linkedWorker?.id, 99);
+  assert.equal(orphanPicker?.linkedWorker?.fullName, 'Synthetic deleted worker snapshot');
+  assert.equal(orphanPicker?.linkState, 'linked_other');
+  await assert.rejects(() => assign(1, '77', orphan.link.linkId), (error: any) => error.code === 'BIOMETRIC_DIRECTORY_LINK_CONFLICT');
+  await assert.rejects(() => assign(99, '77', orphan.link.linkId), (error: any) => error.code === 'BIOMETRIC_DIRECTORY_WORKER_NOT_FOUND');
+  await revoke(99, '77', orphan.link.linkId);
+  const orphanReassigned = await assign(2, '77');
+  assert.notEqual(orphanReassigned.link.linkId, orphan.link.linkId);
+  const [[orphanHistory]] = await fixture.execute<any[]>('SELECT status,worker_id,worker_name_snapshot,revoked_by FROM attendance_biometric_worker_links WHERE id = ?', [orphan.link.linkId]);
+  assert.equal(orphanHistory.status, 'revoked');
+  assert.equal(orphanHistory.worker_id, 99);
+  assert.equal(orphanHistory.worker_name_snapshot, 'Synthetic deleted worker snapshot');
+  assert.equal(orphanHistory.revoked_by, 1);
+  assert.equal((await directoryLinks.listUsers({ streamId, roster: 'all', currentWorkerId: 2 })).items.find(item => item.identityId === '77')?.linkedWorkerExists, true);
+  checks.push('A hard-deleted worker leaves an explicitly marked blocked orphan link; exact-version revocation releases it while retaining the deleted worker snapshot and audit history');
+  assert.deepEqual(await ledger(), ledgerBefore);
+  assert.deepEqual((await fixture.query<any[]>('SELECT * FROM attendance_source_events ORDER BY id'))[0], rawInboxBefore);
+  checks.push('Directory sync and manual binding leave every archived movement/content hash, original worker/person-code field, attendance record, finance row and setting byte-for-byte unchanged');
 
   async function progressValue(): Promise<string | null> {
     const [rows] = await fixture!.execute<any[]>(`SELECT id, stream_id, schema_version, tail_cursor, reconcile_cursor,

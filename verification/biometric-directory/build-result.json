@@ -1,0 +1,11 @@
+{
+  "checkedAtUtc": "2026-11-19T14:28:00.027Z",
+  "passed": true,
+  "inMemoryOnly": true,
+  "serverInputs": 144,
+  "uiInputs": 2597,
+  "directoryRuntimeIncluded": true,
+  "directoryRouterIncluded": true,
+  "cssBuiltSeparately": true,
+  "fullTypeScriptPassClaimed": false
+}

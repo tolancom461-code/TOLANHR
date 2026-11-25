@@ -1,0 +1,16 @@
+{
+  "verifiedAtUtc": "2026-11-19T14:28:00.028Z",
+  "syntheticLocalDataOnly": true,
+  "realTailwindCss": true,
+  "screenshot": "worker-link-preview.jpg",
+  "checks": [
+    "Existing worker link button opens local synchronized identity directory",
+    "English user name, PIN, device, registration identity and last synchronization date/time in Riyadh displayed",
+    "Identity linked to another worker is disabled",
+    "Search change clears previous selection and disables Save",
+    "Historical identity requires explicit checkbox; successful save displays archived status",
+    "Revocation requires confirmation and updates selection state; old person-code display remains",
+    "Orphan identity linked to a deleted worker can be explicitly released before new selection",
+    "Final current identity search and confirmation panel render correctly"
+  ]
+}

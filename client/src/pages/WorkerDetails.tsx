@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { formatRiyadhAttendanceTime, parseAttendanceTime } from '@shared/attendance-time';
 import DashboardLayout from "@/components/DashboardLayout";
 import WorkerPhotoPreview from "@/components/WorkerPhotoPreview";
+import WorkerBiometricLinkStatus from '@/components/WorkerBiometricLinkStatus';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -242,14 +243,7 @@ export default function WorkerDetails() {
                       <Fingerprint className="h-3 w-3" />
                       الربط مع البصمة
                     </p>
-                    {worker.biometricPersonCode ? (
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">مربوط</Badge>
-                        <span className="font-mono text-sm" dir="ltr">{worker.biometricPersonCode}</span>
-                      </div>
-                    ) : (
-                      <p className="font-semibold text-muted-foreground">غير مربوط</p>
-                    )}
+                    <WorkerBiometricLinkStatus workerId={worker.id} legacyCode={worker.biometricPersonCode} />
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">الحالة</p>

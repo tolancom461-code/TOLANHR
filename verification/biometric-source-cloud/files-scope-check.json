@@ -1,0 +1,58 @@
+{
+  "checkedAtUtc": "2026-11-19T12:46:02.143Z",
+  "reference": "Local original-files snapshot before the approved QR and Riyadh-time additions; not the deployed ZIP",
+  "referenceRecordedAtUtc": "2026-11-19T07:50:57.040Z",
+  "originalFiles": 756,
+  "unchanged": 747,
+  "changed": [
+    {
+      "path": "client/src/pages/AttendanceLog.tsx",
+      "baselineSha256": "24a2e361b984d0cedd8dcb2017396229ef06e244300fd3943ef018b98cc8d9f0",
+      "currentSha256": "c739bb49cfff2362bf93db6baabac04974ede5a250db8d9aefcf5e4181b62ad8"
+    },
+    {
+      "path": "client/src/pages/AttendanceScanner.tsx",
+      "baselineSha256": "5555156b26188f4fa4ff7e5f68bc1d36c5efb97dca28d131c1ee267e2a15a966",
+      "currentSha256": "dea7d824e2edf2904879879678ef5d50f17899719d51cdbaa8c914279f1adf10"
+    },
+    {
+      "path": "client/src/pages/PunchesReviewCenter.tsx",
+      "baselineSha256": "620029424a47745971d15f741799d9bb3d6ce77805304b388b0dacf7f74e61e2",
+      "currentSha256": "2488aa05973434641e16d4d16d7ee1eff8bed48d09aa29412c5f9ad9cdafef47"
+    },
+    {
+      "path": "client/src/pages/WorkerDetails.tsx",
+      "baselineSha256": "d70a497b86c51112391c7aeb00d64ca1b8aca11e9d493e04712bca43215d2476",
+      "currentSha256": "0c1bce4e9f0b779aa14418d16931e493991d3d5856d9a83600005082a88e3cbc"
+    },
+    {
+      "path": "drizzle/schema.ts",
+      "baselineSha256": "c5f9d99e4371f2e0ad87f5ad3aceadc0a9b818cea582fb8ff8aadabf36278990",
+      "currentSha256": "0fcade525e024f283c32eeb35a1789e92347c79f0bee730bac85b016185dc97b"
+    },
+    {
+      "path": "server/attendance-logic.ts",
+      "baselineSha256": "5767d837fa0c1b9255bd0c1f9a2e2b2048cb5df9f8a42318fa71c69cc1f8afc1",
+      "currentSha256": "a76f6f3c0182638820e475acce58556ce22e7873b02da80573cb6774d9521793"
+    },
+    {
+      "path": "server/db/connection.ts",
+      "baselineSha256": "f84f6f2cb810664df2b693f6a2078a8c6a47489d26e15191313dd4ed4c560c43",
+      "currentSha256": "d30767a270c6ba73088c927a642026d23b7063bb5d56252796f99df5207706db"
+    },
+    {
+      "path": "server/routers/attendance.ts",
+      "baselineSha256": "0782312ceeb7ab2c044f64b2c978a9bd6651ca45fa4ba584b850ab159d825c27",
+      "currentSha256": "58c58a66f0a3c4180f9e9d3370ecd63f2b353d50ca9c456698f7543316c03006"
+    },
+    {
+      "path": "server/_core/index.ts",
+      "baselineSha256": "ab23980c194bc127fcc12ceb66cef1cf168e64d6616e6f919ad9329454bdae08",
+      "currentSha256": "bb77481b74f2419a161b213ccaa8106e8dced7b3f930ddc8975344c75deb6e61"
+    }
+  ],
+  "missing": [],
+  "latestPhaseExistingFile": "server/_core/index.ts",
+  "codeFilesModifiedByThisCheck": false,
+  "liveDatabaseAccessed": false
+}

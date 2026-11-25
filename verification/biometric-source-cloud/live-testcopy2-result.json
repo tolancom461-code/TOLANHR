@@ -1,0 +1,111 @@
+{
+  "readOnlyAudit": true,
+  "liveRecordsWrittenByThisAudit": false,
+  "previousCheck": {
+    "ok": true,
+    "identity": {
+      "database_name": "TESTCOPY2",
+      "checked_at_utc": "2026-11-19 13:26:27.264158"
+    },
+    "comparison": [
+      {
+        "source_eligible_count": "3600",
+        "matched_archive_count": "3600",
+        "missing_archive_count": "0",
+        "mismatched_payload_count": "0"
+      }
+    ],
+    "summary": [
+      {
+        "biometric_count": "3600",
+        "linked_attendance_count": "0"
+      }
+    ],
+    "progress": [
+      {
+        "tail_cursor": "5393364",
+        "reconcile_cursor": "5390537",
+        "updated_at_utc": "2026-11-19 13:25:54.412994"
+      }
+    ]
+  },
+  "finalCheck": {
+    "ok": true,
+    "identity": {
+      "database_name": "TESTCOPY2",
+      "checked_at_utc": "2026-11-19 13:27:52.659497"
+    },
+    "comparison": [
+      {
+        "source_eligible_count": "3600",
+        "matched_archive_count": "3600",
+        "missing_archive_count": "0",
+        "mismatched_payload_count": "0"
+      }
+    ],
+    "targetStates": [
+      {
+        "event_type": "break_in",
+        "status": "review_only",
+        "event_count": "2",
+        "mapped_worker_count": "0",
+        "linked_attendance_count": "0"
+      },
+      {
+        "event_type": "break_out",
+        "status": "review_only",
+        "event_count": "19",
+        "mapped_worker_count": "0",
+        "linked_attendance_count": "0"
+      },
+      {
+        "event_type": "check_in",
+        "status": "unmapped",
+        "event_count": "1933",
+        "mapped_worker_count": "0",
+        "linked_attendance_count": "0"
+      },
+      {
+        "event_type": "check_out",
+        "status": "unmapped",
+        "event_count": "1643",
+        "mapped_worker_count": "0",
+        "linked_attendance_count": "0"
+      },
+      {
+        "event_type": "overtime_in",
+        "status": "review_only",
+        "event_count": "1",
+        "mapped_worker_count": "0",
+        "linked_attendance_count": "0"
+      },
+      {
+        "event_type": "overtime_out",
+        "status": "review_only",
+        "event_count": "2",
+        "mapped_worker_count": "0",
+        "linked_attendance_count": "0"
+      }
+    ],
+    "progress": [
+      {
+        "stream_id": "78d31b88-7cc4-4a9d-b8ae-12b621ca7b5f",
+        "schema_version": 1,
+        "tail_cursor": "5393364",
+        "reconcile_cursor": "5391377",
+        "updated_at_utc": "2026-11-19 13:27:48.171119"
+      }
+    ],
+    "databaseTotals": [
+      {
+        "database_name": "test",
+        "biometric_count": "0"
+      },
+      {
+        "database_name": "TESTCOPY2",
+        "biometric_count": "3600"
+      }
+    ]
+  },
+  "scope": "Initial live archive import into TESTCOPY2 only; comparison of immutable export fields and source-key coverage; no financial before/after claim"
+}

@@ -7,6 +7,10 @@ import { createSourcePunchHttpClient } from './http-source';
 import { createMysqlSourceImportProgressStore } from './mysql-progress';
 import { createBiometricSourceImporter } from './runner';
 import { BiometricSourceImportError } from './types';
+import { createBiometricDirectoryHttpClient, BiometricDirectorySyncError } from '../biometric-directory/http-source';
+import { createBiometricDirectorySync } from '../biometric-directory/sync';
+import { createMysqlBiometricDirectoryStore } from '../biometric-directory/mysql-store';
+import { BiometricDirectoryError } from '../biometric-directory/types';
 
 async function applicationPool(): Promise<Pool> {
   const { getDb } = await import('../db/connection');
@@ -33,10 +37,20 @@ export function startBiometricSourceImporter({ env = process.env, getPool = appl
   let stopped = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let importer: ReturnType<typeof createBiometricSourceImporter> | undefined;
+  let directoryTimer: ReturnType<typeof setTimeout> | undefined;
+  let directorySync: ReturnType<typeof createBiometricDirectorySync> | undefined;
+  let poolPromise: Promise<Pool> | undefined;
+  const sharedPool = () => {
+    if (poolPromise) return poolPromise;
+    const pending = Promise.resolve().then(getPool);
+    poolPromise = pending;
+    void pending.catch(() => { if (poolPromise === pending) poolPromise = undefined; });
+    return pending;
+  };
   const run = async () => {
     try {
       if (!importer) {
-        const pool = await getPool();
+        const pool = await sharedPool();
         if (stopped) return;
         importer = createBiometricSourceImporter({ source: createSourcePunchHttpClient(settings),
           inbox: createAttendanceSourceInbox(createMysqlAttendanceSourceInboxStore(pool, settings.expectedDatabase)),
@@ -54,7 +68,32 @@ export function startBiometricSourceImporter({ env = process.env, getPool = appl
       if (!stopped) { timer = setTimeout(() => { void run(); }, settings.intervalMs); timer.unref?.(); }
     }
   };
+  const runDirectory = async () => {
+    try {
+      if (!directorySync) {
+        const pool = await sharedPool();
+        if (stopped) return;
+        directorySync = createBiometricDirectorySync({ source: createBiometricDirectoryHttpClient(settings),
+          cache: createMysqlBiometricDirectoryStore(pool, settings.expectedDatabase), streamId: settings.streamId });
+      }
+      const result = await directorySync.runOnce();
+      report(`directory completed pages=${result.pages} upserted=${result.upserted} sweepCompleted=${result.sweepCompleted}`);
+    } catch (error) {
+      const code = (error instanceof BiometricDirectorySyncError || error instanceof BiometricDirectoryError)
+        && /^BIOMETRIC_DIRECTORY_[A-Z_]+$/.test(error.code)
+        ? error.code : 'BIOMETRIC_DIRECTORY_SYNC_FAILED';
+      report(code);
+    } finally {
+      if (!stopped) { directoryTimer = setTimeout(() => { void runDirectory(); }, 60_000); directoryTimer.unref?.(); }
+    }
+  };
   report('enabled archive-only; attendance promotion disabled');
   void run();
-  return () => { stopped = true; if (timer) clearTimeout(timer); };
+  if (env.BIOMETRIC_SOURCE_DIRECTORY_ENABLED === 'true') void runDirectory();
+  return () => {
+    stopped = true;
+    if (timer) clearTimeout(timer);
+    if (directoryTimer) clearTimeout(directoryTimer);
+    directorySync?.stop();
+  };
 }

@@ -21,6 +21,7 @@ import WorkerRow from '@/components/WorkerRow';
 import WorkerPhotoPicker from '@/components/WorkerPhotoPicker';
 import WorkerPhotoPreview from '@/components/WorkerPhotoPreview';
 import WorkerBiometricLinkPicker, { type WorkerBiometricSelection } from '@/components/WorkerBiometricLinkPicker';
+import WorkerBiometricLinkStatus from '@/components/WorkerBiometricLinkStatus';
 import { fileToBase64 } from '@/lib/imageCompression';
 import { useAuth } from '@/hooks/useAuth';
 import { canManageWorkerPhotos } from '@shared/workerPhotoPolicy';
@@ -821,11 +822,9 @@ export default function Workers() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">الربط مع البصمة</p>
-                    <p className="font-medium">
-                      {selectedWorker.biometricPersonCode ? (
-                        <span className="font-mono" dir="ltr">{selectedWorker.biometricPersonCode}</span>
-                      ) : 'غير مربوط'}
-                    </p>
+                    <div className="font-medium">
+                      <WorkerBiometricLinkStatus workerId={selectedWorker.id} legacyCode={selectedWorker.biometricPersonCode} />
+                    </div>
                   </div>
                 </div>
               </div>

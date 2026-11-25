@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "completedAtUtc": "2026-11-19T12:09:41.346Z",
+  "completedAtUtc": "2026-11-19T14:20:59.587Z",
   "archiveCount": 8,
   "fixture": "Owned random loopback MySQL and HTTP; synthetic records only; no env file, application startup, live database or device",
   "checks": [
     "Owned random loopback MySQL port, data directory and synthetic schema verified before any fixture DDL",
-    "Only the three reviewed CREATE definitions were retargeted exactly to the owned schema; production GRANT was never executed",
+    "Five reviewed CREATE definitions were retargeted exactly to the owned schema; production GRANT was never executed",
     "Real SQL and authenticated HTTP export all six valid movement states across pages, including null and archived identities, with no final-event prerequisite",
     "Leading-zero PINs, identifiers beyond JS safe integers and UTC microseconds survive; unsupported, contradictory, untimed and unproven legacy states stay at source",
     "Consumer HTTP -> inbox SQL -> dedicated durable progress archives only: in/out unmapped and four auxiliary states review-only; all existing settings and ledger unchanged",
@@ -13,7 +13,14 @@
     "Full reconciliation recovers a newly committed ID below the tail once, while the independent tail cursor imports newer IDs",
     "Malformed source event yields a fixed source failure and does not advance that page or fabricate an archive item",
     "Revoking one durable key immediately denies its requests without progress movement; the other program key continues without duplicate receipts",
-    "Only credential digests/prefixes persist, plaintext keys never enter punch exports/inbox/progress/list metadata, and unrelated attendance/finance/worker data stays identical"
+    "Only credential digests/prefixes persist, plaintext keys never enter punch exports/inbox/progress/list metadata, and unrelated attendance/finance/worker data stays identical",
+    "Real producer identity SQL -> protected HTTP -> consumer directory sync mirrors current and historical enrollments without matching repeated PINs or names to workers",
+    "Explicit manual identity version assignment supports multiple devices/history, requires historical confirmation, rejects inactive/unknown targets, and never steals another worker link",
+    "Padded/blank names refresh through real HTTP without changing workers; archiving an enrollment retains its link while a new same-PIN identity stays unlinked; original link snapshot and punch hashes remain unchanged",
+    "Same-identity device/PIN coordinates cannot change: an earlier valid update in the same page rolls back on conflict; missing source rows do not delete cached identities",
+    "Concurrent different-worker assignment produces exactly one active link; generated unique key enforces it in SQL, explicit revoke/relink retains immutable history and stale requests cannot remove the newer assignment",
+    "A hard-deleted worker leaves an explicitly marked blocked orphan link; exact-version revocation releases it while retaining the deleted worker snapshot and audit history",
+    "Directory sync and manual binding leave every archived movement/content hash, original worker/person-code field, attendance record, finance row and setting byte-for-byte unchanged"
   ],
   "cleanup": {
     "httpServerClosed": true,

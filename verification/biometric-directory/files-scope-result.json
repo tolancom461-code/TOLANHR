@@ -1,0 +1,28 @@
+{
+  "checkedAtUtc": "2026-11-19T14:24:59.883Z",
+  "baselineOriginalFiles": 756,
+  "originalFilesUnchanged": 744,
+  "originalFilesChanged": [
+    "client/src/components/WorkerBiometricLinkPicker.tsx",
+    "client/src/pages/AttendanceLog.tsx",
+    "client/src/pages/AttendanceScanner.tsx",
+    "client/src/pages/PunchesReviewCenter.tsx",
+    "client/src/pages/WorkerDetails.tsx",
+    "client/src/pages/Workers.tsx",
+    "drizzle/schema.ts",
+    "server/attendance-logic.ts",
+    "server/db/connection.ts",
+    "server/routers/attendance.ts",
+    "server/routers/workers.ts",
+    "server/_core/index.ts"
+  ],
+  "missing": [],
+  "existingFilesChangedInDirectoryPhase": [
+    "server/routers/workers.ts",
+    "client/src/components/WorkerBiometricLinkPicker.tsx",
+    "client/src/pages/WorkerDetails.tsx",
+    "client/src/pages/Workers.tsx",
+    "server/biometric-source-importer/runtime.ts"
+  ],
+  "liveDatabaseAccessedDuringDevelopment": false
+}

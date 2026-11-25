@@ -23,6 +23,7 @@ import { canManageWorkerPhotos } from "@shared/workerPhotoPolicy";
 import { buildWorkerPhotoAuditDetails, buildWorkerPhotoStorageKey, decodeWorkerPhotoBase64 } from "../worker-photos";
 import { ENV } from "../_core/env";
 import { BiometricIntegrationError, getBiometricPersonByCode, searchBiometricDirectory } from "../biometric-integration";
+import { biometricDirectoryWorkerProcedures } from '../biometric-directory/router';
 
 function canCurrentUserManageWorkerPhotos(user: any): boolean {
   const isOwner = Boolean(ENV.ownerOpenId && user?.openId === ENV.ownerOpenId);
@@ -45,6 +46,7 @@ function biometricIntegrationToTrpcError(error: unknown): TRPCError {
 
   // Workers Management
 export const workersRouter = router({
+    ...biometricDirectoryWorkerProcedures,
     list: protectedProcedure
       .query(async ({ ctx }) => {
         return await db.getAllWorkers();

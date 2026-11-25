@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import BiometricSourceLinkPicker from './BiometricSourceLinkPicker';
 
 export type WorkerBiometricSelection = {
   personCode: string;
@@ -20,7 +21,15 @@ type Props = {
   onChange: (value: WorkerBiometricSelection) => void;
 };
 
-export default function WorkerBiometricLinkPicker({
+export default function WorkerBiometricLinkPicker(props: Props) {
+  const mode = trpc.workers.sourceBiometricMode.useQuery(undefined, { retry: false, staleTime: 60_000 });
+  if (mode.isLoading) return <p className="text-sm text-muted-foreground">جارٍ التحقق من إعداد دليل البصمة…</p>;
+  if (mode.error) return <p role="alert" className="text-sm text-destructive">{mode.error.message}</p>;
+  if (mode.data?.enabled) return <BiometricSourceLinkPicker workerId={props.workerId} workerName={props.workerName} legacyPersonCode={props.currentPersonCode} />;
+  return <LegacyWorkerBiometricLinkPicker {...props} />;
+}
+
+function LegacyWorkerBiometricLinkPicker({
   workerId,
   workerName,
   value,

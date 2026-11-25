@@ -1,0 +1,25 @@
+{
+  "recordedAtUtc": "2026-11-19T14:02:46.263Z",
+  "files": [
+    {
+      "path": "server/routers/workers.ts",
+      "sha256": "d35cdf1c08f7eb48b76a59f5b8c3dde287a1ec9910a5f81111e4b4153afbd458"
+    },
+    {
+      "path": "client/src/components/WorkerBiometricLinkPicker.tsx",
+      "sha256": "6e245b3ccfd4e9524ae65036eba9e8d319b8552b50259efa7346f07107bf5700"
+    },
+    {
+      "path": "client/src/pages/WorkerDetails.tsx",
+      "sha256": "0c1bce4e9f0b779aa14418d16931e493991d3d5856d9a83600005082a88e3cbc"
+    },
+    {
+      "path": "client/src/pages/Workers.tsx",
+      "sha256": "b7334105fc70e1f1a4c89996dd4292c25fc12fe6d82956b973d86148646f0932"
+    },
+    {
+      "path": "server/biometric-source-importer/runtime.ts",
+      "sha256": "8fc027972b3255a9de16b4b3dd212c62394a581808fe9c9c5c3554389d300657"
+    }
+  ]
+}
