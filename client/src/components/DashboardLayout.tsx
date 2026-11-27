@@ -199,7 +199,7 @@ function getMenuSections(t: any) {
       { icon: QrCode, label: t.navItems.attendanceScanner, path: "/attendance" },
       { icon: Fingerprint, label: t.navItems.biometricUnit, path: "/biometric-service", externalHref: "http://127.0.0.1:9096", color: "text-cyan-600" },
       { icon: ClipboardList, label: t.navItems.attendanceLog, path: "/attendance/log" },
-      { icon: ClipboardList, label: "الحركات الواردة — QR والبصمة", path: "/attendance/sources" },
+      { icon: ClipboardList, label: "الحركات الواردة — QR - بصمة", path: "/attendance/sources" },
       { icon: FileText, label: t.navItems.attendanceReports, path: "/attendance/reports" },
       { icon: Clock, label: t.navItems.workDays, path: "/work-days" },
     ]

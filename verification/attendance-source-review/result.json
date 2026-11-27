@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "completedAtUtc": "2026-11-25T13:08:54.147Z",
+  "completedAtUtc": "2026-11-25T13:31:42.460Z",
   "fixture": "Synthetic records on a process-owned random loopback MySQL schema; no env file, live database or application startup",
   "sourceCount": 87,
   "checks": [
@@ -16,7 +16,8 @@
     "Five pages and reverse sort cover all eighty-seven receipts exactly once, including sixty timestamp ties; summary cards ignore only the selected status while retaining other filters",
     "Group options retain inactive groups for historical reporting, filtering uses explicitly labelled current groups without rewriting historical worker names, and invalid dates/missing IDs return safe public errors",
     "The same read-only SQL remains usable when optional directory and activation tables are absent, preserving QR evidence without inventing biometric bindings",
-    "Every existing/new table row remains unchanged after all real list/detail and permission checks; public DTOs omit internal journal/hash and configuration fields"
+    "Every existing/new table row remains unchanged after all real list/detail and permission checks; public DTOs omit internal journal/hash and configuration fields",
+    "The actual React review page and application CSS were served with real read-only tRPC/MySQL data as a synthetic auditor; UI queries preserved all rows"
   ],
   "cleanup": {
     "localConnectionsClosed": true,

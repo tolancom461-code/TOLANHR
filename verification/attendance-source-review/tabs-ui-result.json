@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "dateRiyadh": "2026-11-25",
+  "environment": "Local actual React page and application CSS, auditor role, synthetic records on owned MySQL; no live application changes",
+  "buildPassed": true,
+  "typescript": { "existingDiagnostics": 582, "pageDiagnostics": 0 },
+  "checks": [
+    "Page accessibility name, navigation label and combined source choice use QR - بصمة; the prior QR والبصمة text is absent from both edited UI files",
+    "Two visible RTL tabs: سجل الحركات and الملخص والمتابعة; no visible decorative headings, explanatory banners or summary captions",
+    "Summary duplicate card selects already_recorded and opens the records tab; keyboard focus lands on the records tab trigger",
+    "The selected result is retained in the records tab and its filter chip is hidden in summary, whose counts intentionally ignore result selection",
+    "Case-insensitive infix search ETA returns 61 synthetic records; the search and filtered summary survive a tab switch",
+    "Choosing a custom period reveals both calendar inputs with their selected values preserved",
+    "Desktop layout and 390px mobile layout inspected visually; both tab targets are 49px high on mobile",
+    "Mobile document width stays within viewport; wide records table scrolls within its own container"
+  ],
+  "dataVerificationReport": "result.json",
+  "previewClosed": true,
+  "ownedMysqlStopped": true
+}
