@@ -1,0 +1,39 @@
+{
+  "checkedAtUtc": "2026-11-27T12:15:04.948963Z",
+  "checkedAtRiyadh": "2026-11-27T15:15:04.948963+03:00",
+  "application": "https://www.tolanhr.com",
+  "database": "test",
+  "method": "Read-only public deployment checks and SQL comparisons; SQL transactions rolled back and connections closed",
+  "deployment": {
+    "healthStatus": 200,
+    "protectedReviewApiStatus": 401,
+    "protectedReviewApiError": "UNAUTHORIZED"
+  },
+  "streamId": "78d31b88-7cc4-4a9d-b8ae-12b621ca7b5f",
+  "movements": {
+    "producerApiEligible": 3605,
+    "imported": 3605,
+    "missingInTest": 0,
+    "fieldMismatches": 0,
+    "comparedFields": ["device_id", "device_user_id", "registration_identity", "movement_type", "raw_state", "original_utc_time", "immutable_unassigned_source_fields"],
+    "producerTailCursor": "5419678",
+    "consumerTailCursor": "5419678"
+  },
+  "directory": {
+    "producerIdentities": 185,
+    "importedIdentities": 185,
+    "matchedIdentities": 185,
+    "fieldMismatches": 0,
+    "current": 173,
+    "currentWithoutNames": 0,
+    "historical": 12,
+    "historicalWithoutNames": 8,
+    "comparedFields": ["device_id", "device_user_id", "display_name", "device_name", "serial_number", "current_or_historical_status"]
+  },
+  "admission": {
+    "activationRows": 0,
+    "activeWorkerLinks": 0,
+    "acceptedBiometricSourceEvents": 0
+  },
+  "nextStep": "Manual worker-to-registration linking in the main application, then separately reviewed activation using a fresh database UTC timestamp"
+}

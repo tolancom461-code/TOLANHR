@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "completedAtUtc": "2026-11-27T12:40:32.017Z",
+  "fixture": "Synthetic records on a process-owned random loopback MySQL schema; no env file, real database or application startup",
+  "checks": [
+    "A process-owned random loopback MySQL schema and datadir were verified before fixture writes; no env file, real database or application startup",
+    "Synthetic workers preserve old code 900002 alongside versioned device identities, attendance, payroll and an unrelated setting",
+    "Disabled directory mode preserves legacy worker payloads without acquiring a connection; an empty page performs no query",
+    "New mode ignores legacy code 900002 for active status and uses one batch query restricted to current page worker IDs",
+    "The real link writer shows active PIN1, and real revocation immediately shows unlinked while preserving the old code, versioned link snapshot, attendance and finance",
+    "Multiple active versioned identities remain visible, other streams cannot supply current bindings, and absent or mismatched cache coordinates use saved link snapshots",
+    "Wrong database, invalid stream, missing tables and connection failures report unavailable without legacy fallback, false unlinked status, private errors or worker page failure",
+    "The actual WorkerRow renders active device PIN instead of 900002, shows unlinked after revocation, distinguishes unavailable, suppresses stale linked cache after a page refresh failure, preserves the legacy-only display and represents multiple active identities",
+    "The real WorkerRow and current CSS were served with live read-only summary queries on the isolated fixture for browser review",
+    "All helper and rendered-preview reads preserve every worker, legacy code, attendance row, financial row, setting and link history"
+  ],
+  "cleanup": {
+    "localConnectionsClosed": true,
+    "mysqlStopped": true,
+    "bootstrapRemoved": true,
+    "graceful": true,
+    "syntheticFixtureRetained": true
+  }
+}

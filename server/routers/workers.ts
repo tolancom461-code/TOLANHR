@@ -24,6 +24,7 @@ import { buildWorkerPhotoAuditDetails, buildWorkerPhotoStorageKey, decodeWorkerP
 import { ENV } from "../_core/env";
 import { BiometricIntegrationError, getBiometricPersonByCode, searchBiometricDirectory } from "../biometric-integration";
 import { biometricDirectoryWorkerProcedures } from '../biometric-directory/router';
+import { attachWorkerSourceBiometricLinks } from '../biometric-directory/worker-list-links';
 
 function canCurrentUserManageWorkerPhotos(user: any): boolean {
   const isOwner = Boolean(ENV.ownerOpenId && user?.openId === ENV.ownerOpenId);
@@ -60,7 +61,8 @@ export const workersRouter = router({
         searchQuery: z.string().optional(),
       }))
       .query(async ({ input }) => {
-        return await db.getWorkersWithPagination(input.page, input.limit, input.groupId, input.searchQuery);
+        const page = await db.getWorkersWithPagination(input.page, input.limit, input.groupId, input.searchQuery);
+        return { ...page, data: await attachWorkerSourceBiometricLinks(page.data) };
       }),
     
     listByGroup: protectedProcedure

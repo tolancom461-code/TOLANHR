@@ -64,7 +64,7 @@ export default function Workers() {
 
   const utils = trpc.useUtils();
   const groupId = filterGroup !== "all" ? parseInt(filterGroup) : undefined;
-  const { data: workersData, isLoading } = trpc.workers.listWithPagination.useQuery({
+  const { data: workersData, isLoading, isError: workerListFailed } = trpc.workers.listWithPagination.useQuery({
     page: currentPage,
     limit: pageSize,
     groupId,
@@ -609,6 +609,7 @@ export default function Workers() {
                     <WorkerRow
                       key={worker.id}
                       worker={worker}
+                      biometricStatusUnavailable={workerListFailed}
                       onView={handleView}
                       onShowQR={handleShowQR}
                       onExportQR={handleExportWorkerQR}

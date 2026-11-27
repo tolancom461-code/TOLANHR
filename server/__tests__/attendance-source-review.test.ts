@@ -69,6 +69,24 @@ describe('source review filter and historical projection boundary',()=>{
     const result=decodeSourceReviewRow({...row(),source:'qr',source_user_name:'Captured QR worker',worker_name:'Captured QR worker',before_activation:null});
     expect(result.worker?.id).toBe(7);expect(result.beforeActivation).toBeNull();
   });
+  it('uses the binary ASCII UUID contract across JSON decisions, configured streams and link joins',()=>{
+    for (const directory of [true,false]) {
+      for (const state of [activation,null]) {
+        const {sql,params}=buildSourceReviewQuery({directory,activation:state},streamId);
+        expect(sql).toContain('CAST(? AS CHAR CHARACTER SET ascii) COLLATE ascii_bin AS configured_stream');
+        expect(sql).toContain('CAST(? AS CHAR CHARACTER SET ascii) COLLATE ascii_bin AS activation_stream');
+        for (const key of ['l','s']) {
+          expect(sql).toContain(`CAST(LOWER(JSON_UNQUOTE(JSON_EXTRACT(b.journal,'$.${key}'))) AS CHAR CHARACTER SET ascii) COLLATE ascii_bin`);
+        }
+        expect(sql).toContain('h.id=n.journal_link');
+        expect(sql).toContain('h.stream_id=n.journal_stream');
+        expect(sql).toContain('c.stream_id=u.stream_id');
+        expect(params[0]).toBe(streamId);
+        expect(params[3]).toBe(state?.streamId??null);
+        expect(sql).not.toMatch(/SET NAMES|ALTER TABLE|UPDATE /);
+      }
+    }
+  });
   it('requires complete immutable winner receipt evidence, including stream/activation and stored-second time agreement',()=>{
     const {sql}=buildSourceReviewQuery({directory:true,activation},streamId);
     expect(sql).toContain("JSON_CONTAINS_PATH(b.journal,'all','$.v','$.s','$.a','$.w','$.l','$.p')");
@@ -87,7 +105,13 @@ describe('source review filter and historical projection boundary',()=>{
     expect(sql).toContain('SHA2(CONCAT(');
     expect(sql).toContain('MICROSECOND(n.event_time_utc)>=500000');
     expect(sql).toContain('MICROSECOND(e.event_time_utc)>=500000');
-    expect(sql).toContain("SELECT COUNT(*) FROM notes e WHERE e.attendance_event_id=p.id AND e.source<>n.source AND e.status='accepted')=1");
+    expect(sql).toContain("WHERE (SELECT COUNT(*) FROM notes e WHERE e.attendance_event_id=p.id AND e.source<>n.source AND e.status='accepted')=1");
+    expect(sql).toContain('LEFT JOIN winner_candidates p ON p.receipt_id=n.id');
+    const candidates=sql.slice(sql.indexOf('winner_candidates AS'),sql.indexOf('resolved AS'));
+    const candidateJoin=candidates.slice(candidates.indexOf('JOIN attendance_events p'),candidates.indexOf('WHERE (SELECT COUNT(*)'));
+    expect(candidateJoin).not.toMatch(/SELECT|EXISTS/);
+    expect(candidateJoin).toContain("n.journal_worker=CASE WHEN n.source='qr' THEN n.worker_id ELSE h.worker_id END");
+    expect(candidateJoin).toContain("p.worker_id=CASE WHEN n.source='qr' THEN n.worker_id ELSE h.worker_id END");
     // A missing/mismatched accepted receipt leaves winner_id NULL; neither forged note.p nor QR_COOLDOWN is trusted.
     expect(sql).toContain("WHEN winner_id IS NOT NULL THEN 'already_recorded' ELSE 'manual_review'");
   });

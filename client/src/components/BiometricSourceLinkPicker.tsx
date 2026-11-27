@@ -46,7 +46,11 @@ export default function BiometricSourceLinkPicker({ workerId, workerName, legacy
   }, [directory.data, selection]);
   const clearSelection = () => { setSelection(null); setConfirmHistorical(false); };
   const refresh = async () => {
-    await Promise.all([utils.workers.sourceBiometricWorkerLinks.invalidate(), utils.workers.sourceBiometricUsers.invalidate()]);
+    await Promise.all([
+      utils.workers.sourceBiometricWorkerLinks.invalidate(),
+      utils.workers.sourceBiometricUsers.invalidate(),
+      utils.workers.listWithPagination.invalidate(),
+    ]);
   };
   const saveSelection = async () => {
     if (!workerId || !selection || busy || searchPending || directory.isFetching || (selection.status === 'historical' && !confirmHistorical)) return;

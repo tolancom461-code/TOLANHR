@@ -1,10 +1,25 @@
 {
   "passed": true,
-  "completedAtUtc": "2026-11-25T13:31:42.460Z",
+  "completedAtUtc": "2026-11-27T12:54:15.053Z",
   "fixture": "Synthetic records on a process-owned random loopback MySQL schema; no env file, live database or application startup",
   "sourceCount": 87,
+  "collationProfiles": [
+    {
+      "name": "unicode_ci",
+      "connection_collation": "utf8mb4_unicode_ci",
+      "bound_value_collation": "utf8mb4_unicode_ci",
+      "json_uuid_collation": "utf8mb4_bin"
+    },
+    {
+      "name": "bin",
+      "connection_collation": "utf8mb4_bin",
+      "bound_value_collation": "utf8mb4_bin",
+      "json_uuid_collation": "utf8mb4_bin"
+    }
+  ],
   "checks": [
     "Process-owned random loopback MySQL server, schema and data directory verified before fixture DDL; no env file or application startup",
+    "Explicit unicode_ci and binary connection profiles are verified against mixed legacy unicode_ci text, new ASCII binary UUIDs and UTF-8 binary identity/PIN columns; JSON collation is recorded rather than assumed to match TiDB",
     "Eighty-seven synthetic receipts include QR/biometric approvals, frozen historic identities, reused PINs, dangling references, auxiliary states, wildcard text and a sixty-row timestamp tie",
     "Actual tRPC middleware permits an auditor, rejects anonymous users and guards before database loading, and exposes only list/detail read procedures",
     "The real CTE projects stored Riyadh attendance as UTC and shows duplicate QR against its original biometric winner without confusing its rejected raw status",
@@ -15,6 +30,10 @@
     "Riyadh midnight bounds are inclusive/exclusive at UTC21:00 with microseconds preserved, and original-event versus arrival-date filtering remains distinct",
     "Five pages and reverse sort cover all eighty-seven receipts exactly once, including sixty timestamp ties; summary cards ignore only the selected status while retaining other filters",
     "Group options retain inactive groups for historical reporting, filtering uses explicitly labelled current groups without rewriting historical worker names, and invalid dates/missing IDs return safe public errors",
+    "Actual list, detail, Unicode/infix/literal-wildcard search, current-group filters, summaries and pagination return identical DTOs under unicode_ci and binary connections without changing any row",
+    "Exact binary stored UUID and acted/current PIN comparisons reject case-only mismatches under both connection profiles; matching controls remain accepted/linked, and every temporary synthetic probe is restored",
+    "Both collation profiles preserve the proven duplicate winner while rejecting forged hashes, missing receipt pointers, wrong decisions/streams, late evidence and multiple valid accepted receipts; synthetic probes leave the original 87 receipts unchanged",
+    "Mixed-collation reads remain identical when activation alone or directory alone is absent, including NULL CTE context and empty-directory projections",
     "The same read-only SQL remains usable when optional directory and activation tables are absent, preserving QR evidence without inventing biometric bindings",
     "Every existing/new table row remains unchanged after all real list/detail and permission checks; public DTOs omit internal journal/hash and configuration fields",
     "The actual React review page and application CSS were served with real read-only tRPC/MySQL data as a synthetic auditor; UI queries preserved all rows"

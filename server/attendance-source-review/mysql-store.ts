@@ -12,7 +12,7 @@ const validInt = (key: string) => `CASE WHEN JSON_TYPE(JSON_EXTRACT(b.journal,'$
  AND CAST(JSON_UNQUOTE(JSON_EXTRACT(b.journal,'$.${key}')) AS UNSIGNED)<=2147483647
  THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(b.journal,'$.${key}')) AS UNSIGNED) ELSE NULL END`;
 const validUuid = (key: string) => `CASE WHEN LOWER(JSON_UNQUOTE(JSON_EXTRACT(b.journal,'$.${key}'))) REGEXP '${UUID_SQL}'
- THEN LOWER(JSON_UNQUOTE(JSON_EXTRACT(b.journal,'$.${key}'))) ELSE NULL END`;
+ THEN CAST(LOWER(JSON_UNQUOTE(JSON_EXTRACT(b.journal,'$.${key}'))) AS CHAR CHARACTER SET ascii) COLLATE ascii_bin ELSE NULL END`;
 const timeMatches = (attendance: string,receipt: string) => {
   const floor = `TIMESTAMPADD(MICROSECOND,-MICROSECOND(${receipt}.event_time_utc),${receipt}.event_time_utc)`;
   return `(DATE_SUB(${attendance}.event_time,INTERVAL 3 HOUR)=${floor} OR
@@ -48,7 +48,43 @@ export function buildSourceReviewQuery(context: Context, streamId: string | null
   const worker = `CASE WHEN n.source='qr' THEN n.worker_id WHEN ${ACTED} THEN h.worker_id ELSE c.worker_id END`;
   const journalValid = "n.journal_version=1 AND n.journal_stream IS NOT NULL AND n.journal_activation REGEXP '^[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.][0-9]{6}Z$'";
   const fullDecision = `${journalValid} AND n.content_valid=1 AND n.decision_complete=1 AND n.journal_worker IS NOT NULL AND n.journal_winner IS NOT NULL`;
-  const sql = `WITH context AS (SELECT ? AS configured_stream,CAST(? AS DATETIME(6)) AS activation_sql,? AS activation_iso,? AS activation_stream),
+  const historicalLink = `LEFT JOIN ${links} h ON n.source='biometric' AND ${ACTED} AND ${fullDecision}
+  AND h.id=n.journal_link AND h.stream_id=n.journal_stream AND h.worker_id=n.journal_worker
+  AND h.source_identity_id=n.source_identity_id AND h.device_id_snapshot=n.source_device_id
+  AND h.device_user_id_snapshot=n.source_device_user_id`;
+  // Candidates are rejected receipts, so their worker must come from QR or the
+  // frozen historical link. Keep proof subqueries in WHERE: TiDB rejects them in ON.
+  const rejectedWorker = "CASE WHEN n.source='qr' THEN n.worker_id ELSE h.worker_id END";
+  const verifiedWinners = `winner_candidates AS (SELECT n.id AS receipt_id,p.id,p.worker_id,p.event_type,p.method,p.event_time,p.work_date
+ FROM notes n ${historicalLink}
+ JOIN attendance_events p ON n.status='rejected' AND n.decision_code='SOURCE_FIRST_ARRIVAL'
+  AND ${fullDecision} AND n.journal_worker=${rejectedWorker}
+  AND (n.source<>'qr' OR JSON_TYPE(JSON_EXTRACT(n.journal,'$.l'))='NULL')
+  AND p.id=n.journal_winner AND p.worker_id=${rejectedWorker}
+  AND p.event_type=n.event_type AND p.method IN ('qr','biometric') AND p.method<>n.source
+  AND n.event_time_utc>=DATE_SUB(p.event_time,INTERVAL 3 HOUR)
+  AND TIMESTAMPDIFF(MICROSECOND,DATE_SUB(p.event_time,INTERVAL 3 HOUR),n.event_time_utc)<=54000000000
+  AND n.event_time_utc>=STR_TO_DATE(n.journal_activation,'%Y-%m-%dT%H:%i:%s.%fZ')
+  AND n.received_at>=STR_TO_DATE(n.journal_activation,'%Y-%m-%dT%H:%i:%s.%fZ')
+ WHERE (SELECT COUNT(*) FROM notes e WHERE e.attendance_event_id=p.id AND e.source<>n.source AND e.status='accepted')=1
+  AND EXISTS (SELECT 1 FROM notes e LEFT JOIN ${links} eh ON e.source='biometric'
+   AND eh.id=e.journal_link AND eh.stream_id=e.journal_stream AND eh.worker_id=e.journal_worker
+   AND eh.source_identity_id=e.source_identity_id AND eh.device_id_snapshot=e.source_device_id
+   AND eh.device_user_id_snapshot=e.source_device_user_id
+   WHERE e.attendance_event_id=p.id AND e.source=p.method AND e.status='accepted'
+    AND e.event_type=n.event_type AND e.decision_code='SOURCE_ACCEPTED'
+    AND e.content_valid=1 AND e.journal_version=1 AND e.decision_complete=1 AND e.journal_winner IS NOT NULL
+    AND e.journal_stream=n.journal_stream AND e.journal_activation=n.journal_activation AND e.journal_worker=n.journal_worker
+    AND e.received_at<=n.received_at AND e.event_time_utc>=STR_TO_DATE(e.journal_activation,'%Y-%m-%dT%H:%i:%s.%fZ')
+    AND e.received_at>=STR_TO_DATE(e.journal_activation,'%Y-%m-%dT%H:%i:%s.%fZ') AND ${timeMatches('p','e')}
+    AND ((e.source='qr' AND e.worker_id=n.journal_worker AND JSON_TYPE(JSON_EXTRACT(e.journal,'$.l'))='NULL')
+      OR (e.source='biometric' AND e.worker_id IS NULL AND e.source_person_code IS NULL AND e.source_user_name IS NULL
+       AND e.source_event_id REGEXP '^bio:[a-f0-9]{64}$' AND eh.id IS NOT NULL))))`;
+  // JSON strings inherit the connection collation. UUID projections and bound streams
+  // must use the ASCII binary contract of link IDs, including on TiDB connections.
+  const sql = `WITH context AS (SELECT CAST(? AS CHAR CHARACTER SET ascii) COLLATE ascii_bin AS configured_stream,
+  CAST(? AS DATETIME(6)) AS activation_sql,? AS activation_iso,
+  CAST(? AS CHAR CHARACTER SET ascii) COLLATE ascii_bin AS activation_stream),
  base AS (SELECT s.*,CASE WHEN JSON_VALID(s.decision_note) THEN s.decision_note ELSE '{}' END AS journal
   FROM attendance_source_events s),
  notes AS (SELECT b.*,${contentValidSql()} AS content_valid,
@@ -58,6 +94,7 @@ export function buildSourceReviewQuery(context: Context, streamId: string | null
   ${validInt('w')} AS journal_worker,${validInt('p')} AS journal_winner,
   ${validUuid('l')} AS journal_link,${validUuid('s')} AS journal_stream,
   JSON_UNQUOTE(JSON_EXTRACT(b.journal,'$.a')) AS journal_activation FROM base b),
+ ${verifiedWinners},
  resolved AS (SELECT n.id,n.source,n.source_event_id,n.source_person_code,n.source_device_id,n.source_device_user_id,
   n.source_identity_id,n.source_user_name,n.event_type,n.raw_state,n.status AS raw_status,n.decision_code,
   n.event_time_utc,n.received_at,n.processed_at,n.content_valid,
@@ -81,10 +118,7 @@ export function buildSourceReviewQuery(context: Context, streamId: string | null
   DATE_FORMAT(n.received_at,'%Y-%m-%dT%H:%i:%s.%fZ') AS received_at_iso,
   DATE_FORMAT(n.processed_at,'%Y-%m-%dT%H:%i:%s.%fZ') AS processed_at_iso
  FROM notes n CROSS JOIN context ctx
- LEFT JOIN ${links} h ON n.source='biometric' AND ${ACTED} AND ${fullDecision}
-  AND h.id=n.journal_link AND h.stream_id=n.journal_stream AND h.worker_id=n.journal_worker
-  AND h.source_identity_id=n.source_identity_id AND h.device_id_snapshot=n.source_device_id
-  AND h.device_user_id_snapshot=n.source_device_user_id
+ ${historicalLink}
  LEFT JOIN ${users} u ON n.source='biometric' AND ${UNACTED}
   AND u.stream_id=COALESCE(CASE WHEN ${journalValid} THEN n.journal_stream END,ctx.configured_stream) AND u.source_identity_id=n.source_identity_id
   AND u.device_id=n.source_device_id AND u.device_user_id=n.source_device_user_id
@@ -92,29 +126,7 @@ export function buildSourceReviewQuery(context: Context, streamId: string | null
  LEFT JOIN workers w ON w.id=${worker} LEFT JOIN \`groups\` g ON g.id=w.group_id
  LEFT JOIN attendance_events a ON n.status='accepted' AND a.id=n.attendance_event_id
   AND n.content_valid=1 AND a.worker_id=${worker} AND a.event_type=n.event_type AND a.method=n.source AND ${timeMatches('a','n')}
- LEFT JOIN attendance_events p ON n.status='rejected' AND n.decision_code='SOURCE_FIRST_ARRIVAL'
-  AND ${fullDecision} AND n.journal_worker=${worker}
-  AND (n.source<>'qr' OR JSON_TYPE(JSON_EXTRACT(n.journal,'$.l'))='NULL')
-  AND p.id=n.journal_winner AND p.worker_id=${worker}
-  AND p.event_type=n.event_type AND p.method IN ('qr','biometric') AND p.method<>n.source
-  AND n.event_time_utc>=DATE_SUB(p.event_time,INTERVAL 3 HOUR)
-  AND TIMESTAMPDIFF(MICROSECOND,DATE_SUB(p.event_time,INTERVAL 3 HOUR),n.event_time_utc)<=54000000000
-  AND n.event_time_utc>=STR_TO_DATE(n.journal_activation,'%Y-%m-%dT%H:%i:%s.%fZ')
-  AND n.received_at>=STR_TO_DATE(n.journal_activation,'%Y-%m-%dT%H:%i:%s.%fZ')
-  AND (SELECT COUNT(*) FROM notes e WHERE e.attendance_event_id=p.id AND e.source<>n.source AND e.status='accepted')=1
-  AND EXISTS (SELECT 1 FROM notes e LEFT JOIN ${links} eh ON e.source='biometric'
-   AND eh.id=e.journal_link AND eh.stream_id=e.journal_stream AND eh.worker_id=e.journal_worker
-   AND eh.source_identity_id=e.source_identity_id AND eh.device_id_snapshot=e.source_device_id
-   AND eh.device_user_id_snapshot=e.source_device_user_id
-   WHERE e.attendance_event_id=p.id AND e.source=p.method AND e.status='accepted'
-    AND e.event_type=n.event_type AND e.decision_code='SOURCE_ACCEPTED'
-    AND e.content_valid=1 AND e.journal_version=1 AND e.decision_complete=1 AND e.journal_winner IS NOT NULL
-    AND e.journal_stream=n.journal_stream AND e.journal_activation=n.journal_activation AND e.journal_worker=n.journal_worker
-    AND e.received_at<=n.received_at AND e.event_time_utc>=STR_TO_DATE(e.journal_activation,'%Y-%m-%dT%H:%i:%s.%fZ')
-    AND e.received_at>=STR_TO_DATE(e.journal_activation,'%Y-%m-%dT%H:%i:%s.%fZ') AND ${timeMatches('p','e')}
-    AND ((e.source='qr' AND e.worker_id=n.journal_worker AND JSON_TYPE(JSON_EXTRACT(e.journal,'$.l'))='NULL')
-      OR (e.source='biometric' AND e.worker_id IS NULL AND e.source_person_code IS NULL AND e.source_user_name IS NULL
-       AND e.source_event_id REGEXP '^bio:[a-f0-9]{64}$' AND eh.id IS NOT NULL)))),
+ LEFT JOIN winner_candidates p ON p.receipt_id=n.id),
  review AS (SELECT r.*,CASE
   WHEN raw_status='accepted' THEN CASE WHEN accepted_id IS NOT NULL THEN 'accepted' ELSE 'manual_review' END
   WHEN raw_status='rejected' AND decision_code='SOURCE_FIRST_ARRIVAL' THEN CASE WHEN winner_id IS NOT NULL THEN 'already_recorded' ELSE 'manual_review' END

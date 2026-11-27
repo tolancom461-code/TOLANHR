@@ -1,0 +1,32 @@
+{
+  "checkedAtUtc": "2026-11-27T12:53:10.972768Z",
+  "application": "https://www.tolanhr.com",
+  "database": "test",
+  "deploymentStatus": "Local code verified against live TiDB using read-only queries; deployment remains pending",
+  "failuresReproduced": [
+    "ER_CANT_AGGREGATE_2COLLATIONS: ASCII link UUID versus JSON Unicode UUID",
+    "TiDB does not support the existing correlated proof subqueries in a JOIN ON condition"
+  ],
+  "fixedQueryProfiles": ["utf8mb4_unicode_ci", "utf8mb4_bin"],
+  "profileResultsIdentical": true,
+  "actualReviewStore": {
+    "readOnlyGuardedQueries": 41,
+    "arabicNameMatchesToday": 2,
+    "latinDeviceNameMatchesToday": 2,
+    "currentGroupMatchesToday": 2,
+    "reviewStatusMatchesToday": 2,
+    "summary": {"all": 2, "accepted": 0, "alreadyRecorded": 0, "needsReview": 2, "pending": 0},
+    "workerCode": "288",
+    "deviceUserId": "1",
+    "movementsRiyadh": [
+      {"type": "check_in", "time": "2026-11-27T14:51:55+03:00"},
+      {"type": "check_out", "time": "2026-11-27T15:36:27+03:00"}
+    ],
+    "detailMatchesLinkedWorker": true,
+    "activation": null
+  },
+  "dataMutations": 0,
+  "transactionsRolledBack": true,
+  "connectionsClosed": true,
+  "schemaAndEnvironmentChanges": false
+}

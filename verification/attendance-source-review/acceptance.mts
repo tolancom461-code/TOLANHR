@@ -16,11 +16,13 @@ const activationUtc = '2026-11-25T00:00:00.000000Z';
 const oldLink = uuid(901);
 const checks: string[] = [];
 const cleanup: Record<string, unknown> = {};
+const collationProfiles: Array<Record<string, unknown>> = [];
 let stage = 'start-owned-review-mysql';
 let failure: { stage: string; code: string; line?: number } | undefined;
 let lab: Awaited<ReturnType<typeof startTolanHrMysql>> | undefined;
 let fixture: mysql.Connection | undefined;
 let pool: mysql.Pool | undefined;
+let binaryPool: mysql.Pool | undefined;
 let previewServer: http.Server | undefined;
 let sourceCount = 0;
 const originalConsole = { log: console.log, warn: console.warn, error: console.error };
@@ -37,10 +39,12 @@ try {
   const url = new URL(lab.databaseUrl);
   assert.equal(url.hostname, '127.0.0.1');
   assert.equal(Number(url.port), lab.port);
-  pool = mysql.createPool({ host: '127.0.0.1', port: lab.port, database: lab.schema,
+  const poolOptions = { host: '127.0.0.1', port: lab.port, database: lab.schema,
     user: decodeURIComponent(url.username), password: decodeURIComponent(url.password),
     dateStrings: true, supportBigNumbers: true, bigNumberStrings: true, timezone: 'Z',
-    connectionLimit: 3, multipleStatements: false, flags: '-LOCAL_FILES' });
+    connectionLimit: 3, multipleStatements: false, flags: '-LOCAL_FILES' };
+  pool = mysql.createPool({ ...poolOptions, charset: 'UTF8MB4_UNICODE_CI' });
+  binaryPool = mysql.createPool({ ...poolOptions, charset: 'UTF8MB4_BIN' });
   checks.push('Process-owned random loopback MySQL server, schema and data directory verified before fixture DDL; no env file or application startup');
 
   stage = 'seed-reviewed-schema-and-history';
@@ -48,6 +52,32 @@ try {
   await installCreate('../../docs/sql/attendance-biometric-directory-2026-11-19.test.sql', 'test', 'attendance_biometric_users');
   await installCreate('../../docs/sql/attendance-biometric-directory-2026-11-19.test.sql', 'test', 'attendance_biometric_worker_links');
   await installCreate('../../docs/sql/attendance-source-promotion-state-2026-11-25.TESTCOPY2.sql', 'TESTCOPY2', 'attendance_source_promotion_state');
+  for (const table of ['workers','groups','attendance_events']) {
+    await fixture.query(`ALTER TABLE \`${table}\` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+  }
+  const [collations] = await fixture.execute<any[]>(`SELECT TABLE_NAME,COLUMN_NAME,COLLATION_NAME
+    FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=? AND
+    ((TABLE_NAME='workers' AND COLUMN_NAME='full_name') OR (TABLE_NAME='attendance_events' AND COLUMN_NAME='method')
+      OR (TABLE_NAME='attendance_source_events' AND COLUMN_NAME IN ('id','source_device_user_id'))
+      OR (TABLE_NAME='attendance_biometric_worker_links' AND COLUMN_NAME='id'))`, [lab.schema]);
+  const columnCollation = (table: string, column: string) => collations.find(row => row.TABLE_NAME===table && row.COLUMN_NAME===column)?.COLLATION_NAME;
+  assert.equal(columnCollation('workers','full_name'), 'utf8mb4_unicode_ci');
+  assert.equal(columnCollation('attendance_events','method'), 'utf8mb4_unicode_ci');
+  assert.equal(columnCollation('attendance_source_events','id'), 'ascii_bin');
+  assert.equal(columnCollation('attendance_biometric_worker_links','id'), 'ascii_bin');
+  assert.equal(columnCollation('attendance_source_events','source_device_user_id'), 'utf8mb4_bin');
+  for (const [name, candidate, expected] of [['unicode_ci',pool,'utf8mb4_unicode_ci'],['bin',binaryPool,'utf8mb4_bin']] as const) {
+    const connection = await candidate.getConnection();
+    try {
+      const [[profile]] = await connection.execute<any[]>(`SELECT @@collation_connection AS connection_collation,
+        COLLATION(?) AS bound_value_collation,COLLATION(JSON_UNQUOTE(JSON_EXTRACT(?,'$.l'))) AS json_uuid_collation`,
+      [streamId,JSON.stringify({l:oldLink})]);
+      assert.equal(profile.connection_collation, expected);
+      assert.equal(profile.bound_value_collation, expected);
+      collationProfiles.push({ name, ...profile });
+    } finally { connection.release(); }
+  }
+  checks.push('Explicit unicode_ci and binary connection profiles are verified against mixed legacy unicode_ci text, new ASCII binary UUIDs and UTF-8 binary identity/PIN columns; JSON collation is recorded rather than assumed to match TiDB');
   await fixture.execute("INSERT INTO `groups` (id,code,name,is_active) VALUES (1,'REVIEW-OLD','Synthetic Old Group',1),(2,'REVIEW-CURRENT','Synthetic Current Group',1),(3,'REVIEW-INACTIVE','Synthetic Inactive Group',0)");
   await fixture.execute(`INSERT INTO workers (id,code,full_name,group_id,status) VALUES
     (1,'S-W1','Synthetic Current Alpha',2,'active'),(2,'S-W2','Synthetic Current Beta',1,'active'),
@@ -130,6 +160,7 @@ try {
   const { createAttendanceSourceReviewProcedures } = await import('../../server/attendance-source-review/router.ts');
   const { router } = await import('../../server/_core/trpc.ts');
   const store = createMysqlAttendanceSourceReviewStore(pool, lab.schema, streamId);
+  const binaryStore = createMysqlAttendanceSourceReviewStore(binaryPool, lab.schema, streamId);
   const before = await snapshot();
   let loads = 0;
   const reviewRouter = router(createAttendanceSourceReviewProcedures(async () => { loads++; return { store }; }));
@@ -277,6 +308,95 @@ try {
   await rejects(() => auditor.detail({ id: uuid(9999) }), 'NOT_FOUND');
   checks.push('Group options retain inactive groups for historical reporting, filtering uses explicitly labelled current groups without rewriting historical worker names, and invalid dates/missing IDs return safe public errors');
 
+  stage = 'mixed-collation-read-profile-equivalence';
+  await compareProfiles();
+  checks.push('Actual list, detail, Unicode/infix/literal-wildcard search, current-group filters, summaries and pagination return identical DTOs under unicode_ci and binary connections without changing any row');
+
+  stage = 'mixed-collation-exact-stored-uuid-and-pin';
+  const [[savedLink]] = await fixture.execute<any[]>('SELECT id,device_user_id_snapshot FROM attendance_biometric_worker_links WHERE id=?', [oldLink]);
+  const [[savedSource]] = await fixture.execute<any[]>('SELECT decision_note FROM attendance_source_events WHERE id=?', [uuid(2)]);
+  const alphabeticLink = 'a0000000-0000-4000-8000-000000000901';
+  try {
+    await fixture.execute('UPDATE attendance_biometric_worker_links SET id=? WHERE id=?', [alphabeticLink,oldLink]);
+    await fixture.execute('UPDATE attendance_source_events SET decision_note=? WHERE id=?', [journal(1,alphabeticLink,101),uuid(2)]);
+    await eachDetail(2, item => assert.equal(item.displayStatus, 'accepted'));
+    await fixture.execute('UPDATE attendance_biometric_worker_links SET id=? WHERE id=?', [alphabeticLink.toUpperCase(),alphabeticLink]);
+    await eachDetail(2, item => {
+      assert.equal(item.displayStatus, 'manual_review'); assert.equal(item.worker, null);
+      assert.equal(item.approvedMovement, null); assert.equal(item.referenceIssue, true);
+    });
+  } finally {
+    await fixture.execute('UPDATE attendance_biometric_worker_links SET id=? WHERE id IN (?,?)', [savedLink.id,alphabeticLink,alphabeticLink.toUpperCase()]);
+    await fixture.execute('UPDATE attendance_source_events SET decision_note=? WHERE id=?', [savedSource.decision_note,uuid(2)]);
+  }
+  await withSourcePin(2, 'PIN-Ab17', async () => {
+    try {
+      await fixture!.execute('UPDATE attendance_biometric_worker_links SET device_user_id_snapshot=? WHERE id=?', ['PIN-Ab17',oldLink]);
+      await eachDetail(2, item => assert.equal(item.displayStatus, 'accepted'));
+      await fixture!.execute('UPDATE attendance_biometric_worker_links SET device_user_id_snapshot=? WHERE id=?', ['pin-Ab17',oldLink]);
+      await eachDetail(2, item => {
+        assert.equal(item.displayStatus, 'manual_review'); assert.equal(item.worker, null);
+        assert.equal(item.approvedMovement, null); assert.equal(item.referenceIssue, true);
+      });
+    } finally { await fixture!.execute('UPDATE attendance_biometric_worker_links SET device_user_id_snapshot=? WHERE id=?', [savedLink.device_user_id_snapshot,oldLink]); }
+  });
+  const [[savedUser]] = await fixture.execute<any[]>('SELECT device_user_id FROM attendance_biometric_users WHERE stream_id=? AND source_identity_id=?', [streamId,'700']);
+  await withSourcePin(26, 'PIN-Ab17', async () => {
+    try {
+      await fixture!.execute('UPDATE attendance_biometric_users SET device_user_id=? WHERE stream_id=? AND source_identity_id=?', ['PIN-Ab17',streamId,'700']);
+      await eachDetail(26, item => assert.equal(item.worker?.id, 2));
+      await fixture!.execute('UPDATE attendance_biometric_users SET device_user_id=? WHERE stream_id=? AND source_identity_id=?', ['pin-Ab17',streamId,'700']);
+      await eachDetail(26, item => { assert.equal(item.worker, null); assert.equal(item.displayStatus, 'unmapped'); });
+    } finally { await fixture!.execute('UPDATE attendance_biometric_users SET device_user_id=? WHERE stream_id=? AND source_identity_id=?', [savedUser.device_user_id,streamId,'700']); }
+  });
+  assert.deepEqual(await snapshot(), before);
+  checks.push('Exact binary stored UUID and acted/current PIN comparisons reject case-only mismatches under both connection profiles; matching controls remain accepted/linked, and every temporary synthetic probe is restored');
+
+  stage = 'mixed-collation-duplicate-winner-proof';
+  const [[winnerEvidence]] = await fixture.execute<any[]>(`SELECT attendance_event_id,decision_note,decision_code,content_sha256,received_at
+    FROM attendance_source_events WHERE id=?`, [uuid(2)]);
+  const invalidWinnerEvidence: Array<[string,unknown]> = [
+    ['content_sha256','f'.repeat(64)], ['attendance_event_id',null], ['decision_code','SOURCE_PERIOD_LOCKED'],
+    ['decision_note',JSON.stringify({v:1,s:uuid(777),a:activationUtc,w:1,l:oldLink,p:101})],
+    ['received_at','2026-11-25 14:00:01.000000'],
+  ];
+  for (const [column,value] of invalidWinnerEvidence) {
+    assert.ok(['content_sha256','attendance_event_id','decision_code','decision_note','received_at'].includes(column));
+    try {
+      await fixture.execute(`UPDATE attendance_source_events SET \`${column}\`=? WHERE id=?`, [value,uuid(2)]);
+      await eachDetail(3, item => {
+        assert.equal(item.displayStatus, 'manual_review'); assert.equal(item.approvedMovement, null);
+        assert.equal(item.referenceIssue, true); assert.equal(item.rawStatus, 'rejected');
+      });
+    } finally { await fixture.execute(`UPDATE attendance_source_events SET \`${column}\`=? WHERE id=?`, [winnerEvidence[column],uuid(2)]); }
+  }
+  try {
+    await source(9002, {eventTimeUtc:'2026-11-25T12:22:16.000000Z',status:'accepted',attendanceId:102,
+      decisionCode:'SOURCE_ACCEPTED',note:journal(1,oldLink,101)});
+    await eachDetail(3, item => {
+      assert.equal(item.displayStatus, 'manual_review'); assert.equal(item.approvedMovement, null);
+      assert.equal(item.referenceIssue, true);
+    });
+  } finally {
+    const [removed] = await fixture.execute<mysql.ResultSetHeader>('DELETE FROM attendance_source_events WHERE id=?', [uuid(9002)]);
+    sourceCount -= removed.affectedRows;
+  }
+  assert.equal(sourceCount, 87);
+  await eachDetail(3, item => {
+    assert.equal(item.displayStatus, 'already_recorded'); assert.equal(item.approvedMovement?.id, 102);
+    assert.equal(item.referenceIssue, false);
+  });
+  assert.deepEqual(await snapshot(), before);
+  checks.push('Both collation profiles preserve the proven duplicate winner while rejecting forged hashes, missing receipt pointers, wrong decisions/streams, late evidence and multiple valid accepted receipts; synthetic probes leave the original 87 receipts unchanged');
+
+  stage = 'mixed-collation-independent-optional-table-absence';
+  for (const absent of [['attendance_source_promotion_state'],['attendance_biometric_users','attendance_biometric_worker_links']]) {
+    for (const table of absent) await fixture.query(`RENAME TABLE \`${table}\` TO \`owned_paused_${table}\``);
+    try { await compareProfiles(); }
+    finally { for (const table of absent) await fixture.query(`RENAME TABLE \`owned_paused_${table}\` TO \`${table}\``); }
+  }
+  checks.push('Mixed-collation reads remain identical when activation alone or directory alone is absent, including NULL CTE context and empty-directory projections');
+
   stage = 'optional-directory-and-activation-absent-legacy-read';
   for (const table of ['attendance_biometric_users','attendance_biometric_worker_links','attendance_source_promotion_state']) {
     await fixture.query(`RENAME TABLE \`${table}\` TO \`owned_paused_${table}\``);
@@ -288,6 +408,7 @@ try {
     assert.equal(legacyAll.activation, null);
     assert.equal((await legacy.detail(uuid(1))).item.displayStatus, 'accepted');
     assert.equal((await legacy.detail(uuid(2))).item.worker, null);
+    await compareProfiles();
   } finally {
     for (const table of ['attendance_biometric_users','attendance_biometric_worker_links','attendance_source_promotion_state']) {
       await fixture.query(`RENAME TABLE \`owned_paused_${table}\` TO \`${table}\``);
@@ -365,6 +486,40 @@ try {
     assert.equal(create.split(qualified).length, 2);
     await fixture.query(create.replace(qualified, `\`${lab.schema}\`.\`${table}\``));
   }
+  async function compareProfiles() {
+    const unchanged = await snapshot();
+    const filters = [{limit:100,sort:'asc'}, {search:'dIsCoUnT',limit:100}, {search:'50%_',limit:100},
+      {search:'عربي',limit:100}, {search:'S-W2',limit:20}, {search:'fRoZeN',limit:100},
+      {groupId:1,limit:100}, {groupId:2,status:'accepted',limit:100}, {source:'qr',limit:100},
+      {movement:'break_in',limit:20}, {status:'needs_review',limit:100}, {page:2,limit:20,sort:'desc'},
+      {dateFrom:'2026-11-25',dateTo:'2026-11-25',timeBasis:'received_at',limit:100}] as const;
+    for (const filter of filters) assert.deepEqual(await binaryStore.list(filter), await store.list(filter));
+    for (const number of [1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20,25,26,27]) {
+      assert.deepEqual(await binaryStore.detail(uuid(number)), await store.detail(uuid(number)));
+    }
+    assert.deepEqual(await snapshot(), unchanged);
+  }
+  async function eachDetail(number: number, check: (item: Awaited<ReturnType<typeof store.detail>>['item']) => void) {
+    const unchanged = await snapshot();
+    const left = await store.detail(uuid(number)); const right = await binaryStore.detail(uuid(number));
+    assert.deepEqual(right,left); check(left.item); assert.deepEqual(await snapshot(), unchanged);
+  }
+  async function withSourcePin(number: number, pin: string, operation: () => Promise<void>) {
+    const [[original]] = await fixture!.execute<any[]>(`SELECT *,DATE_FORMAT(event_time_utc,'%Y-%m-%dT%H:%i:%s.%fZ') AS source_time_iso
+      FROM attendance_source_events WHERE id=?`, [uuid(number)]);
+    const prepared = prepareSourceEvent({ source:original.source,sourceEventId:original.source_event_id,workerId:original.worker_id,
+      sourcePersonCode:original.source_person_code,sourceDeviceId:original.source_device_id,sourceDeviceUserId:pin,
+      sourceIdentityId:original.source_identity_id,sourceUserName:original.source_user_name,eventType:original.event_type,
+      rawState:original.raw_state,eventTimeUtc:original.source_time_iso }, () => original.id);
+    try {
+      await fixture!.execute('UPDATE attendance_source_events SET source_device_user_id=?,content_sha256=? WHERE id=?',
+        [prepared.sourceDeviceUserId,prepared.contentSha256,original.id]);
+      await operation();
+    } finally {
+      await fixture!.execute('UPDATE attendance_source_events SET source_device_user_id=?,content_sha256=? WHERE id=?',
+        [original.source_device_user_id,original.content_sha256,original.id]);
+    }
+  }
   async function directory(identityId: string, pin: string, status: string, name: string) {
     await fixture!.execute(`INSERT INTO attendance_biometric_users
       (stream_id,source_identity_id,device_id,device_user_id,display_name,device_name,status,last_synced_at_utc)
@@ -408,7 +563,7 @@ try {
       await closed;
     }
   } catch { failure ??= { stage: 'close-preview-server', code: 'SOURCE_REVIEW_CLEANUP_FAILED' }; }
-  try { await pool?.end(); await fixture?.end(); cleanup.localConnectionsClosed = true; }
+  try { await pool?.end(); await binaryPool?.end(); await fixture?.end(); cleanup.localConnectionsClosed = true; }
   catch { failure ??= { stage: 'close-owned-connections', code: 'SOURCE_REVIEW_CLEANUP_FAILED' }; }
   try { if (lab) Object.assign(cleanup, await lab.close()); }
   catch { failure ??= { stage: 'stop-owned-mysql', code: 'SOURCE_REVIEW_CLEANUP_FAILED' }; }
@@ -417,7 +572,7 @@ try {
 
 const report = { passed: !failure, completedAtUtc: new Date().toISOString(),
   fixture: 'Synthetic records on a process-owned random loopback MySQL schema; no env file, live database or application startup',
-  sourceCount,checks,cleanup,...(failure ? {failure} : {}) };
+  sourceCount,collationProfiles,checks,cleanup,...(failure ? {failure} : {}) };
 await fs.writeFile(path.join(import.meta.dirname, 'result.json'), JSON.stringify(report, null, 2) + '\n');
 process.stdout.write(JSON.stringify(report) + '\n');
 if (failure) process.exitCode = 1;
